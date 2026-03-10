@@ -28,7 +28,7 @@ describe('set templates', () => {
 		]);
 	});
 
-	it('keeps two matching small plates per side before consolidating to a larger plate', () => {
+	it('uses a bumper plate when the exact side weight matches', () => {
 		expect(
 			computeSmartSetSequence(
 				[
@@ -38,7 +38,7 @@ describe('set templates', () => {
 				20,
 				40
 			)[1].result.plates
-		).toEqual([{ weight: 2.5, count: 2 }]);
+		).toEqual([{ weight: 5, count: 1 }]);
 	});
 
 	it('counts how many moves it takes to increase the load', () => {
@@ -52,12 +52,12 @@ describe('set templates', () => {
 		);
 
 		expect(sequence[1].additionCost).toBe(2);
-		expect(sequence[1].removalCost).toBe(0);
-		expect(sequence[1].upWeightMoveCost).toBe(2);
-		expect(sequence[1].changeCost).toBe(2);
+		expect(sequence[1].removalCost).toBe(2);
+		expect(sequence[1].upWeightMoveCost).toBe(4);
+		expect(sequence[1].changeCost).toBe(4);
 	});
 
-	it('penalizes three matching change plates on one side when a cleaner option exists', () => {
+	it('prefers heavier plates to keep the bar consistent across sets', () => {
 		expect(
 			computeSmartSetSequence(
 				[
@@ -67,10 +67,24 @@ describe('set templates', () => {
 				80
 			)[0].result.plates
 		).toEqual([
-			{ weight: 15, count: 1 },
-			{ weight: 10, count: 1 },
+			{ weight: 20, count: 1 },
+			{ weight: 5, count: 1 },
 			{ weight: 2.5, count: 1 },
 			{ weight: 0.5, count: 1 }
 		]);
+	});
+
+	it('limits change plates to 2 of the same weight per side', () => {
+		const result = computeSmartSetSequence(
+			[{ id: 1, percentage: '100' }],
+			20,
+			27.5
+		)[0].result;
+
+		for (const plate of result.plates) {
+			if ([2.5, 2, 1.5, 1.25, 1, 0.5].includes(plate.weight)) {
+				expect(plate.count).toBeLessThanOrEqual(2);
+			}
+		}
 	});
 });
