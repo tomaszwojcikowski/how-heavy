@@ -65,23 +65,7 @@ function buildResultLockingBumpers(
 	if (remaining < 0) return null;
 	const remainderCombo = remaining > 0.001 ? getPlateCombinationForSideWeight(remaining) : [];
 	if (remainderCombo === null) return null;
-	const plates = mergePlates(lockedBumpers, remainderCombo);
-	const achievedSide = plates.reduce((s, p) => s + p.weight * p.count, 0);
-	const achievedTotal = fromQuarterKiloUnits(toQuarterKiloUnits(barWeight + achievedSide * 2));
-	const isExact = Math.abs(achievedTotal - targetTotal) < 0.01;
-	return {
-		status: isExact ? 'exact' : 'rounded',
-		barWeight,
-		requestedTotal: targetTotal,
-		resolvedTotal: achievedTotal,
-		exact: isExact,
-		oneSideWeight: achievedSide,
-		delta: Number.parseFloat((achievedTotal - targetTotal).toFixed(2)),
-		plates,
-		message: isExact
-			? 'Exact plate loading available.'
-			: `Nearest achievable: ${achievedTotal} kg.`
-	};
+	return makeResult(barWeight, targetTotal, mergePlates(lockedBumpers, remainderCombo));
 }
 
 /**
@@ -146,6 +130,57 @@ function diffPlates(prev: PlateCount[], next: PlateCount[]): { additions: PlateC
 }
 
 /**
+ * Consolidate pairs of smaller change plates into a single larger equivalent:
+ * 2×1.25 kg → 1×2.5 kg, then 2×2.5 kg → 1×5 kg bumper.
+ * Iterates until stable so 4×1.25 → 2×2.5 → 1×5 is resolved in one call.
+ * Total side weight is conserved exactly.
+ */
+function consolidatePlates(plates: PlateCount[]): PlateCount[] {
+	const map = new Map<number, number>(plates.map((p) => [p.weight, p.count]));
+	const rules: [number, number][] = [[1.25, 2.5], [2.5, 5]];
+	let changed = true;
+	while (changed) {
+		changed = false;
+		for (const [from, to] of rules) {
+			const n = map.get(from) ?? 0;
+			const pairs = Math.floor(n / 2);
+			if (pairs === 0) continue;
+			map.set(from, n - pairs * 2);
+			if ((map.get(from) ?? 0) === 0) map.delete(from);
+			map.set(to, (map.get(to) ?? 0) + pairs);
+			changed = true;
+		}
+	}
+	return Array.from(map.entries())
+		.map(([weight, count]) => ({ weight: weight as PlateWeight, count }))
+		.sort((a, b) => b.weight - a.weight);
+}
+
+/** Total plate-move cost (additions + removals) between two bar states. */
+function moveCost(prev: PlateCount[], next: PlateCount[]): number {
+	const { additions, removals } = diffPlates(prev, next);
+	return additions.reduce((s, p) => s + p.count, 0) + removals.reduce((s, p) => s + p.count, 0);
+}
+
+/** Build a TargetLoadResult from a concrete plate list (total weight already known to be achievable). */
+function makeResult(barWeight: BarWeight, requestedTotal: number, plates: PlateCount[]): TargetLoadResult {
+	const achievedSide = Number.parseFloat(plates.reduce((s, p) => s + p.weight * p.count, 0).toFixed(4));
+	const achievedTotal = fromQuarterKiloUnits(toQuarterKiloUnits(barWeight + achievedSide * 2));
+	const isExact = Math.abs(achievedTotal - requestedTotal) < 0.01;
+	return {
+		status: isExact ? 'exact' : 'rounded',
+		barWeight,
+		requestedTotal,
+		resolvedTotal: achievedTotal,
+		exact: isExact,
+		oneSideWeight: achievedSide,
+		delta: Number.parseFloat((achievedTotal - requestedTotal).toFixed(2)),
+		plates,
+		message: isExact ? 'Exact plate loading available.' : `Nearest achievable: ${achievedTotal} kg.`
+	};
+}
+
+/**
  * Smart set-sequence algorithm — ascending build strategy.
  *
  * Processes steps lightest → heaviest. Each heavier step is built by ADDING
@@ -194,38 +229,35 @@ export function computeSmartSetSequence(
 			continue;
 		}
 
-		// ── Weight going UP: lock bumpers, freely rerack change plates ────────────
+		// ── Weight going UP ───────────────────────────────────────────────────────
 		if (delta > 0.01) {
-			// Keep all bumper plates from previous step; recompute small plates fresh.
-			// This allows change plates (2.5, 1.25 kg etc.) to be reracked for a
-			// cleaner bar while bumper plates (5 kg+) are never removed going up.
-			const prevBumpers = prev.plates.filter((p) => isBumperPlate(p.weight));
-			const bumperLockedResult = buildResultLockingBumpers(barWeight, targetTotal, targetSideWeight, prevBumpers);
-			if (bumperLockedResult !== null) {
-				results.push(bumperLockedResult);
-				continue;
-			}
-			// Fallback: pure add-only (should rarely be needed)
+			// Candidate A: add the minimum delta plates on top of the previous bar,
+			// then consolidate any resulting pairs of small plates into larger
+			// equivalents (2×2.5→5 kg bumper, 2×1.25→2.5 kg).
+			// Usually the fewest plate moves.
 			const deltaPlates = addPlatesForDelta(delta);
-			if (deltaPlates !== null) {
-				const achievedDelta = deltaPlates.reduce((s, p) => s + p.weight * p.count, 0);
-				const newPlates = mergePlates(prev.plates, deltaPlates);
-				const achievedSide = Number.parseFloat((prevSideWeight + achievedDelta).toFixed(4));
-				const achievedTotal = fromQuarterKiloUnits(toQuarterKiloUnits(barWeight + achievedSide * 2));
-				const isExact = Math.abs(achievedTotal - targetTotal) < 0.01;
-				results.push({
-					status: isExact ? 'exact' : 'rounded',
-					barWeight,
-					requestedTotal: targetTotal,
-					resolvedTotal: achievedTotal,
-					exact: isExact,
-					oneSideWeight: achievedSide,
-					delta: Number.parseFloat((achievedTotal - targetTotal).toFixed(2)),
-					plates: newPlates,
-					message: isExact
-						? 'Exact plate loading available.'
-						: `Nearest achievable: ${achievedTotal} kg.`
-				});
+			const candidateA = deltaPlates !== null
+				? consolidatePlates(mergePlates(prev.plates, deltaPlates))
+				: null;
+
+			// Candidate B: lock all bumper plates from the previous step in place
+			// and fresh-compute an optimal change-plate fill for the remaining
+			// side weight. Preferred when prev has many accumulated change plates.
+			const prevBumpers = prev.plates.filter((p) => isBumperPlate(p.weight));
+			const freshResult = buildResultLockingBumpers(barWeight, targetTotal, targetSideWeight, prevBumpers);
+			const candidateB = freshResult !== null ? freshResult.plates : null;
+
+			// Pick whichever requires fewer plate moves; tiebreak by fewest total plates.
+			const candidates = ([candidateA, candidateB].filter(Boolean) as PlateCount[][])
+				.map((plates) => ({
+					plates,
+					cost: moveCost(prev.plates, plates),
+					count: plates.reduce((s, p) => s + p.count, 0)
+				}))
+				.sort((a, b) => a.cost - b.cost || a.count - b.count);
+
+			if (candidates.length > 0) {
+				results.push(makeResult(barWeight, targetTotal, candidates[0].plates));
 				continue;
 			}
 		}
@@ -241,44 +273,12 @@ export function computeSmartSetSequence(
 				const remaining = Number.parseFloat((targetSideWeight - bumperWeight).toFixed(4));
 				const prevChange = prev.plates.filter((p) => !isBumperPlate(p.weight));
 				const changeSubset = remaining > 0.001 ? findSubsetCombo(remaining, prevChange) : [];
-				const plates = mergePlates(prevBumpers, changeSubset);
-				const achievedSide = plates.reduce((s, p) => s + p.weight * p.count, 0);
-				const achievedTotal = fromQuarterKiloUnits(toQuarterKiloUnits(barWeight + achievedSide * 2));
-				const isExact = Math.abs(achievedTotal - targetTotal) < 0.01;
-				results.push({
-					status: isExact ? 'exact' : 'rounded',
-					barWeight,
-					requestedTotal: targetTotal,
-					resolvedTotal: achievedTotal,
-					exact: isExact,
-					oneSideWeight: achievedSide,
-					delta: Number.parseFloat((achievedTotal - targetTotal).toFixed(2)),
-					plates,
-					message: isExact
-						? 'Exact plate loading available.'
-						: `Nearest achievable: ${achievedTotal} kg.`
-				});
+				results.push(makeResult(barWeight, targetTotal, consolidatePlates(mergePlates(prevBumpers, changeSubset))));
 				continue;
 			}
 
 			// Target is below total bumper weight — must remove some bumpers too.
-			const subsetCombo = findSubsetCombo(targetSideWeight, prev.plates);
-			const subsetSide = subsetCombo.reduce((s, p) => s + p.weight * p.count, 0);
-			const subsetTotal = fromQuarterKiloUnits(toQuarterKiloUnits(barWeight + subsetSide * 2));
-			const isExact = Math.abs(subsetTotal - targetTotal) < 0.01;
-			results.push({
-				status: isExact ? 'exact' : 'rounded',
-				barWeight,
-				requestedTotal: targetTotal,
-				resolvedTotal: subsetTotal,
-				exact: isExact,
-				oneSideWeight: subsetSide,
-				delta: Number.parseFloat((subsetTotal - targetTotal).toFixed(2)),
-				plates: subsetCombo,
-				message: isExact
-					? 'Exact plate loading available.'
-					: `Nearest achievable: ${subsetTotal} kg.`
-			});
+			results.push(makeResult(barWeight, targetTotal, consolidatePlates(findSubsetCombo(targetSideWeight, prev.plates))));
 			continue;
 		}
 
