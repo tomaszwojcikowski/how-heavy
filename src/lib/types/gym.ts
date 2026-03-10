@@ -16,8 +16,10 @@ export interface PlateDefinition {
 	color: string;
 	accentColor: string;
 	textColor: string;
+	edgeColor: string;
 	radius: number;
 	ringRadius: number;
+	thickness: number;
 	order: number;
 }
 

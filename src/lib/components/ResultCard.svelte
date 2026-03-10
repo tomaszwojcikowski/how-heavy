@@ -34,7 +34,7 @@
 		</div>
 	</div>
 
-	<PlateStackPreview plates={result.plates} />
+	<PlateStackPreview barWeight={result.barWeight} plates={result.plates} />
 
 	{#if result.plates.length > 0}
 		<ul class="result-card__list">

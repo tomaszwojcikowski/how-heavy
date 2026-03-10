@@ -11,11 +11,13 @@ export const PLATE_DEFINITIONS = [
 		kind: 'bumper',
 		label: '20 kg bumper',
 		shortLabel: '20',
-		color: '#e83f3f',
-		accentColor: '#ffb2a8',
-		textColor: '#fff7f4',
+		color: '#171717',
+		accentColor: '#454545',
+		textColor: '#f2f2f2',
+		edgeColor: '#090909',
 		radius: 96,
 		ringRadius: 27,
+		thickness: 34,
 		order: 1
 	},
 	{
@@ -24,11 +26,13 @@ export const PLATE_DEFINITIONS = [
 		kind: 'bumper',
 		label: '15 kg bumper',
 		shortLabel: '15',
-		color: '#f0c63c',
-		accentColor: '#fff1ab',
-		textColor: '#402b00',
-		radius: 90,
+		color: '#181818',
+		accentColor: '#4b4b4b',
+		textColor: '#f2f2f2',
+		edgeColor: '#0b0b0b',
+		radius: 96,
 		ringRadius: 25,
+		thickness: 28,
 		order: 2
 	},
 	{
@@ -37,11 +41,13 @@ export const PLATE_DEFINITIONS = [
 		kind: 'bumper',
 		label: '10 kg bumper',
 		shortLabel: '10',
-		color: '#2fbe71',
-		accentColor: '#b4ffd0',
-		textColor: '#f4fff7',
-		radius: 84,
+		color: '#1b1b1b',
+		accentColor: '#555555',
+		textColor: '#f2f2f2',
+		edgeColor: '#101010',
+		radius: 96,
 		ringRadius: 24,
+		thickness: 22,
 		order: 3
 	},
 	{
@@ -50,11 +56,13 @@ export const PLATE_DEFINITIONS = [
 		kind: 'bumper',
 		label: '5 kg bumper',
 		shortLabel: '5',
-		color: '#3f73ff',
-		accentColor: '#bfd0ff',
-		textColor: '#f7f9ff',
-		radius: 76,
+		color: '#202020',
+		accentColor: '#5f5f5f',
+		textColor: '#f2f2f2',
+		edgeColor: '#141414',
+		radius: 90,
 		ringRadius: 21,
+		thickness: 14,
 		order: 4
 	},
 	{
@@ -66,8 +74,10 @@ export const PLATE_DEFINITIONS = [
 		color: '#4b4e57',
 		accentColor: '#d4dae6',
 		textColor: '#f5f7fb',
+		edgeColor: '#2b2d33',
 		radius: 58,
 		ringRadius: 15,
+		thickness: 8,
 		order: 5
 	},
 	{
@@ -79,8 +89,10 @@ export const PLATE_DEFINITIONS = [
 		color: '#8d54ff',
 		accentColor: '#ead6ff',
 		textColor: '#f9f4ff',
+		edgeColor: '#5e37aa',
 		radius: 54,
 		ringRadius: 14,
+		thickness: 7,
 		order: 6
 	},
 	{
@@ -92,8 +104,10 @@ export const PLATE_DEFINITIONS = [
 		color: '#ff8d1a',
 		accentColor: '#ffe2b5',
 		textColor: '#3d1f00',
+		edgeColor: '#b9600c',
 		radius: 50,
 		ringRadius: 13,
+		thickness: 6,
 		order: 7
 	},
 	{
@@ -105,8 +119,10 @@ export const PLATE_DEFINITIONS = [
 		color: '#13a3b3',
 		accentColor: '#c0f8ff',
 		textColor: '#effcff',
+		edgeColor: '#0a6e78',
 		radius: 46,
 		ringRadius: 12,
+		thickness: 6,
 		order: 8
 	},
 	{
@@ -118,8 +134,10 @@ export const PLATE_DEFINITIONS = [
 		color: '#ff5f7e',
 		accentColor: '#ffd1de',
 		textColor: '#fff5f8',
+		edgeColor: '#b53d56',
 		radius: 42,
 		ringRadius: 11,
+		thickness: 5,
 		order: 9
 	},
 	{
@@ -131,8 +149,10 @@ export const PLATE_DEFINITIONS = [
 		color: '#0b8a84',
 		accentColor: '#b8f5ef',
 		textColor: '#effffb',
+		edgeColor: '#07655f',
 		radius: 38,
 		ringRadius: 10,
+		thickness: 4,
 		order: 10
 	}
 ] satisfies readonly PlateDefinition[];

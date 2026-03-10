@@ -94,7 +94,7 @@
 				</div>
 			</div>
 
-			<PlateStackPreview plates={groupedPlates} />
+			<PlateStackPreview barWeight={summary.barWeight} plates={groupedPlates} />
 		</section>
 	</div>
 </section>
