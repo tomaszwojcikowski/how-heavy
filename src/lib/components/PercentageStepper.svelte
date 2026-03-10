@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { onDestroy } from 'svelte';
+
 	export let value: string = '';
 	export let onChange: (value: string) => void;
 	export let onRemove: (() => void) | null = null;
@@ -12,10 +14,27 @@
 	export let decrementLabel: string = 'Decrease percentage';
 	export let incrementLabel: string = 'Increase percentage';
 
+	let pulseActive = false;
+	let pulseTimeout: ReturnType<typeof setTimeout> | null = null;
+
+	function triggerPulse() {
+		pulseActive = true;
+
+		if (pulseTimeout) {
+			clearTimeout(pulseTimeout);
+		}
+
+		pulseTimeout = setTimeout(() => {
+			pulseActive = false;
+			pulseTimeout = null;
+		}, 140);
+	}
+
 	function increment() {
 		const current = Number.parseFloat(value);
 		const base = Number.isFinite(current) ? current : 0;
 		const next = Math.min(max, base + step);
+		triggerPulse();
 		onChange(String(next));
 	}
 
@@ -23,16 +42,24 @@
 		const current = Number.parseFloat(value);
 		const base = Number.isFinite(current) ? current : 0;
 		const next = Math.max(min, base - step);
+		triggerPulse();
 		onChange(String(next));
 	}
 
 	function handleInput(e: Event) {
+		triggerPulse();
 		onChange((e.currentTarget as HTMLInputElement).value);
 	}
+
+	onDestroy(() => {
+		if (pulseTimeout) {
+			clearTimeout(pulseTimeout);
+		}
+	});
 </script>
 
 <div class="pct-stepper-row">
-	<div class="pct-stepper" role="group" aria-label={label}>
+	<div class:pct-stepper--pulse={pulseActive} class="pct-stepper" role="group" aria-label={label}>
 		<button
 			type="button"
 			class="stepper-btn"
@@ -105,6 +132,11 @@
 		box-shadow: 0 0 0 3px color-mix(in srgb, var(--md-sys-color-primary) 16%, transparent);
 	}
 
+	.pct-stepper--pulse {
+		transform: scale(0.985);
+		box-shadow: 0 0 0 4px color-mix(in srgb, var(--md-sys-color-primary) 10%, transparent);
+	}
+
 	/* ── Stepper buttons ── */
 	.stepper-btn {
 		display: flex;
@@ -136,6 +168,7 @@
 
 	.stepper-btn:active {
 		background: color-mix(in srgb, var(--md-sys-color-primary) 18%, var(--md-sys-color-surface-container-low));
+		transform: scale(0.92);
 	}
 
 	.stepper-btn .material-symbols-rounded {
@@ -204,6 +237,10 @@
 		background: var(--tone-primary-surface);
 		color: var(--tone-primary-text);
 		border-color: var(--tone-primary-border);
+	}
+
+	.remove-btn:active {
+		transform: scale(0.94);
 	}
 
 	.remove-btn .material-symbols-rounded {

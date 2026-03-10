@@ -1,10 +1,13 @@
-import { PLATE_DEFINITIONS, fromQuarterKiloUnits, isSupportedBarWeight, toQuarterKiloUnits } from '$lib/utils/plates';
+import { getMaxPlateCountPerSide, PLATE_DEFINITIONS, fromQuarterKiloUnits, isSupportedBarWeight, toQuarterKiloUnits } from '$lib/utils/plates';
 import type { BarWeight, CurrentLoadSummary, PlateCount, PlateWeight, TargetLoadResult } from '$lib/types/gym';
 
 const SEARCH_STEP_UNITS = 2;
 type PlateCombinationVector = number[];
 
 const PLATE_LOOKUP_TABLE: Array<PlateCombinationVector | null> = [Array.from({ length: PLATE_DEFINITIONS.length }, () => 0)];
+const CHANGE_PLATE_INDICES = PLATE_DEFINITIONS
+	.map((plate, index) => (plate.kind === 'change' ? index : -1))
+	.filter((index) => index >= 0);
 
 // Tiebreaker preference order (indices into PLATE_DEFINITIONS): prefer 15 kg, 10 kg before 20 kg.
 // PLATE_DEFINITIONS: [20=0, 15=1, 10=2, 5=3, 2.5=4, 2=5, 1.5=6, 1.25=7, 1=8, 0.5=9]
@@ -14,12 +17,40 @@ function normalizeWeight(value: number): number {
 	return Number.parseFloat(value.toFixed(2));
 }
 
+function countChangePlates(combination: number[]): number {
+	return CHANGE_PLATE_INDICES.reduce((sum, index) => sum + combination[index], 0);
+}
+
+function countCrowdedChangePlateStacks(combination: number[]): number {
+	return CHANGE_PLATE_INDICES.reduce((sum, index) => sum + Math.max(0, combination[index] - 2), 0);
+}
+
 function compareCombinationCounts(candidate: number[], best: number[]): number {
 	const candidatePlateCount = candidate.reduce((sum, count) => sum + count, 0);
 	const bestPlateCount = best.reduce((sum, count) => sum + count, 0);
 
 	if (candidatePlateCount !== bestPlateCount) {
 		return candidatePlateCount - bestPlateCount;
+	}
+
+	const candidateChangePlateCount = countChangePlates(candidate);
+	const bestChangePlateCount = countChangePlates(best);
+
+	if (candidateChangePlateCount !== bestChangePlateCount) {
+		return candidateChangePlateCount - bestChangePlateCount;
+	}
+
+	const candidateCrowdedStacks = countCrowdedChangePlateStacks(candidate);
+	const bestCrowdedStacks = countCrowdedChangePlateStacks(best);
+
+	if (candidateCrowdedStacks !== bestCrowdedStacks) {
+		return candidateCrowdedStacks - bestCrowdedStacks;
+	}
+
+	for (const index of CHANGE_PLATE_INDICES) {
+		if (candidate[index] !== best[index]) {
+			return best[index] - candidate[index];
+		}
 	}
 
 	for (const index of FINDER_TIEBREAK_ORDER) {
@@ -54,6 +85,11 @@ function ensurePlateLookupTable(targetUnits: number): void {
 			}
 
 			const candidate = [...(PLATE_LOOKUP_TABLE[remainder] as PlateCombinationVector)];
+
+			if (candidate[index] + 1 > getMaxPlateCountPerSide(plate.weight)) {
+				continue;
+			}
+
 			candidate[index] += 1;
 
 			if (!bestCombination || compareCombinationCounts(candidate, bestCombination) < 0) {
@@ -157,7 +193,7 @@ export function resolveTargetLoad(barWeight: BarWeight, requestedTotal: number):
 			oneSideWeight: null,
 			delta: null,
 			plates: [],
-			message: 'Choose either a 15 kg or 20 kg bar.'
+			message: 'Choose either 15 kg or 20 kg.'
 		};
 	}
 

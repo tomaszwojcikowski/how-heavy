@@ -8,10 +8,14 @@
 	export let barWeight: BarWeight = 20;
 	export let plates: PlateCount[] = [];
 	export let emptyMessage = 'No plates needed — the empty bar already matches.';
+	export let emptyHint = 'Tap a preset or add plates above to preview the load.';
+	export let emptyGhostWeights: PlateWeight[] = [20, 10, 2.5];
 	export let onRemovePlate: ((weight: PlateWeight) => void) | null = null;
 
 	// heavy → light, used for both sides (left arm uses row-reverse CSS)
 	$: expandedPlates = plates.flatMap((plate) => Array.from({ length: plate.count }, () => plate.weight));
+	$: showingGhost = expandedPlates.length === 0;
+	$: renderedPlates = showingGhost ? emptyGhostWeights : expandedPlates;
 
 	function plateThickness(weight: PlateWeight): number {
 		const plate = PLATE_MAP[weight.toString() as keyof typeof PLATE_MAP];
@@ -49,7 +53,7 @@
 </script>
 
 <div class="stack-shell">
-	<div class="barbell-wrap" aria-label={`Barbell loaded with ${formatWeight(barWeight)} bar`}>
+	<div class="barbell-wrap" aria-label={`Barbell loaded with ${formatWeight(barWeight)}`}>
 		<!-- Shaft runs behind everything, centered vertically -->
 		<div
 			class="shaft"
@@ -60,16 +64,17 @@
 		<div class="barbell-row">
 			<!-- Left arm: DOM order heavy→light + sleeve + cap; row-reverse flips visual to cap→sleeve→light→heavy→center -->
 			<div class="arm arm--left" aria-label="Left side">
-				{#each expandedPlates as weight, i (`left-${weight}-${i}`)}
+				{#each renderedPlates as weight, i (`left-${weight}-${i}`)}
 					<!-- svelte-ignore a11y_no_static_element_interactions -->
 					<svelte:element
-						this={onRemovePlate ? 'button' : 'div'}
-						type={onRemovePlate ? 'button' : undefined}
+						this={onRemovePlate && !showingGhost ? 'button' : 'div'}
+						type={onRemovePlate && !showingGhost ? 'button' : undefined}
 						class="plate"
-						class:plate--interactive={onRemovePlate}
+						class:plate--ghost={showingGhost}
+						class:plate--interactive={onRemovePlate && !showingGhost}
 						style="width:{plateThickness(weight)}px;height:{plateHeight(weight)}px;background:{plateColor(weight)};border-color:{plateEdge(weight)}"
-						onclick={onRemovePlate ? () => onRemovePlate(weight) : undefined}
-						aria-label={onRemovePlate ? `Remove ${weight} kg plate` : undefined}
+						onclick={onRemovePlate && !showingGhost ? () => onRemovePlate(weight) : undefined}
+						aria-label={onRemovePlate && !showingGhost ? `Remove ${weight} kg plate` : undefined}
 						in:scale={{ duration: 180, start: 0.8 }}
 						out:scale={{ duration: 140, start: 0.85 }}
 					>
@@ -83,21 +88,21 @@
 			<!-- Center label -->
 			<div class="bar-label">
 				<span>{barWeight} kg</span>
-				<small>bar</small>
 			</div>
 
 			<!-- Right arm: sleeve + cap at the end; visual order heavy→light→sleeve→cap from center -->
 			<div class="arm arm--right" aria-label="Right side">
-				{#each expandedPlates as weight, i (`right-${weight}-${i}`)}
+				{#each renderedPlates as weight, i (`right-${weight}-${i}`)}
 					<!-- svelte-ignore a11y_no_static_element_interactions -->
 					<svelte:element
-						this={onRemovePlate ? 'button' : 'div'}
-						type={onRemovePlate ? 'button' : undefined}
+						this={onRemovePlate && !showingGhost ? 'button' : 'div'}
+						type={onRemovePlate && !showingGhost ? 'button' : undefined}
 						class="plate"
-						class:plate--interactive={onRemovePlate}
+						class:plate--ghost={showingGhost}
+						class:plate--interactive={onRemovePlate && !showingGhost}
 						style="width:{plateThickness(weight)}px;height:{plateHeight(weight)}px;background:{plateColor(weight)};border-color:{plateEdge(weight)}"
-						onclick={onRemovePlate ? () => onRemovePlate(weight) : undefined}
-						aria-label={onRemovePlate ? `Remove ${weight} kg plate` : undefined}
+						onclick={onRemovePlate && !showingGhost ? () => onRemovePlate(weight) : undefined}
+						aria-label={onRemovePlate && !showingGhost ? `Remove ${weight} kg plate` : undefined}
 						in:scale={{ duration: 180, start: 0.8 }}
 						out:scale={{ duration: 140, start: 0.85 }}
 					>
@@ -110,8 +115,11 @@
 		</div>
 	</div>
 
-	{#if expandedPlates.length === 0}
-		<p class="empty-note">{emptyMessage}</p>
+	{#if showingGhost}
+		<div class="empty-state">
+			<p class="empty-note">{emptyMessage}</p>
+			<p class="empty-hint">{emptyHint}</p>
+		</div>
 	{/if}
 </div>
 
@@ -202,6 +210,11 @@
 		transform: scaleY(0.9);
 	}
 
+	.plate.plate--ghost {
+		opacity: 0.28;
+		filter: saturate(0.72);
+	}
+
 	.plate span {
 		font-family: 'Archivo', sans-serif;
 		font-size: 0.6rem;
@@ -249,16 +262,21 @@
 		color: var(--text-primary);
 	}
 
-	.bar-label small {
-		font-size: 0.7rem;
-		text-transform: uppercase;
-		letter-spacing: 0.06em;
-		color: var(--text-secondary);
+	.empty-state {
+		display: grid;
+		gap: 0.3rem;
 	}
 
 	.empty-note {
 		margin: 0;
 		color: var(--text-secondary);
 		font-size: 0.9rem;
+	}
+
+	.empty-hint {
+		margin: 0;
+		font-size: 0.78rem;
+		line-height: 1.35;
+		color: var(--text-tertiary);
 	}
 </style>

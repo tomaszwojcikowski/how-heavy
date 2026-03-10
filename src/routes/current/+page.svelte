@@ -10,6 +10,7 @@
 	import type { BarWeight, PlateWeight } from '$lib/types/gym';
 	import { calculateCurrentLoad, summarizePlateCounts } from '$lib/utils/calculations';
 	import { formatWeight } from '$lib/utils/formatting';
+	import { getMaxPlateCountPerSide } from '$lib/utils/plates';
 	import { applyBarTheme } from '$lib/utils/theme';
 
 	const QUICK_PRESETS: { label: string; icon: string; plates: PlateWeight[] }[] = [
@@ -38,6 +39,7 @@
 
 	$: summary = calculateCurrentLoad(selectedBar, oneSidePlates);
 	$: groupedPlates = summarizePlateCounts(oneSidePlates);
+	$: showStickyPlateSummary = oneSidePlates.length >= 3;
 	$: if (browser && hydrated) {
 		applyBarTheme(selectedBar);
 		void saveCurrentState({
@@ -100,6 +102,12 @@
 	}
 
 	function addPlate(weight: PlateWeight) {
+		const samePlateCount = oneSidePlates.filter((plate) => plate === weight).length;
+
+		if (samePlateCount >= getMaxPlateCountPerSide(weight)) {
+			return;
+		}
+
 		applyPlateChange([...oneSidePlates, weight], `Added ${formatWeight(weight)} plate.`);
 	}
 
@@ -140,6 +148,10 @@
 			undoTimeout = null;
 		}
 	}
+
+	function formatPlateChip(weight: PlateWeight, count: number) {
+		return `${count}×${weight}`;
+	}
 </script>
 
 <svelte:head>
@@ -162,8 +174,16 @@
 				<span class="totals-strip__label">Per side</span>
 				<strong class="totals-strip__value">{formatWeight(summary.oneSideWeight)}</strong>
 				<span class="sep">·</span>
-				<span class="totals-strip__label">{formatWeight(summary.barWeight)} bar</span>
+				<span class="totals-strip__label">{formatWeight(summary.barWeight)}</span>
 			</div>
+			{#if showStickyPlateSummary}
+				<div class="totals-strip__chips" aria-label="Plate summary per side">
+					{#each groupedPlates as plate (plate.weight)}
+						<span class="totals-strip__chip">{formatPlateChip(plate.weight, plate.count)}</span>
+					{/each}
+					<span class="totals-strip__chip totals-strip__chip--meta">/ side</span>
+				</div>
+			{/if}
 		</div>
 
 		<!-- Controls: bar selector + plate picker -->
@@ -200,6 +220,11 @@
 				{/each}
 			</div>
 
+			<div class="mirror-note" role="note" aria-label="Mirrored plate loading">
+				<span class="material-symbols-rounded" aria-hidden="true">compare_arrows</span>
+				<span>Build one side only. The app mirrors the same plates on both sides of the bar.</span>
+			</div>
+
 			<PlatePicker selectedPlates={oneSidePlates} onAdd={addPlate} onRemove={removePlate} />
 		</section>
 
@@ -209,7 +234,8 @@
 				barWeight={summary.barWeight}
 				plates={groupedPlates}
 				onRemovePlate={removePlate}
-				emptyMessage="Tap plates above to build your barbell."
+				emptyMessage="Tap plates above or load a quick setup to build your barbell."
+				emptyHint="Selections are mirrored automatically, so you only ever pick one side."
 			/>
 		</section>
 
@@ -301,6 +327,32 @@
 		flex-wrap: wrap;
 	}
 
+	.totals-strip__chips {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.35rem;
+		width: 100%;
+	}
+
+	.totals-strip__chip {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		padding: 0.28rem 0.58rem;
+		border-radius: 999px;
+		background: color-mix(in srgb, var(--md-sys-color-surface-container-lowest) 84%, transparent);
+		border: 1px solid color-mix(in srgb, var(--outline) 78%, transparent);
+		font-size: 0.72rem;
+		font-weight: 700;
+		color: var(--text-secondary);
+	}
+
+	.totals-strip__chip--meta {
+		background: transparent;
+		border-style: dashed;
+		color: var(--text-tertiary);
+	}
+
 	.totals-strip__label {
 		color: var(--text-tertiary);
 		font-size: var(--type-label);
@@ -340,6 +392,26 @@
 		display: flex;
 		gap: 0.5rem;
 		flex-wrap: wrap;
+	}
+
+	.mirror-note {
+		display: flex;
+		align-items: flex-start;
+		gap: 0.55rem;
+		padding: 0.8rem 0.9rem;
+		border-radius: 10px;
+		border: 1px solid var(--outline);
+		background: color-mix(in srgb, var(--tone-secondary-surface) 68%, white 32%);
+		font-size: 0.84rem;
+		line-height: 1.35;
+		color: var(--text-secondary);
+	}
+
+	.mirror-note .material-symbols-rounded {
+		font-size: 1rem;
+		color: var(--tone-secondary-text);
+		margin-top: 0.08rem;
+		flex-shrink: 0;
 	}
 
 	.preset-btn {

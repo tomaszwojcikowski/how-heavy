@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import { calculateCurrentLoad, calculateOneSideWeight, getPlateCombinationForSideWeight, resolveTargetLoad, summarizePlateCounts } from './calculations';
+import { PLATE_DEFINITIONS } from './plates';
 
 describe('plate calculation engine', () => {
 	it('prefers the tie-break combination when multiple exact side loads exist', () => {
@@ -17,6 +18,18 @@ describe('plate calculation engine', () => {
 		expect(result.resolvedTotal).toBe(100);
 		expect(result.oneSideWeight).toBe(40);
 		expect(result.plates).toEqual([{ weight: 20, count: 2 }]);
+	});
+
+	it('prefers compact small-plate combinations for exact loads', () => {
+		const result = resolveTargetLoad(20, 76);
+
+		expect(result.status).toBe('exact');
+		expect(result.plates).toEqual([
+			{ weight: 15, count: 1 },
+			{ weight: 10, count: 1 },
+			{ weight: 2.5, count: 1 },
+			{ weight: 0.5, count: 1 }
+		]);
 	});
 
 	it('rounds to the nearest achievable total when needed', () => {
@@ -74,5 +87,23 @@ describe('plate calculation engine', () => {
 			{ weight: 2.5, count: 2 },
 			{ weight: 1, count: 1 }
 		]);
+	});
+
+	it('never suggests more than four matching change plates per side', () => {
+		for (let sideWeight = 0.5; sideWeight <= 80; sideWeight += 0.25) {
+			const combination = getPlateCombinationForSideWeight(Number.parseFloat(sideWeight.toFixed(2)));
+
+			if (!combination) {
+				continue;
+			}
+
+			for (const plate of combination) {
+				const definition = PLATE_DEFINITIONS.find((item) => item.weight === plate.weight);
+
+				if (definition?.kind === 'change') {
+					expect(plate.count).toBeLessThanOrEqual(4);
+				}
+			}
+		}
 	});
 });

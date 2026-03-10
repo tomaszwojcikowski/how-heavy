@@ -192,6 +192,28 @@ body {
 body {
 	min-height: 100vh;
 	line-height: var(--leading-copy);
+	position: relative;
+	transition:
+		background 280ms var(--md-sys-motion-easing-emphasized),
+		color 220ms var(--md-sys-motion-easing-standard);
+}
+
+body::before {
+	content: '';
+	position: fixed;
+	inset: 0;
+	pointer-events: none;
+	opacity: 0;
+	background:
+		radial-gradient(circle at 18% 18%, color-mix(in srgb, var(--theme-page-glow) 78%, white 22%) 0%, transparent 42%),
+		radial-gradient(circle at 82% 20%, color-mix(in srgb, var(--accent-tertiary) 18%, transparent) 0%, transparent 36%),
+		radial-gradient(circle at 50% 100%, color-mix(in srgb, var(--accent-primary) 12%, transparent) 0%, transparent 42%);
+	transition: opacity 240ms var(--md-sys-motion-easing-standard);
+	z-index: 0;
+}
+
+:root.theme-transitioning body::before {
+	animation: theme-wash 360ms var(--md-sys-motion-easing-emphasized);
 }
 
 button,
@@ -230,6 +252,8 @@ p {
 	/* Extra bottom padding so fixed nav doesn't cover content */
 	padding: 1rem 1rem calc(5rem + env(safe-area-inset-bottom, 0px));
 	box-sizing: border-box;
+	position: relative;
+	z-index: 1;
 }
 
 .topbar {
@@ -320,7 +344,23 @@ p {
 	background: var(--interactive-primary);
 	color: #fffaf5;
 	transform: translateY(-1px);
-	box-shadow: var(--interactive-primary-shadow);
+	box-shadow:
+		var(--interactive-primary-shadow),
+		0 0 0 1px color-mix(in srgb, var(--md-sys-color-on-primary) 12%, transparent);
+}
+
+@keyframes theme-wash {
+	0% {
+		opacity: 0;
+	}
+
+	35% {
+		opacity: 0.92;
+	}
+
+	100% {
+		opacity: 0;
+	}
 }
 
 .page-frame {

@@ -1,10 +1,72 @@
 import { getPlateCombinationForSideWeight, resolveTargetLoad } from '$lib/utils/calculations';
-import { PLATE_MAP, fromQuarterKiloUnits, toQuarterKiloUnits } from '$lib/utils/plates';
+import { getMaxPlateCountPerSide, PLATE_MAP, fromQuarterKiloUnits, toQuarterKiloUnits } from '$lib/utils/plates';
 import type { BarWeight, PlateCount, PlateWeight, TargetLoadResult } from '$lib/types/gym';
 
 export interface SetStep {
 	id: number;
 	percentage: string;
+}
+
+export interface SetTemplate {
+	id: string;
+	label: string;
+	description: string;
+	percentages?: readonly string[];
+	buildSteps?: (oneRm: number, barWeight: BarWeight) => SetStep[];
+}
+
+const ROUNDED_WARMUP_FACTORS = [0.45, 0.6, 0.75] as const;
+const ROUNDED_WARMUP_INCREMENT = 5;
+
+export const SET_TEMPLATES: readonly SetTemplate[] = [
+	{
+		id: 'warmup-ramp',
+		label: '3-step warm-up',
+		description: 'Three rounded loads that are faster to build on the bar.',
+		buildSteps: buildRoundedWarmupSteps
+	},
+	{
+		id: 'top-set',
+		label: 'Top-set builder',
+		description: 'Ramp with smaller jumps before a heavy top set.',
+		percentages: ['45', '55', '65', '75', '85', '92.5']
+	}
+] as const;
+
+export function buildSetStepsFromTemplate(percentages: readonly string[]): SetStep[] {
+	return percentages.map((percentage, index) => ({
+		id: index + 1,
+		percentage
+	}));
+}
+
+function roundToNearestIncrement(value: number, increment: number): number {
+	return Math.round(value / increment) * increment;
+}
+
+function formatPercentage(value: number): string {
+	return value.toFixed(2).replace(/\.00$/, '').replace(/0$/, '');
+}
+
+export function buildRoundedWarmupSteps(oneRm: number, barWeight: BarWeight): SetStep[] {
+	if (!Number.isFinite(oneRm) || oneRm <= barWeight) {
+		return buildSetStepsFromTemplate(['45', '60', '75']);
+	}
+
+	let previousTotal: number = barWeight;
+	const percentages = ROUNDED_WARMUP_FACTORS.map((factor) => {
+		const desiredTotal = oneRm * factor;
+		const roundedTotal = Math.max(
+			barWeight,
+			roundToNearestIncrement(desiredTotal, ROUNDED_WARMUP_INCREMENT),
+			previousTotal + ROUNDED_WARMUP_INCREMENT
+		);
+
+		previousTotal = roundedTotal;
+		return formatPercentage((roundedTotal / oneRm) * 100);
+	});
+
+	return buildSetStepsFromTemplate(percentages);
 }
 
 export interface ComputedSetStep {
@@ -14,9 +76,15 @@ export interface ComputedSetStep {
 	result: TargetLoadResult;
 	/** Plates to add vs the previous step (heaviest first) */
 	additions: PlateCount[];
+	/** Number of individual plate additions required across the whole bar */
+	additionCost: number;
 	/** Plates to remove vs the previous step (heaviest first) */
 	removals: PlateCount[];
-	/** Total number of individual plate moves (adds + removes) */
+	/** Number of individual plate removals required across the whole bar */
+	removalCost: number;
+	/** Total number of whole-bar moves required when this step increases the load */
+	upWeightMoveCost: number;
+	/** Total number of individual plate moves across the whole bar (adds + removes) */
 	changeCost: number;
 }
 
@@ -130,10 +198,9 @@ function diffPlates(prev: PlateCount[], next: PlateCount[]): { additions: PlateC
 }
 
 /**
- * Consolidate pairs of smaller change plates into a single larger equivalent:
- * 2×1.25 kg → 1×2.5 kg, then 2×2.5 kg → 1×5 kg bumper.
- * Iterates until stable so 4×1.25 → 2×2.5 → 1×5 is resolved in one call.
- * Total side weight is conserved exactly.
+ * Consolidate only the EXCESS change plates beyond the allowed per-side cap.
+ * This keeps up to 4 identical small plates on the full bar (2 per side) before
+ * folding extra pairs into larger equivalents.
  */
 function consolidatePlates(plates: PlateCount[]): PlateCount[] {
 	const map = new Map<number, number>(plates.map((p) => [p.weight, p.count]));
@@ -143,7 +210,9 @@ function consolidatePlates(plates: PlateCount[]): PlateCount[] {
 		changed = false;
 		for (const [from, to] of rules) {
 			const n = map.get(from) ?? 0;
-			const pairs = Math.floor(n / 2);
+			const maxCount = getMaxPlateCountPerSide(from as PlateWeight);
+			const excess = Number.isFinite(maxCount) ? Math.max(0, n - maxCount) : 0;
+			const pairs = Math.ceil(excess / 2);
 			if (pairs === 0) continue;
 			map.set(from, n - pairs * 2);
 			if ((map.get(from) ?? 0) === 0) map.delete(from);
@@ -156,10 +225,10 @@ function consolidatePlates(plates: PlateCount[]): PlateCount[] {
 		.sort((a, b) => b.weight - a.weight);
 }
 
-/** Total plate-move cost (additions + removals) between two bar states. */
+/** Total whole-bar plate-move cost (adds + removals on both sides) between two bar states. */
 function moveCost(prev: PlateCount[], next: PlateCount[]): number {
 	const { additions, removals } = diffPlates(prev, next);
-	return additions.reduce((s, p) => s + p.count, 0) + removals.reduce((s, p) => s + p.count, 0);
+	return (additions.reduce((s, p) => s + p.count, 0) + removals.reduce((s, p) => s + p.count, 0)) * 2;
 }
 
 /** Build a TargetLoadResult from a concrete plate list (total weight already known to be achievable). */
@@ -232,8 +301,7 @@ export function computeSmartSetSequence(
 		// ── Weight going UP ───────────────────────────────────────────────────────
 		if (delta > 0.01) {
 			// Candidate A: add the minimum delta plates on top of the previous bar,
-			// then consolidate any resulting pairs of small plates into larger
-			// equivalents (2×2.5→5 kg bumper, 2×1.25→2.5 kg).
+			// then only consolidate excess change plates beyond the 4-on-the-bar cap.
 			// Usually the fewest plate moves.
 			const deltaPlates = addPlatesForDelta(delta);
 			const candidateA = deltaPlates !== null
@@ -292,16 +360,21 @@ export function computeSmartSetSequence(
 			i === 0
 				? { additions: results[i].plates ?? [], removals: [] }
 				: diffPlates(results[i - 1].plates, results[i].plates);
-		const changeCost =
-			additions.reduce((sum, p) => sum + p.count, 0) +
-			removals.reduce((sum, p) => sum + p.count, 0);
+		const additionCost = additions.reduce((sum, p) => sum + p.count, 0) * 2;
+		const removalCost = removals.reduce((sum, p) => sum + p.count, 0) * 2;
+		const changeCost = additionCost + removalCost;
+		const previousTargetTotal = i === 0 ? barWeight : parsed[i - 1].percentage * oneRm / 100;
+		const upWeightMoveCost = s.percentage * oneRm / 100 > previousTargetTotal ? changeCost : 0;
 		return {
 			id: s.id,
 			percentage: s.percentage,
 			targetTotal: Math.round(((oneRm * s.percentage) / 100) * 4) / 4,
 			result: results[i],
 			additions,
+			additionCost,
 			removals,
+			removalCost,
+			upWeightMoveCost,
 			changeCost
 		};
 	});

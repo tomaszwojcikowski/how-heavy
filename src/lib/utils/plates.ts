@@ -167,6 +167,8 @@ export const PLATE_MAP = Object.fromEntries(
 	PLATE_DEFINITIONS.map((plate) => [plate.weight.toString(), plate])
 ) as Record<PlateWeightKey, PlateDefinition>;
 
+const MAX_CHANGE_PLATES_PER_SIDE = 4;
+
 export function toQuarterKiloUnits(weight: number): number {
 	return Math.round(weight * QUARTER_KILO_UNITS);
 }
@@ -177,6 +179,10 @@ export function fromQuarterKiloUnits(units: number): number {
 
 export function plateKey(weight: PlateWeight): PlateWeightKey {
 	return weight.toString() as PlateWeightKey;
+}
+
+export function getMaxPlateCountPerSide(weight: PlateWeight): number {
+	return PLATE_MAP[plateKey(weight)].kind === 'change' ? MAX_CHANGE_PLATES_PER_SIDE : Number.POSITIVE_INFINITY;
 }
 
 export function isSupportedBarWeight(weight: number): weight is BarWeight {

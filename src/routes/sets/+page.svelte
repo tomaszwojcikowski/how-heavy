@@ -11,7 +11,7 @@
 	import { modeDescriptions, modeLabels } from '$lib/site';
 	import { loadCalculatorState, saveSetsState } from '$lib/stores/calculator';
 	import { formatWeight } from '$lib/utils/formatting';
-	import { computeSmartSetSequence } from '$lib/utils/sets';
+	import { buildSetStepsFromTemplate, computeSmartSetSequence, SET_TEMPLATES, type SetTemplate } from '$lib/utils/sets';
 	import type { BarWeight, PlateCount } from '$lib/types/gym';
 	import { applyBarTheme } from '$lib/utils/theme';
 
@@ -21,11 +21,9 @@
 	let selectedBar: BarWeight = 20;
 	let oneRmValue = '100';
 	let hydrated = false;
+	let selectedTemplateId: string | null = null;
 
-	let steps: Array<{ id: number; percentage: string }> = DEFAULT_PERCENTAGES.map((p, i) => ({
-		id: i + 1,
-		percentage: p
-	}));
+	let steps: Array<{ id: number; percentage: string }> = buildSetStepsFromTemplate(DEFAULT_PERCENTAGES);
 	let nextId = DEFAULT_PERCENTAGES.length + 1;
 
 	onMount(async () => {
@@ -47,6 +45,22 @@
 		}
 	}
 
+	$: if (selectedTemplateId) {
+		const template = SET_TEMPLATES.find((item) => item.id === selectedTemplateId);
+
+		if (template?.buildSteps) {
+			const nextSteps = template.buildSteps(parsedOneRm, selectedBar);
+			const changed =
+				nextSteps.length !== steps.length ||
+				nextSteps.some((step, index) => step.percentage !== steps[index]?.percentage);
+
+			if (changed) {
+				steps = nextSteps;
+				nextId = nextSteps.length + 1;
+			}
+		}
+	}
+
 	$: if (browser && hydrated) {
 		applyBarTheme(selectedBar);
 		void saveSetsState({
@@ -57,15 +71,28 @@
 
 	function addStep() {
 		if (steps.length >= MAX_STEPS) return;
+		selectedTemplateId = null;
 		steps = [...steps, { id: nextId++, percentage: '' }];
 	}
 
 	function removeStep(id: number) {
+		selectedTemplateId = null;
 		steps = steps.filter((s) => s.id !== id);
 	}
 
 	function updatePercentage(id: number, value: string) {
+		selectedTemplateId = null;
 		steps = steps.map((s) => (s.id === id ? { ...s, percentage: value } : s));
+	}
+
+	function applyTemplate(template: SetTemplate) {
+		const nextSteps = template.buildSteps
+			? template.buildSteps(parsedOneRm, selectedBar)
+			: buildSetStepsFromTemplate(template.percentages ?? []);
+
+		steps = nextSteps;
+		nextId = nextSteps.length + 1;
+		selectedTemplateId = template.id;
 	}
 
 	function formatPlateChange(plates: PlateCount[]): string {
@@ -104,7 +131,7 @@
 				<p class="orm-helper">
 					Adjust in 2.5 kg steps or type directly.
 					{#if Number.isFinite(parsedOneRm) && parsedOneRm <= selectedBar}
-						Must be above the {selectedBar} kg bar.
+						Must be above {selectedBar} kg.
 					{/if}
 				</p>
 			</div>
@@ -121,6 +148,26 @@
 				incrementLabel="Increase one rep max by 2.5 kilograms"
 				onChange={(value) => (oneRmValue = value)}
 			/>
+		</div>
+
+		<div class="template-strip" role="group" aria-label="Training set presets">
+			<div class="template-strip__copy">
+				<p class="template-strip__label">Warm-up builder</p>
+				<p class="template-strip__helper">Generate 3 rounded warm-up loads from your current 1RM, then tweak any step.</p>
+			</div>
+			<div class="template-strip__buttons">
+				{#each SET_TEMPLATES as template (template.id)}
+					<button
+						type="button"
+						class:template-btn--selected={selectedTemplateId === template.id}
+						class="template-btn"
+						onclick={() => applyTemplate(template)}
+					>
+						<span>{template.label}</span>
+						<small>{template.description}</small>
+					</button>
+				{/each}
+			</div>
 		</div>
 	</section>
 
@@ -157,6 +204,12 @@
 					<!-- Change pills vs previous step -->
 					{#if stepIndex > 0}
 						<div class="step-diff">
+							{#if computed.upWeightMoveCost > 0}
+								<span class="diff-pill diff-pill--moves">
+									<span class="material-symbols-rounded" aria-hidden="true">swap_vert</span>
+									{computed.upWeightMoveCost} {computed.upWeightMoveCost === 1 ? 'move' : 'moves'} to load
+								</span>
+							{/if}
 							{#if computed.removals.length > 0}
 								<span class="diff-pill diff-pill--remove">
 									<span class="material-symbols-rounded" aria-hidden="true">remove</span>
@@ -189,6 +242,7 @@
 						barWeight={selectedBar}
 						plates={computed.result.plates}
 						emptyMessage="Empty bar — no plates needed."
+						emptyHint="Use a warm-up preset or enter a percentage to preview plates for this set."
 					/>
 				{:else if step.percentage === ''}
 					<p class="step-placeholder">Enter a percentage above</p>
@@ -248,6 +302,82 @@
 	.orm-block {
 		display: grid;
 		gap: 0.65rem;
+	}
+
+	.template-strip {
+		display: grid;
+		gap: 0.75rem;
+		padding-top: 0.15rem;
+	}
+
+	.template-strip__copy {
+		display: grid;
+		gap: 0.18rem;
+	}
+
+	.template-strip__label {
+		margin: 0;
+		font-size: var(--type-body-sm);
+		font-weight: 700;
+		color: var(--text-primary);
+	}
+
+	.template-strip__helper {
+		margin: 0;
+		font-size: 0.78rem;
+		line-height: 1.35;
+		color: var(--text-secondary);
+	}
+
+	.template-strip__buttons {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+		gap: 0.6rem;
+	}
+
+	.template-btn {
+		display: grid;
+		gap: 0.18rem;
+		padding: 0.8rem 0.9rem;
+		border-radius: 12px;
+		border: 1px solid var(--outline);
+		background: color-mix(in srgb, var(--md-sys-color-surface-container-lowest) 84%, transparent);
+		text-align: left;
+		cursor: pointer;
+		transition:
+			transform 120ms cubic-bezier(0.2, 0, 0, 1),
+			background 120ms cubic-bezier(0.2, 0, 0, 1),
+			border-color 120ms cubic-bezier(0.2, 0, 0, 1),
+			box-shadow 180ms cubic-bezier(0.2, 0, 0, 1);
+	}
+
+	.template-btn span {
+		font-family: 'Archivo', sans-serif;
+		font-size: 0.96rem;
+		font-weight: 800;
+		letter-spacing: var(--tracking-tight);
+		color: var(--text-primary);
+	}
+
+	.template-btn small {
+		font-size: 0.76rem;
+		line-height: 1.35;
+		color: var(--text-secondary);
+	}
+
+	.template-btn:hover {
+		background: color-mix(in srgb, var(--tone-secondary-surface) 72%, white 28%);
+		border-color: var(--tone-secondary-border);
+	}
+
+	.template-btn:active {
+		transform: scale(0.98);
+	}
+
+	.template-btn--selected {
+		background: color-mix(in srgb, var(--tone-secondary-surface) 78%, white 22%);
+		border-color: var(--tone-secondary-border);
+		box-shadow: 0 10px 22px color-mix(in srgb, var(--accent-secondary) 16%, transparent);
 	}
 
 	.orm-copy {
@@ -356,6 +486,11 @@
 		background: var(--md-sys-color-surface-container-lowest);
 		color: var(--text-secondary);
 		border: 1px solid var(--outline);
+	}
+
+	.diff-pill--moves {
+		background: color-mix(in srgb, var(--tone-tertiary-surface) 78%, white 22%);
+		color: var(--tone-tertiary-text);
 	}
 
 	/* Placeholders */

@@ -20,11 +20,14 @@
 		{#each BAR_OPTIONS as option (option)}
 			<button
 				type="button"
+				class:bar-option--15={option === 15}
+				class:bar-option--20={option === 20}
 				class:bar-option--selected={option === value}
 				class="bar-option"
 				onclick={() => onChange(option)}
 				aria-pressed={option === value}
 			>
+				<span class="bar-option__theme-dot" aria-hidden="true"></span>
 				<span class="bar-option__weight">{option}</span>
 				<span class="bar-option__unit">kg</span>
 			</button>
@@ -72,7 +75,7 @@
 		display: inline-flex;
 		align-items: baseline;
 		justify-content: center;
-		gap: 0.16rem;
+		gap: 0.22rem;
 		min-width: 4.2rem;
 		padding: 0.55rem 0.8rem;
 		border-radius: 999px;
@@ -84,7 +87,26 @@
 			background 120ms cubic-bezier(0.2, 0, 0, 1),
 			border-color 120ms cubic-bezier(0.2, 0, 0, 1),
 			color 120ms cubic-bezier(0.2, 0, 0, 1),
-			transform 120ms cubic-bezier(0.2, 0, 0, 1);
+			transform 120ms cubic-bezier(0.2, 0, 0, 1),
+			box-shadow 180ms cubic-bezier(0.2, 0, 0, 1);
+		position: relative;
+		overflow: hidden;
+	}
+
+	.bar-option__theme-dot {
+		width: 0.55rem;
+		height: 0.55rem;
+		border-radius: 999px;
+		flex-shrink: 0;
+		box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.28);
+	}
+
+	.bar-option--20 .bar-option__theme-dot {
+		background: linear-gradient(180deg, #4a97ef, #1565c0);
+	}
+
+	.bar-option--15 .bar-option__theme-dot {
+		background: linear-gradient(180deg, #ef6ba4, #c2185b);
 	}
 
 	.bar-option:hover {
@@ -93,13 +115,17 @@
 	}
 
 	.bar-option--selected {
-		background: color-mix(in srgb, var(--tone-tertiary-surface) 86%, white 14%);
+		background: color-mix(in srgb, var(--tone-tertiary-surface) 88%, white 12%);
 		border-color: color-mix(in srgb, var(--accent-primary) 26%, transparent);
 		color: var(--text-primary);
+		box-shadow:
+			0 10px 24px color-mix(in srgb, var(--accent-primary) 18%, transparent),
+			inset 0 1px 0 rgba(255, 255, 255, 0.42);
+		transform: translateY(-1px) scale(1.01);
 	}
 
 	.bar-option:active {
-		transform: translateY(1px);
+		transform: translateY(1px) scale(0.98);
 	}
 
 	.bar-option__weight {

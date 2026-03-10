@@ -1,14 +1,30 @@
 <script lang="ts">
+	import { onDestroy } from 'svelte';
 	import { scale } from 'svelte/transition';
 
 	import PlateGraphic from '$lib/components/PlateGraphic.svelte';
 	import type { PlateWeight } from '$lib/types/gym';
-	import { PLATE_DEFINITIONS } from '$lib/utils/plates';
+	import { getMaxPlateCountPerSide, PLATE_DEFINITIONS } from '$lib/utils/plates';
 	import { summarizePlateCounts } from '$lib/utils/calculations';
 
 	export let selectedPlates: PlateWeight[] = [];
 	export let onAdd: (weight: PlateWeight) => void = () => {};
 	export let onRemove: (weight: PlateWeight) => void = () => {};
+
+	const plateGroups = [
+		{
+			key: 'bumper',
+			title: 'Bumper plates',
+			helper: 'Large work plates closest to the collar.',
+			plates: PLATE_DEFINITIONS.filter((plate) => plate.kind === 'bumper')
+		},
+		{
+			key: 'change',
+			title: 'Change plates',
+			helper: 'Fine-tune the load with smaller jumps.',
+			plates: PLATE_DEFINITIONS.filter((plate) => plate.kind === 'change')
+		}
+	] as const;
 
 	$: selectedCounts = summarizePlateCounts(selectedPlates);
 
@@ -36,45 +52,77 @@
 			repeatInterval = null;
 		}
 	}
+
+	onDestroy(() => {
+		endHold();
+	});
 </script>
 
 <div class="plate-picker">
-	<div class="plate-picker__tray">
-		{#each PLATE_DEFINITIONS as plate (plate.weight)}
-			{@const count = selectedCounts.find((item) => item.weight === plate.weight)?.count ?? 0}
-			<div class="plate-choice">
-			<strong class="plate-choice__label" aria-label="{plate.weight} kilograms">{plate.weight} <span>kg</span></strong>
-			<PlateGraphic weight={plate.weight} size={graphicSize(plate.weight)} count={count} />
-				<div class="plate-choice__actions">
-					<button
-						type="button"
-						class="plate-choice__action plate-choice__action--remove"
-						onpointerdown={() => count > 0 && startHold(() => onRemove(plate.weight))}
-						onpointerup={endHold}
-						onpointerleave={endHold}
-						onpointercancel={endHold}
-						onclick={(e: MouseEvent) => { if (e.detail === 0 && count > 0) onRemove(plate.weight); }}
-						disabled={count === 0}
-						aria-label={`Remove ${plate.weight} kilogram plate`}
-					>
-						<span class="material-symbols-rounded" aria-hidden="true">remove</span>
-					</button>
-					<button
-						type="button"
-						class="plate-choice__action plate-choice__action--add"
-						onpointerdown={() => startHold(() => onAdd(plate.weight))}
-						onpointerup={endHold}
-						onpointerleave={endHold}
-						onpointercancel={endHold}
-						onclick={(e: MouseEvent) => { if (e.detail === 0) onAdd(plate.weight); }}
-						aria-label={`Add ${plate.weight} kilogram plate`}
-					>
-						<span class="material-symbols-rounded" aria-hidden="true">add</span>
-					</button>
+	{#each plateGroups as group (group.key)}
+		<section class="plate-picker__section" data-kind={group.key} aria-label={group.title}>
+			<div class="plate-picker__section-copy">
+				<div>
+					<p class="plate-picker__section-title">{group.title}</p>
+					<p class="plate-picker__section-helper">{group.helper}</p>
 				</div>
+				<span class="plate-picker__section-badge">{group.plates.length} options</span>
 			</div>
-		{/each}
-	</div>
+
+			<div class="plate-picker__tray">
+				{#each group.plates as plate (plate.weight)}
+					{@const count = selectedCounts.find((item) => item.weight === plate.weight)?.count ?? 0}
+					{@const maxCount = getMaxPlateCountPerSide(plate.weight)}
+					{@const atMaxCount = count >= maxCount}
+					<div class:plate-choice--change={group.key === 'change'} class="plate-choice">
+						<div class="plate-choice__count" aria-live="polite">
+							{#if count > 0}
+								{count} loaded
+							{:else if Number.isFinite(maxCount)}
+								{maxCount} / side max
+							{:else}
+								Tap to load
+							{/if}
+						</div>
+						<strong class="plate-choice__label" aria-label="{plate.weight} kilograms">{plate.weight} <span>kg</span></strong>
+						<PlateGraphic weight={plate.weight} size={graphicSize(plate.weight)} count={count} />
+						<div class="plate-choice__actions">
+							<button
+								type="button"
+								class="plate-choice__action plate-choice__action--remove"
+								onpointerdown={() => count > 0 && startHold(() => onRemove(plate.weight))}
+								onpointerup={endHold}
+								onpointerleave={endHold}
+								onpointercancel={endHold}
+								onclick={(e: MouseEvent) => {
+									if (e.detail === 0 && count > 0) onRemove(plate.weight);
+								}}
+								disabled={count === 0}
+								aria-label={`Remove ${plate.weight} kilogram plate`}
+							>
+								<span class="material-symbols-rounded" aria-hidden="true">remove</span>
+							</button>
+							<button
+								type="button"
+								class="plate-choice__action plate-choice__action--add"
+								onpointerdown={() => !atMaxCount && startHold(() => onAdd(plate.weight))}
+								onpointerup={endHold}
+								onpointerleave={endHold}
+								onpointercancel={endHold}
+								onclick={(e: MouseEvent) => {
+									if (e.detail === 0 && !atMaxCount) onAdd(plate.weight);
+								}}
+								disabled={atMaxCount}
+								aria-label={`Add ${plate.weight} kilogram plate`}
+							>
+								<span class="material-symbols-rounded" aria-hidden="true">add</span>
+							</button>
+						</div>
+					</div>
+				{/each}
+			</div>
+		</section>
+	{/each}
 
 	{#if selectedCounts.length > 0}
 		<div class="plate-picker__selected">
@@ -98,6 +146,61 @@
 		gap: 1rem;
 	}
 
+	.plate-picker__section {
+		display: grid;
+		gap: 0.85rem;
+		padding: 0.95rem;
+		border-radius: var(--radius-xl);
+		border: 1px solid var(--outline);
+		background: color-mix(in srgb, var(--surface-4) 82%, white 18%);
+		box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.44);
+	}
+
+	.plate-picker__section[data-kind='bumper'] {
+		background: linear-gradient(180deg, color-mix(in srgb, var(--tone-primary-surface) 52%, white 48%), var(--surface-4));
+	}
+
+	.plate-picker__section[data-kind='change'] {
+		background: linear-gradient(180deg, color-mix(in srgb, var(--tone-secondary-surface) 56%, white 44%), var(--surface-4));
+	}
+
+	.plate-picker__section-copy {
+		display: flex;
+		justify-content: space-between;
+		gap: 0.75rem;
+		align-items: start;
+	}
+
+	.plate-picker__section-title {
+		margin: 0;
+		font-family: 'Archivo', sans-serif;
+		font-size: 0.98rem;
+		font-weight: 800;
+		letter-spacing: var(--tracking-tight);
+		color: var(--text-primary);
+	}
+
+	.plate-picker__section-helper {
+		margin: 0.15rem 0 0;
+		font-size: 0.78rem;
+		line-height: 1.35;
+		color: var(--text-secondary);
+	}
+
+	.plate-picker__section-badge {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		padding: 0.28rem 0.6rem;
+		border-radius: 999px;
+		background: color-mix(in srgb, var(--md-sys-color-surface-container-lowest) 82%, transparent);
+		border: 1px solid var(--outline);
+		font-size: 0.72rem;
+		font-weight: 700;
+		white-space: nowrap;
+		color: var(--text-secondary);
+	}
+
 	.plate-picker__tray {
 		display: grid;
 		grid-template-columns: repeat(auto-fit, minmax(7.25rem, 1fr));
@@ -113,6 +216,25 @@
 		border: 1px solid var(--outline);
 		background: var(--surface-4);
 		box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45);
+		position: relative;
+		transition: transform 120ms cubic-bezier(0.2, 0, 0, 1), box-shadow 160ms cubic-bezier(0.2, 0, 0, 1);
+	}
+
+	.plate-choice--change {
+		background: color-mix(in srgb, var(--md-sys-color-surface-container-lowest) 84%, var(--tone-secondary-surface) 16%);
+	}
+
+	.plate-choice__count {
+		position: absolute;
+		top: 0.5rem;
+		right: 0.5rem;
+		padding: 0.18rem 0.42rem;
+		border-radius: 999px;
+		background: color-mix(in srgb, var(--md-sys-color-surface-container-lowest) 88%, transparent);
+		border: 1px solid color-mix(in srgb, var(--outline) 82%, transparent);
+		font-size: 0.68rem;
+		font-weight: 700;
+		color: var(--text-secondary);
 	}
 
 	.plate-choice__label {
@@ -150,6 +272,11 @@
 		background: var(--surface-2);
 		color: var(--text-primary);
 		cursor: pointer;
+		transition: transform 110ms cubic-bezier(0.2, 0, 0, 1), background 120ms cubic-bezier(0.2, 0, 0, 1), border-color 120ms cubic-bezier(0.2, 0, 0, 1);
+	}
+
+	.plate-choice__action:active {
+		transform: scale(0.92);
 	}
 
 	.plate-choice__action .material-symbols-rounded {

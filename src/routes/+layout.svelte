@@ -4,7 +4,7 @@
 	import { page } from '$app/state';
 	import { onMount } from 'svelte';
 	import favicon from '$lib/assets/favicon.svg';
-	import { modeLabels } from '$lib/site';
+	import { modeLabels, navLabels } from '$lib/site';
 	import { loadCalculatorState } from '$lib/stores/calculator';
 	import { applyBarTheme } from '$lib/utils/theme';
 	import '$lib/material';
@@ -43,19 +43,19 @@
 	</main>
 
 	<nav class="primary-nav" aria-label="Primary">
-		<a class:active={page.url.pathname === `${base}/target/`} href={resolve('/target')}>
+		<a class:active={page.url.pathname === `${base}/target/`} href={resolve('/target')} aria-label={modeLabels.findPlates}>
 			<span class="nav-icon material-symbols-rounded" aria-hidden="true">sports_score</span>
-			<span class="nav-label">{modeLabels.findPlates}</span>
+			<span class="nav-label">{navLabels.findPlates}</span>
 			<md-ripple></md-ripple>
 		</a>
-		<a class:active={page.url.pathname === `${base}/current/`} href={resolve('/current')}>
+		<a class:active={page.url.pathname === `${base}/current/`} href={resolve('/current')} aria-label={modeLabels.countPlates}>
 			<span class="nav-icon material-symbols-rounded" aria-hidden="true">exercise</span>
-			<span class="nav-label">{modeLabels.countPlates}</span>
+			<span class="nav-label">{navLabels.countPlates}</span>
 			<md-ripple></md-ripple>
 		</a>
-		<a class:active={page.url.pathname === `${base}/sets/`} href={resolve('/sets')}>
+		<a class:active={page.url.pathname === `${base}/sets/`} href={resolve('/sets')} aria-label={modeLabels.trainingSets}>
 			<span class="nav-icon material-symbols-rounded" aria-hidden="true">bar_chart</span>
-			<span class="nav-label">{modeLabels.trainingSets}</span>
+			<span class="nav-label">{navLabels.trainingSets}</span>
 			<md-ripple></md-ripple>
 		</a>
 	</nav>

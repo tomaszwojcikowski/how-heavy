@@ -8,6 +8,12 @@ export const modeLabels = {
 	trainingSets: 'Sets'
 } as const;
 
+export const navLabels = {
+	findPlates: 'Load',
+	countPlates: 'Count',
+	trainingSets: 'Plan'
+} as const;
+
 export const modeDescriptions = {
 	findPlates: 'Enter a target weight and get the exact plate stack needed on each side.',
 	countPlates: 'Tap the plates already loaded and calculate the total bar weight instantly.',
