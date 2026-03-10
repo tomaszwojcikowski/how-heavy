@@ -1,42 +1,79 @@
-# sv
+# How Heavy
 
-Everything you need to build a Svelte project, powered by [`sv`](https://github.com/sveltejs/cli).
+How Heavy is a mobile-first SvelteKit app for planning barbell loading with CrossFit-style bumper plates and change plates.
 
-## Creating a project
+It supports two modes:
 
-If you're seeing this, you've probably already done this step. Congrats!
+- target mode: enter a desired total weight and get the exact or nearest achievable one-side plate stack
+- current mode: tap the plates already on one side of the bar and calculate the full loaded weight
 
-```sh
-# create a new project
-npx sv create my-app
+The app is configured for static deployment to GitHub Pages at `https://tomaszwojcikowski.github.io/how-heavy/` and uses GitHub Actions for CI and deployment.
+
+## Stack
+
+- SvelteKit with TypeScript
+- `@sveltejs/adapter-static` for GitHub Pages
+- SVG-based custom plate graphics
+- Vitest and Testing Library for tests
+- ESLint and Prettier for code quality
+- `idb-keyval` for local persistence
+
+## Development
+
+Install dependencies:
+
+```bash
+npm install
 ```
 
-To recreate this project with the same configuration:
+Start the dev server:
 
-```sh
-# recreate this project
-npx sv@0.12.5 create --template minimal --types ts --install npm .
-```
-
-## Developing
-
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
-
-```sh
+```bash
 npm run dev
-
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
 ```
 
-## Building
+## Quality Checks
 
-To create a production version of your app:
+Run type and Svelte checks:
 
-```sh
-npm run build
+```bash
+npm run check
 ```
 
-You can preview the production build with `npm run preview`.
+Run linting:
 
-> To deploy your app, you may need to install an [adapter](https://svelte.dev/docs/kit/adapters) for your target environment.
+```bash
+npm run lint
+```
+
+Run tests:
+
+```bash
+npm run test:run
+```
+
+## Production Build
+
+Build for GitHub Pages:
+
+```bash
+BASE_PATH=/how-heavy npm run build
+```
+
+Preview the production build locally:
+
+```bash
+npm run preview
+```
+
+## Deployment
+
+- `.github/workflows/ci.yml` runs checks, linting, tests, and a build verification step
+- `.github/workflows/deploy.yml` builds and publishes the site to GitHub Pages
+- the SvelteKit base path is `/how-heavy` for production builds
+
+## Supported Equipment
+
+- bars: 15 kg, 20 kg
+- bumper plates: 5 kg, 10 kg, 15 kg, 20 kg
+- change plates: 0.5 kg, 1 kg, 1.25 kg, 1.5 kg, 2 kg, 2.5 kg
