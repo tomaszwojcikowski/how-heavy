@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { base, resolve } from '$app/paths';
+	import { onNavigate } from '$app/navigation';
 	import { page } from '$app/state';
 	import favicon from '$lib/assets/favicon.svg';
 	import { modeLabels } from '$lib/site';
@@ -7,6 +8,16 @@
 	import '../app.css';
 
 	let { children } = $props();
+
+	onNavigate((navigation) => {
+		if (!document.startViewTransition) return;
+		return new Promise((resolve) => {
+			document.startViewTransition(async () => {
+				resolve();
+				await navigation.complete;
+			});
+		});
+	});
 </script>
 
 <svelte:head>

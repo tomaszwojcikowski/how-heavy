@@ -1,7 +1,11 @@
 <script lang="ts">
 	import { afterUpdate } from 'svelte';
+	import { fly, scale } from 'svelte/transition';
+	import { flip } from 'svelte/animate';
+	import { cubicOut } from 'svelte/easing';
 
 	import BarSelector from '$lib/components/BarSelector.svelte';
+	import PercentageStepper from '$lib/components/PercentageStepper.svelte';
 	import PlateStackPreview from '$lib/components/PlateStackPreview.svelte';
 	import { modeDescriptions, modeLabels } from '$lib/site';
 	import { formatWeight } from '$lib/utils/formatting';
@@ -28,7 +32,11 @@
 	});
 
 	$: parsedOneRm = Number.parseFloat(oneRmValue.replace(',', '.'));
-	$: computedSteps = computeSmartSetSequence(steps, selectedBar, parsedOneRm);
+
+	let computedSteps: ReturnType<typeof computeSmartSetSequence> = [];
+	$: if (Number.isFinite(parsedOneRm) && parsedOneRm > selectedBar) {
+		computedSteps = computeSmartSetSequence(steps, selectedBar, parsedOneRm);
+	}
 
 	function adjustOneRm(delta: number) {
 		const base = Number.parseFloat(oneRmValue.replace(',', '.'));
@@ -98,7 +106,11 @@
 	<div class="steps-list">
 		{#each steps as step, stepIndex (step.id)}
 			{@const computed = computedSteps.find((c) => c.id === step.id)}
-			<div class="step-card">
+			<div class="step-card"
+				in:fly={{ y: 20, duration: 220, easing: cubicOut }}
+				out:scale={{ duration: 160, start: 0.94 }}
+				animate:flip={{ duration: 280, easing: cubicOut }}
+			>
 				<!-- Step header -->
 				<div class="step-card__header">
 					<div class="step-card__meta">
@@ -109,29 +121,13 @@
 					</div>
 
 					<div class="step-card__controls">
-						<div class="pct-input-wrap">
-							<input
-								type="number"
-								inputmode="decimal"
-								min="1"
-								max="200"
-								step="1"
-								placeholder="80"
-								value={step.percentage}
-								oninput={(e) => updatePercentage(step.id, (e.currentTarget as HTMLInputElement).value)}
-								aria-label="Percentage for set {stepIndex + 1}"
-								class="pct-input"
-							/>
-							<span class="pct-suffix" aria-hidden="true">%</span>
-						</div>
-						<button
-							type="button"
-							class="remove-step-btn"
-							onclick={() => removeStep(step.id)}
-							aria-label="Remove set {stepIndex + 1}"
-						>
-							<span class="material-symbols-rounded" aria-hidden="true">close</span>
-						</button>
+						<PercentageStepper
+							value={step.percentage}
+							label="Percentage for set {stepIndex + 1}"
+							onChange={(v) => updatePercentage(step.id, v)}
+							onRemove={() => removeStep(step.id)}
+							removeLabel="Remove set {stepIndex + 1}"
+						/>
 					</div>
 				</div>
 
@@ -219,6 +215,7 @@
 		border: 1px solid var(--outline);
 		border-radius: var(--radius-xl);
 		box-shadow: var(--shadow);
+		transition: box-shadow 180ms cubic-bezier(0.2, 0, 0, 1);
 	}
 
 	.orm-row {
@@ -278,6 +275,7 @@
 		border: 1px solid var(--outline);
 		border-radius: var(--radius-xl);
 		box-shadow: var(--shadow);
+		transition: box-shadow 180ms cubic-bezier(0.2, 0, 0, 1);
 	}
 
 	.step-card__header {
@@ -310,73 +308,7 @@
 	}
 
 	.step-card__controls {
-		display: flex;
-		align-items: center;
-		gap: 0.4rem;
 		flex-shrink: 0;
-	}
-
-	.pct-input-wrap {
-		position: relative;
-		display: flex;
-		align-items: center;
-	}
-
-	.pct-input {
-		width: 5.2rem;
-		padding: 0.48rem 1.6rem 0.48rem 0.7rem;
-		border: 1px solid var(--outline);
-		border-radius: 8px;
-		background: var(--md-sys-color-surface-container-lowest);
-		color: var(--text-primary);
-		font-family: 'Archivo', sans-serif;
-		font-size: 1.05rem;
-		font-weight: 700;
-		text-align: right;
-		-moz-appearance: textfield;
-		appearance: textfield;
-	}
-
-	.pct-input::-webkit-inner-spin-button,
-	.pct-input::-webkit-outer-spin-button { display: none; }
-
-	.pct-input:focus {
-		outline: 2px solid var(--accent-primary);
-		outline-offset: 1px;
-	}
-
-	.pct-suffix {
-		position: absolute;
-		right: 0.55rem;
-		font-size: 0.82rem;
-		font-weight: 700;
-		color: var(--text-secondary);
-		pointer-events: none;
-	}
-
-	.remove-step-btn {
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		width: 2.1rem;
-		height: 2.1rem;
-		border-radius: 50%;
-		border: 1px solid var(--outline);
-		background: transparent;
-		color: var(--text-secondary);
-		cursor: pointer;
-		flex-shrink: 0;
-		transition: background 0.12s ease, color 0.12s ease;
-	}
-
-	.remove-step-btn:hover {
-		background: var(--tone-primary-surface);
-		color: var(--tone-primary-text);
-		border-color: var(--tone-primary-border);
-	}
-
-	.remove-step-btn .material-symbols-rounded {
-		font-size: 1.05rem;
 	}
 
 	/* Diff pills */

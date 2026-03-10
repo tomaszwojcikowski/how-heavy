@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { fade, fly } from 'svelte/transition';
+	import { cubicOut } from 'svelte/easing';
 	import PlateStackPreview from '$lib/components/PlateStackPreview.svelte';
 	import { formatWeight } from '$lib/utils/formatting';
 	import type { PlateCount, TargetLoadResult } from '$lib/types/gym';
@@ -46,12 +48,13 @@
 
 <section class="result-card" aria-live="polite">
 	{#if result.status === 'invalid'}
-		<div class="result-placeholder">
+		<div class="result-placeholder" transition:fade={{ duration: 150 }}>
 			<span class="material-symbols-rounded result-placeholder__icon" aria-hidden="true">calculate</span>
 			<p class="result-placeholder__title">Ready to calculate</p>
 			<p class="result-placeholder__hint">Enter a target weight and choose a bar to see which plates to load per side</p>
 		</div>
 	{:else}
+		<div class="result-content" in:fly={{ y: 10, duration: 220, easing: cubicOut }} out:fade={{ duration: 100 }}>
 		<div class="result-card__header">
 			<div class="result-card__headline">
 				<p class="eyebrow">{eyebrowText}</p>
@@ -108,6 +111,7 @@
 				</button>
 			</div>
 		{/if}
+		</div><!-- /.result-content -->
 	{/if}
 </section>
 
@@ -120,6 +124,12 @@
 		border: 1px solid var(--outline);
 		border-radius: var(--radius-xl);
 		box-shadow: var(--shadow);
+		transition: box-shadow 180ms cubic-bezier(0.2, 0, 0, 1);
+	}
+
+	.result-content {
+		display: grid;
+		gap: 1rem;
 	}
 
 	.result-card__header {

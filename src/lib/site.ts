@@ -5,7 +5,7 @@ export const tagline = 'Fast weight planning for 15 kg and 20 kg bars.';
 export const modeLabels = {
 	findPlates: 'Find Plates',
 	countPlates: 'Count Plates',
-	trainingSets: 'Training Sets'
+	trainingSets: 'Sets'
 } as const;
 
 export const modeDescriptions = {
