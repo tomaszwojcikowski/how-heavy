@@ -88,6 +88,12 @@ export interface ComputedSetStep {
 	changeCost: number;
 }
 
+interface SequenceState {
+	result: TargetLoadResult;
+	totalCost: number;
+	path: TargetLoadResult[];
+}
+
 function mergePlates(a: PlateCount[], b: PlateCount[]): PlateCount[] {
 	const map = new Map<PlateWeight, number>();
 	for (const { weight, count } of [...a, ...b]) {
@@ -96,6 +102,14 @@ function mergePlates(a: PlateCount[], b: PlateCount[]): PlateCount[] {
 	return Array.from(map.entries())
 		.map(([weight, count]) => ({ weight, count }))
 		.sort((a, b) => b.weight - a.weight);
+}
+
+function plateSignature(plates: PlateCount[]): string {
+	return plates.map((plate) => `${plate.weight}:${plate.count}`).join('|');
+}
+
+function resultSignature(result: TargetLoadResult): string {
+	return `${result.status}:${result.resolvedTotal ?? result.requestedTotal}:${plateSignature(result.plates)}`;
 }
 
 /**
@@ -249,6 +263,73 @@ function makeResult(barWeight: BarWeight, requestedTotal: number, plates: PlateC
 	};
 }
 
+function dedupeResults(results: Array<TargetLoadResult | null | undefined>): TargetLoadResult[] {
+	const deduped = new Map<string, TargetLoadResult>();
+
+	for (const result of results) {
+		if (!result) {
+			continue;
+		}
+
+		deduped.set(resultSignature(result), result);
+	}
+
+	return Array.from(deduped.values());
+}
+
+function buildStepCandidates(
+	prev: TargetLoadResult | null,
+	barWeight: BarWeight,
+	targetTotal: number,
+	targetSideWeight: number
+): TargetLoadResult[] {
+	if (prev === null || prev.status === 'invalid' || prev.status === 'below-bar' || targetSideWeight <= 0) {
+		return [resolveTargetLoad(barWeight, targetTotal)];
+	}
+
+	const prevSideWeight = prev.oneSideWeight ?? 0;
+	const delta = Number.parseFloat((targetSideWeight - prevSideWeight).toFixed(4));
+
+	if (Math.abs(delta) < 0.01) {
+		return [{ ...prev, requestedTotal: targetTotal }];
+	}
+
+	const unconstrained = resolveTargetLoad(barWeight, targetTotal);
+
+	if (delta > 0.01) {
+		const deltaPlates = addPlatesForDelta(delta);
+		const candidateA = deltaPlates !== null
+			? makeResult(barWeight, targetTotal, consolidatePlates(mergePlates(prev.plates, deltaPlates)))
+			: null;
+
+		const prevBumpers = prev.plates.filter((p) => isBumperPlate(p.weight));
+		const candidateB = buildResultLockingBumpers(barWeight, targetTotal, targetSideWeight, prevBumpers);
+
+		return dedupeResults([candidateA, candidateB, unconstrained]);
+	}
+
+	const prevBumpers = prev.plates.filter((p) => isBumperPlate(p.weight));
+	const bumperWeight = prevBumpers.reduce((s, p) => s + p.weight * p.count, 0);
+	const candidateKeepBumpers = targetSideWeight >= bumperWeight
+		? makeResult(
+				barWeight,
+				targetTotal,
+				consolidatePlates(
+					mergePlates(
+						prevBumpers,
+						(targetSideWeight - bumperWeight) > 0.001
+							? findSubsetCombo(Number.parseFloat((targetSideWeight - bumperWeight).toFixed(4)), prev.plates.filter((p) => !isBumperPlate(p.weight)))
+							: []
+					)
+				)
+			)
+		: null;
+
+	const candidateSubset = makeResult(barWeight, targetTotal, consolidatePlates(findSubsetCombo(targetSideWeight, prev.plates)));
+
+	return dedupeResults([candidateKeepBumpers, candidateSubset, unconstrained]);
+}
+
 /**
  * Smart set-sequence algorithm — ascending build strategy.
  *
@@ -276,83 +357,65 @@ export function computeSmartSetSequence(
 
 	if (parsed.length === 0) return [];
 
-	const results: TargetLoadResult[] = [];
+	let states: SequenceState[] = [];
 
 	for (let i = 0; i < parsed.length; i++) {
 		const targetTotal = Math.round(((oneRm * parsed[i].percentage) / 100) * 4) / 4;
 		const targetSideWeight = (targetTotal - barWeight) / 2;
-		const prev = results[i - 1] ?? null;
 
-		// First step, or previous step was invalid / below-bar — compute unconstrained
-		if (prev === null || prev.status === 'invalid' || prev.status === 'below-bar' || targetSideWeight <= 0) {
-			results.push(resolveTargetLoad(barWeight, targetTotal));
+		if (i === 0) {
+			const firstResult = resolveTargetLoad(barWeight, targetTotal);
+			states = [{
+				result: firstResult,
+				totalCost: moveCost([], firstResult.plates),
+				path: [firstResult]
+			}];
 			continue;
 		}
 
-		const prevSideWeight = prev.oneSideWeight ?? 0;
-		const delta = Number.parseFloat((targetSideWeight - prevSideWeight).toFixed(4));
+		const nextStates = new Map<string, SequenceState>();
 
-		// ── Same weight as previous step ──────────────────────────────────────────
-		if (Math.abs(delta) < 0.01) {
-			results.push({ ...prev, requestedTotal: targetTotal });
-			continue;
-		}
+		for (const state of states) {
+			const candidates = buildStepCandidates(state.result, barWeight, targetTotal, targetSideWeight);
 
-		// ── Weight going UP ───────────────────────────────────────────────────────
-		if (delta > 0.01) {
-			// Candidate A: add the minimum delta plates on top of the previous bar,
-			// then only consolidate excess change plates beyond the 4-on-the-bar cap.
-			// Usually the fewest plate moves.
-			const deltaPlates = addPlatesForDelta(delta);
-			const candidateA = deltaPlates !== null
-				? consolidatePlates(mergePlates(prev.plates, deltaPlates))
-				: null;
+			for (const candidate of candidates) {
+				const signature = resultSignature(candidate);
+				const totalCost = state.totalCost + moveCost(state.result.plates, candidate.plates);
+				const existing = nextStates.get(signature);
 
-			// Candidate B: lock all bumper plates from the previous step in place
-			// and fresh-compute an optimal change-plate fill for the remaining
-			// side weight. Preferred when prev has many accumulated change plates.
-			const prevBumpers = prev.plates.filter((p) => isBumperPlate(p.weight));
-			const freshResult = buildResultLockingBumpers(barWeight, targetTotal, targetSideWeight, prevBumpers);
-			const candidateB = freshResult !== null ? freshResult.plates : null;
-
-			// Pick whichever requires fewer plate moves; tiebreak by fewest total plates.
-			const candidates = ([candidateA, candidateB].filter(Boolean) as PlateCount[][])
-				.map((plates) => ({
-					plates,
-					cost: moveCost(prev.plates, plates),
-					count: plates.reduce((s, p) => s + p.count, 0)
-				}))
-				.sort((a, b) => a.cost - b.cost || a.count - b.count);
-
-			if (candidates.length > 0) {
-				results.push(makeResult(barWeight, targetTotal, candidates[0].plates));
-				continue;
+				if (
+					!existing ||
+					totalCost < existing.totalCost ||
+					(totalCost === existing.totalCost && candidate.plates.reduce((sum, plate) => sum + plate.count, 0) < existing.result.plates.reduce((sum, plate) => sum + plate.count, 0))
+				) {
+					nextStates.set(signature, {
+						result: candidate,
+						totalCost,
+						path: [...state.path, candidate]
+					});
+				}
 			}
 		}
 
-		// ── Weight going DOWN: keep bumpers, rerack change plates first ───────────
-		if (delta < -0.01) {
-			const prevBumpers = prev.plates.filter((p) => isBumperPlate(p.weight));
-			const bumperWeight = prevBumpers.reduce((s, p) => s + p.weight * p.count, 0);
-
-			if (targetSideWeight >= bumperWeight) {
-				// Target is still above total bumper weight — keep all bumpers and
-				// only adjust the small change plates.
-				const remaining = Number.parseFloat((targetSideWeight - bumperWeight).toFixed(4));
-				const prevChange = prev.plates.filter((p) => !isBumperPlate(p.weight));
-				const changeSubset = remaining > 0.001 ? findSubsetCombo(remaining, prevChange) : [];
-				results.push(makeResult(barWeight, targetTotal, consolidatePlates(mergePlates(prevBumpers, changeSubset))));
-				continue;
-			}
-
-			// Target is below total bumper weight — must remove some bumpers too.
-			results.push(makeResult(barWeight, targetTotal, consolidatePlates(findSubsetCombo(targetSideWeight, prev.plates))));
-			continue;
-		}
-
-		// Fallback (should rarely be reached)
-		results.push(resolveTargetLoad(barWeight, targetTotal));
+		states = Array.from(nextStates.values());
 	}
+
+	const bestState = states.reduce((best, state) => {
+		if (!best) {
+			return state;
+		}
+
+		const bestPlateCount = best.result.plates.reduce((sum, plate) => sum + plate.count, 0);
+		const statePlateCount = state.result.plates.reduce((sum, plate) => sum + plate.count, 0);
+
+		if (state.totalCost !== best.totalCost) {
+			return state.totalCost < best.totalCost ? state : best;
+		}
+
+		return statePlateCount < bestPlateCount ? state : best;
+	}, null as SequenceState | null);
+
+	const results = bestState?.path ?? [];
 
 	// Compute diffs
 	return parsed.map((s, i) => {
@@ -363,8 +426,11 @@ export function computeSmartSetSequence(
 		const additionCost = additions.reduce((sum, p) => sum + p.count, 0) * 2;
 		const removalCost = removals.reduce((sum, p) => sum + p.count, 0) * 2;
 		const changeCost = additionCost + removalCost;
-		const previousTargetTotal = i === 0 ? barWeight : parsed[i - 1].percentage * oneRm / 100;
-		const upWeightMoveCost = s.percentage * oneRm / 100 > previousTargetTotal ? changeCost : 0;
+		const previousResolvedTotal = i === 0
+			? barWeight
+			: (results[i - 1].resolvedTotal ?? results[i - 1].requestedTotal);
+		const currentResolvedTotal = results[i].resolvedTotal ?? results[i].requestedTotal;
+		const upWeightMoveCost = currentResolvedTotal > previousResolvedTotal ? changeCost : 0;
 		return {
 			id: s.id,
 			percentage: s.percentage,
