@@ -6,6 +6,13 @@
 
 	export let result: TargetLoadResult;
 
+	const statusMeta: Record<TargetLoadResult['status'], { icon: string; label: string; tone: 'exact' | 'rounded' | 'warning' }> = {
+		exact: { icon: 'check_circle', label: 'Exact Match', tone: 'exact' },
+		rounded: { icon: 'published_with_changes', label: 'Nearest Match', tone: 'rounded' },
+		'below-bar': { icon: 'warning', label: 'Below Bar', tone: 'warning' },
+		invalid: { icon: 'error', label: 'Check Input', tone: 'warning' }
+	};
+
 	function plateStyle(weight: number): string {
 		const p = PLATE_MAP[weight.toString() as keyof typeof PLATE_MAP];
 		return `background:${p.color};color:${p.textColor};border-color:${p.edgeColor}`;
@@ -18,9 +25,10 @@
 			<p class="eyebrow">Recommendation</p>
 			<h3>{formatWeight(result.resolvedTotal ?? result.requestedTotal)}</h3>
 		</div>
-		<span class:rounded={result.status === 'rounded'} class:warning={result.status !== 'exact'}>
-			{result.status}
-		</span>
+		<div class="result-card__status" class:rounded={statusMeta[result.status].tone === 'rounded'} class:warning={statusMeta[result.status].tone === 'warning'}>
+			<span class="material-symbols-rounded result-card__status-icon" aria-hidden="true">{statusMeta[result.status].icon}</span>
+			<span>{statusMeta[result.status].label}</span>
+		</div>
 	</div>
 
 	<p class="result-card__message">{result.message}</p>
@@ -76,30 +84,38 @@
 		margin: 0;
 		font-family: 'Archivo', sans-serif;
 		font-size: clamp(1.8rem, 4vw, 2.6rem);
-		line-height: 0.95;
+		line-height: 1.02;
 	}
 
-	span {
+	.result-card__status {
 		align-self: start;
+		display: inline-flex;
+		align-items: center;
+		gap: 0.35rem;
 		padding: 0.45rem 0.7rem;
 		border-radius: 6px;
 		font-size: 0.82rem;
 		font-weight: 800;
 		text-transform: uppercase;
 		letter-spacing: 0.08em;
-		background: rgba(15, 157, 135, 0.14);
-		color: #126857;
+		background: rgba(15, 157, 135, 0.16);
+		color: #0d5a4d;
 	}
 
-	span.rounded,
-	span.warning {
+	.result-card__status.rounded,
+	.result-card__status.warning {
 		background: rgba(255, 111, 60, 0.14);
-		color: #8f3719;
+		color: #7a2f15;
+	}
+
+	.result-card__status-icon {
+		font-size: 1rem;
 	}
 
 	.result-card__message {
 		margin: 0;
-		color: var(--ink-soft);
+		color: var(--ink-muted);
+		font-size: var(--type-body-md);
 	}
 
 	.result-card__metrics {
@@ -118,8 +134,8 @@
 	}
 
 	small {
-		color: var(--ink-soft);
-		font-size: 0.78rem;
+		color: var(--ink-muted);
+		font-size: var(--type-label);
 		text-transform: uppercase;
 		letter-spacing: 0.08em;
 	}

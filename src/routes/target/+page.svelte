@@ -5,6 +5,7 @@
 	import BarSelector from '$lib/components/BarSelector.svelte';
 	import ResultCard from '$lib/components/ResultCard.svelte';
 	import WeightKeypad from '$lib/components/WeightKeypad.svelte';
+	import { modeLabels } from '$lib/site';
 	import { loadCalculatorState, saveTargetState } from '$lib/stores/calculator';
 	import type { BarWeight } from '$lib/types/gym';
 	import { resolveTargetLoad } from '$lib/utils/calculations';
@@ -33,7 +34,7 @@
 </script>
 
 <svelte:head>
-	<title>How Heavy | Target</title>
+	<title>How Heavy | {modeLabels.findPlates}</title>
 </svelte:head>
 
 <section class="calculator-shell">
@@ -49,7 +50,7 @@
 				<WeightKeypad
 					value={targetValue}
 					presets={presets}
-					helper="Common targets are one tap away. Decimal values are supported."
+					helper="Enter a total weight to get the plates needed on each side."
 					onValueChange={(nextValue) => (targetValue = nextValue)}
 				/>
 			</section>

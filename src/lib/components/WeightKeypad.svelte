@@ -1,36 +1,51 @@
 <script lang="ts">
+	import { afterUpdate } from 'svelte';
+
 	export let value = '';
 	export let label = 'Target total';
 	export let helper = 'Use presets or type a total weight';
 	export let presets: number[] = [];
 	export let onValueChange: (nextValue: string) => void = () => {};
 
+	let fieldEl: HTMLElement | undefined;
+
+	afterUpdate(() => {
+		if (fieldEl) {
+			(fieldEl as any).value = value;
+		}
+	});
+
 	function applyPreset(preset: number) {
 		onValueChange(String(preset));
 	}
+
+	$: normalizedValue = Number.parseFloat(value.replace(',', '.'));
 </script>
 
 <div class="weight-keypad">
-	<label>
-		<span>{label}</span>
-		<input
-			type="number"
-			min="0"
-			step="0.25"
-			inputmode="decimal"
-			placeholder="100"
-			value={value}
-			oninput={(event) => onValueChange((event.currentTarget as HTMLInputElement).value)}
-		/>
-	</label>
+	<md-outlined-text-field
+		bind:this={fieldEl}
+		type="text"
+		{label}
+		suffix-text="kg"
+		inputmode="decimal"
+		placeholder="100"
+		supporting-text={helper}
+		oninput={(e: Event) => onValueChange((e.currentTarget as any).value)}
+	></md-outlined-text-field>
 
-	<p>{helper}</p>
-
-	<div class="weight-keypad__presets" aria-label="Common target presets">
-		{#each presets as preset (preset)}
-			<button type="button" onclick={() => applyPreset(preset)}>{preset} kg</button>
-		{/each}
-	</div>
+	{#if presets.length > 0}
+		<md-chip-set aria-label="Common target presets">
+			{#each presets as preset (preset)}
+				<!-- svelte-ignore a11y_click_events_have_key_events a11y_no_static_element_interactions -->
+				<md-filter-chip
+					label="{preset} kg"
+					selected={normalizedValue === preset}
+					onclick={() => applyPreset(preset)}
+				></md-filter-chip>
+			{/each}
+		</md-chip-set>
+	{/if}
 </div>
 
 <style>
@@ -39,49 +54,11 @@
 		gap: 0.85rem;
 	}
 
-	label {
-		display: grid;
-		gap: 0.55rem;
-	}
-
-	span {
-		font-weight: 700;
-		color: var(--ink-soft);
-	}
-
-	input {
+	md-outlined-text-field {
 		width: 100%;
-		box-sizing: border-box;
-		border: 1px solid var(--outline);
-		background: rgba(255, 255, 255, 0.72);
-		border-radius: 8px;
-		padding: 1rem 1.1rem;
-		font: inherit;
-		font-size: 1.2rem;
-		font-weight: 700;
-		color: var(--ink-strong);
 	}
 
-	p {
-		margin: 0;
-		color: var(--ink-soft);
-		font-size: 0.94rem;
-	}
-
-	.weight-keypad__presets {
-		display: flex;
+	md-chip-set {
 		flex-wrap: wrap;
-		gap: 0.6rem;
-	}
-
-	button {
-		border: 1px solid var(--outline);
-		background: rgba(255, 255, 255, 0.7);
-		border-radius: 8px;
-		padding: 0.7rem 0.95rem;
-		font: inherit;
-		font-weight: 700;
-		color: var(--ink-strong);
-		cursor: pointer;
 	}
 </style>

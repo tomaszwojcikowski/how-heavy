@@ -5,6 +5,7 @@
 	import BarSelector from '$lib/components/BarSelector.svelte';
 	import PlatePicker from '$lib/components/PlatePicker.svelte';
 	import PlateStackPreview from '$lib/components/PlateStackPreview.svelte';
+	import { modeLabels } from '$lib/site';
 	import { loadCalculatorState, saveCurrentState } from '$lib/stores/calculator';
 	import type { BarWeight, PlateWeight } from '$lib/types/gym';
 	import { calculateCurrentLoad, summarizePlateCounts } from '$lib/utils/calculations';
@@ -132,7 +133,7 @@
 </script>
 
 <svelte:head>
-	<title>How Heavy | Current</title>
+	<title>How Heavy | {modeLabels.countPlates}</title>
 </svelte:head>
 
 <section class="calculator-shell">
@@ -244,7 +245,7 @@
 		display: flex;
 		gap: 0.45rem;
 		align-items: center;
-		color: var(--ink-soft);
+		color: var(--ink-muted);
 		font-size: 0.88rem;
 		flex-wrap: wrap;
 	}
@@ -277,19 +278,21 @@
 		padding: 0.6rem 1rem;
 		font-weight: 700;
 		border: 1px solid var(--outline);
-		background: rgba(255, 255, 255, 0.68);
+		background: var(--surface-4);
 		cursor: pointer;
-		color: var(--ink-strong);
+		color: var(--ink-soft);
 	}
 
 	.clear-btn:disabled {
-		opacity: 0.5;
+		opacity: 0.7;
+		color: var(--ink-faint);
 		cursor: not-allowed;
 	}
 
 	.clear-btn--confirm {
-		background: rgba(255, 111, 60, 0.14);
-		border-color: rgba(255, 111, 60, 0.32);
+		background: rgba(255, 111, 60, 0.18);
+		border-color: rgba(255, 111, 60, 0.36);
+		color: #8a3517;
 	}
 
 	.undo-toast {
