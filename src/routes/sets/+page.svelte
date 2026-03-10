@@ -55,13 +55,6 @@
 		});
 	}
 
-	function adjustOneRm(delta: number) {
-		const base = Number.parseFloat(oneRmValue.replace(',', '.'));
-		if (!Number.isFinite(base)) return;
-		const next = Math.max(0, Number.parseFloat((base + delta).toFixed(2)));
-		oneRmValue = String(next);
-	}
-
 	function addStep() {
 		if (steps.length >= MAX_STEPS) return;
 		steps = [...steps, { id: nextId++, percentage: '' }];
