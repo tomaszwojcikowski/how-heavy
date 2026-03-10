@@ -34,5 +34,10 @@
 			<span class="nav-label">{modeLabels.countPlates}</span>
 			<md-ripple></md-ripple>
 		</a>
+		<a class:active={page.url.pathname === `${base}/sets/`} href={resolve('/sets')}>
+			<span class="nav-icon material-symbols-rounded" aria-hidden="true">bar_chart</span>
+			<span class="nav-label">{modeLabels.trainingSets}</span>
+			<md-ripple></md-ripple>
+		</a>
 	</nav>
 </div>

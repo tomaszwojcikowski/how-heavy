@@ -181,7 +181,7 @@ p {
 
 .primary-nav {
 	display: grid;
-	grid-template-columns: repeat(2, 1fr);
+	grid-template-columns: repeat(3, 1fr);
 	gap: 0.65rem;
 	padding: 0.35rem;
 	background: var(--surface-3);
