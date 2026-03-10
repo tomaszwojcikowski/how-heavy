@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { scale } from 'svelte/transition';
 
-	import PlateGraphic from '$lib/components/PlateGraphic.svelte';
 	import type { BarWeight, PlateCount, PlateWeight } from '$lib/types/gym';
 	import { formatWeight } from '$lib/utils/formatting';
 	import { PLATE_MAP } from '$lib/utils/plates';
@@ -9,16 +8,26 @@
 	export let barWeight: BarWeight = 20;
 	export let plates: PlateCount[] = [];
 
+	// heavy → light, used for both sides (left arm uses row-reverse CSS)
 	$: expandedPlates = plates.flatMap((plate) => Array.from({ length: plate.count }, () => plate.weight));
-	$: mirroredLeftPlates = [...expandedPlates].reverse();
 
-	function graphicSize(weight: PlateWeight): number {
-		return Math.max(58, Math.round(PLATE_MAP[weight.toString() as keyof typeof PLATE_MAP].radius * 1.2));
+	function plateThickness(weight: PlateWeight): number {
+		const plate = PLATE_MAP[weight.toString() as keyof typeof PLATE_MAP];
+		return Math.max(6, plate.thickness);
 	}
 
-	function stackOffset(weight: PlateWeight): number {
+	function plateHeight(weight: PlateWeight): number {
 		const plate = PLATE_MAP[weight.toString() as keyof typeof PLATE_MAP];
-		return Math.max(8, Math.round(plate.thickness * 0.72));
+		if (plate.kind === 'bumper') return weight === 5 ? 100 : 120;
+		return Math.max(40, Math.round(plate.radius * 1.5));
+	}
+
+	function plateColor(weight: PlateWeight): string {
+		return PLATE_MAP[weight.toString() as keyof typeof PLATE_MAP].color;
+	}
+
+	function plateEdge(weight: PlateWeight): string {
+		return PLATE_MAP[weight.toString() as keyof typeof PLATE_MAP].edgeColor;
 	}
 </script>
 
@@ -28,38 +37,53 @@
 		<strong>{formatWeight(barWeight)} bar</strong>
 	</div>
 
-	<div class="barbell-visual" aria-label={`Barbell visual with ${formatWeight(barWeight)} bar`}>
-		<div class="barbell-shaft" aria-hidden="true"></div>
+	<div class="barbell-wrap" aria-label={`Barbell loaded with ${formatWeight(barWeight)} bar`}>
+		<!-- Shaft runs behind everything, centered vertically -->
+		<div class="shaft" aria-hidden="true"></div>
 
-		<div class="barbell-side barbell-side--left" aria-label="Left side mirrored stack">
-			<div class="barbell-sleeve" aria-hidden="true"></div>
-			{#each mirroredLeftPlates as weight, index (`left-${weight}-${index}`)}
-				<div class="stack-plate" style={`--stack-offset:${index * -stackOffset(weight)}px;`} in:scale={{ duration: 180, start: 0.8 }} out:scale={{ duration: 140, start: 0.85 }}>
-					<PlateGraphic {weight} size={graphicSize(weight)} stacked={true} />
-				</div>
-			{/each}
-		</div>
-
-		<div class="barbell-center">
-			<div class="barbell-grip" aria-hidden="true"></div>
-			<div class="barbell-label">
-				<span>{barWeight} kg</span>
-				<small>olympic bar</small>
+		<div class="barbell-row">
+			<!-- Left arm: DOM order heavy→light + sleeve + cap; row-reverse flips visual to cap→sleeve→light→heavy→center -->
+			<div class="arm arm--left" aria-label="Left side">
+				{#each expandedPlates as weight, i (`left-${weight}-${i}`)}
+					<div
+						class="plate"
+						style="width:{plateThickness(weight)}px;height:{plateHeight(weight)}px;background:{plateColor(weight)};border-color:{plateEdge(weight)}"
+						in:scale={{ duration: 180, start: 0.8 }}
+						out:scale={{ duration: 140, start: 0.85 }}
+					>
+						<span>{weight}</span>
+					</div>
+				{/each}
+				<div class="sleeve" aria-hidden="true"></div>
+				<div class="end-cap" aria-hidden="true"></div>
 			</div>
-		</div>
 
-		<div class="barbell-side barbell-side--right" aria-label="Right side stack">
-			<div class="barbell-sleeve" aria-hidden="true"></div>
-			{#each expandedPlates as weight, index (`right-${weight}-${index}`)}
-				<div class="stack-plate" style={`--stack-offset:${index * -stackOffset(weight)}px;`} in:scale={{ duration: 180, start: 0.8 }} out:scale={{ duration: 140, start: 0.85 }}>
-					<PlateGraphic {weight} size={graphicSize(weight)} stacked={true} />
-				</div>
-			{/each}
+			<!-- Center label -->
+			<div class="bar-label">
+				<span>{barWeight} kg</span>
+				<small>bar</small>
+			</div>
+
+			<!-- Right arm: sleeve + cap at the end; visual order heavy→light→sleeve→cap from center -->
+			<div class="arm arm--right" aria-label="Right side">
+				{#each expandedPlates as weight, i (`right-${weight}-${i}`)}
+					<div
+						class="plate"
+						style="width:{plateThickness(weight)}px;height:{plateHeight(weight)}px;background:{plateColor(weight)};border-color:{plateEdge(weight)}"
+						in:scale={{ duration: 180, start: 0.8 }}
+						out:scale={{ duration: 140, start: 0.85 }}
+					>
+						<span>{weight}</span>
+					</div>
+				{/each}
+				<div class="sleeve" aria-hidden="true"></div>
+				<div class="end-cap" aria-hidden="true"></div>
+			</div>
 		</div>
 	</div>
 
 	{#if expandedPlates.length === 0}
-		<p>No plates needed. The empty bar already matches.</p>
+		<p class="empty-note">No plates needed — the empty bar already matches.</p>
 	{/if}
 </div>
 
@@ -86,159 +110,120 @@
 		font-family: 'Archivo', sans-serif;
 	}
 
-	.barbell-visual {
+	/* Outer container: shaft is absolute, row is relative on top */
+	.barbell-wrap {
 		position: relative;
-		display: grid;
-		grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
-		align-items: end;
-		gap: 0.2rem;
-		min-height: 12rem;
-		padding: 1.25rem 0.25rem 0.5rem;
-		overflow: hidden;
+		overflow-x: auto;
+		overflow-y: visible;
+		padding: 0.5rem 0;
 	}
 
-	.barbell-shaft {
+	/* Shaft spans full width, centered vertically behind plates */
+	.shaft {
 		position: absolute;
-		left: 0;
-		right: 0;
-		bottom: 2.45rem;
-		width: 100%;
-		height: 1rem;
+		inset: 0;
+		top: 50%;
+		height: 0.5rem;
+		transform: translateY(-50%);
+		background: #b6aea6;
 		border-radius: 999px;
-		background: linear-gradient(90deg, #9a978f, #e5ded6 45%, #8b887f 100%);
-		box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.5);
+		z-index: 0;
 	}
 
-	p {
-		margin: 0;
-		color: var(--ink-soft);
-	}
-
-	.barbell-side {
-		display: flex;
-		align-items: end;
-		min-height: 10rem;
+	/* Always-horizontal flex row */
+	.barbell-row {
+		position: relative;
 		z-index: 1;
+		display: flex;
+		flex-direction: row;
+		align-items: center;
+		justify-content: center;
+		min-height: 8rem;
 	}
 
-	.barbell-side--left {
-		justify-content: flex-end;
+	/* Each arm is a horizontal row of plates + sleeve + end-cap */
+	.arm {
+		display: flex;
+		flex-direction: row;
+		align-items: center;
 	}
 
-	.barbell-side--right {
-		justify-content: flex-start;
+	/*
+	 * Left arm: row-reverse flips the visual so DOM [heavy…light, sleeve, cap]
+	 * renders as visual [cap, sleeve, light…heavy] → heaviest is closest to center label.
+	 */
+	.arm--left {
+		flex-direction: row-reverse;
 	}
 
-	.barbell-center {
-		display: grid;
-		justify-items: center;
-		gap: 0.75rem;
-		align-self: center;
-		padding: 0 0.65rem;
-		z-index: 2;
+	/* Individual plate: tall narrow rectangle (side-profile view) */
+	.plate {
+		flex-shrink: 0;
+		border-radius: 3px;
+		border: 1px solid;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		box-shadow: inset 1px 0 0 rgba(255, 255, 255, 0.06);
 	}
 
-	.barbell-grip {
-		width: clamp(5rem, 10vw, 7rem);
-		height: 1.6rem;
-		border-radius: 999px;
-		background:
-			repeating-linear-gradient(
-				90deg,
-				#d5cec5 0,
-				#d5cec5 6px,
-				#8f877e 6px,
-				#8f877e 10px
-			),
-			linear-gradient(90deg, #bdb5ac, #ece4db 50%, #9a9187);
-		box-shadow: inset 0 1px 3px rgba(255, 255, 255, 0.55);
-	}
-
-	.barbell-label {
-		display: grid;
-		justify-items: center;
-		padding: 0.65rem 0.85rem;
-		border-radius: 1rem;
-		background: rgba(255, 255, 255, 0.78);
-		border: 1px solid var(--outline);
-	}
-
-	.barbell-label span {
+	.plate span {
 		font-family: 'Archivo', sans-serif;
-		font-size: 1rem;
+		font-size: 0.6rem;
+		font-weight: 700;
+		color: rgba(255, 255, 255, 0.75);
+		writing-mode: vertical-rl;
+		transform: rotate(180deg);
+	}
+
+	/* Sleeve: the bar extension plates slide onto */
+	.sleeve {
+		flex-shrink: 0;
+		width: 1.2rem;
+		height: 0.75rem;
+		background: #c7beb6;
+		border-radius: 2px;
+	}
+
+	/* End cap: outer tip of the sleeve */
+	.end-cap {
+		flex-shrink: 0;
+		width: 0.35rem;
+		height: 1.75rem;
+		background: #aaa39b;
+		border-radius: 2px;
+	}
+
+	/* Center bar label */
+	.bar-label {
+		display: grid;
+		justify-items: center;
+		padding: 0.4rem 0.65rem;
+		border-radius: 999px;
+		background: rgba(255, 255, 255, 0.85);
+		border: 1px solid var(--outline);
+		margin: 0 0.4rem;
+		flex-shrink: 0;
+		white-space: nowrap;
+	}
+
+	.bar-label span {
+		font-family: 'Archivo', sans-serif;
+		font-size: 0.95rem;
 		font-weight: 800;
 		color: var(--ink-strong);
 	}
 
-	.barbell-label small {
-		font-size: 0.74rem;
+	.bar-label small {
+		font-size: 0.7rem;
 		text-transform: uppercase;
-		letter-spacing: 0.08em;
+		letter-spacing: 0.06em;
 		color: var(--ink-soft);
 	}
 
-	.barbell-sleeve {
-		width: 0.95rem;
-		height: 5.75rem;
-		align-self: end;
-		border-radius: 999px;
-		background: linear-gradient(180deg, #bbb1a7, #f0e7de 45%, #998f86);
-		box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.5);
-	}
-
-	.barbell-side--left .barbell-sleeve {
-		order: 999;
-		margin-left: 0.2rem;
-	}
-
-	.barbell-side--right .barbell-sleeve {
-		margin-right: 0.2rem;
-	}
-
-	.stack-plate {
-		margin-left: var(--stack-offset);
-	}
-
-	.barbell-side--left .stack-plate {
-		margin-left: 0;
-		margin-right: var(--stack-offset);
-	}
-
-	@media (max-width: 40rem) {
-		.stack-heading {
-			display: grid;
-			gap: 0.35rem;
-		}
-
-		.barbell-visual {
-			grid-template-columns: minmax(0, 1fr);
-			justify-items: center;
-			gap: 0.85rem;
-			padding-top: 1rem;
-		}
-
-		.barbell-shaft {
-			left: 50%;
-			width: calc(100% - 1rem);
-			transform: translateX(-50%);
-			bottom: 8.55rem;
-		}
-
-		.barbell-center {
-			order: -1;
-		}
-
-		.barbell-side {
-			width: 100%;
-			justify-content: center;
-		}
-
-		.barbell-side--left {
-			order: 1;
-		}
-
-		.barbell-side--right {
-			order: 2;
-		}
+	.empty-note {
+		margin: 0;
+		color: var(--ink-soft);
+		font-size: 0.9rem;
 	}
 </style>

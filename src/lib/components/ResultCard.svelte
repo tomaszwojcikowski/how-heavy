@@ -2,8 +2,14 @@
 	import PlateStackPreview from '$lib/components/PlateStackPreview.svelte';
 	import { formatWeight } from '$lib/utils/formatting';
 	import type { TargetLoadResult } from '$lib/types/gym';
+	import { PLATE_MAP } from '$lib/utils/plates';
 
 	export let result: TargetLoadResult;
+
+	function plateStyle(weight: number): string {
+		const p = PLATE_MAP[weight.toString() as keyof typeof PLATE_MAP];
+		return `background:${p.color};color:${p.textColor};border-color:${p.edgeColor}`;
+	}
 </script>
 
 <section class="result-card" aria-live="polite">
@@ -39,9 +45,9 @@
 	{#if result.plates.length > 0}
 		<ul class="result-card__list">
 			{#each result.plates as plate (plate.weight)}
-				<li>
+				<li style={plateStyle(plate.weight)}>
 					<span>{plate.weight} kg</span>
-					<strong>x{plate.count} per side</strong>
+					<strong>×{plate.count} per side</strong>
 				</li>
 			{/each}
 		</ul>
@@ -136,8 +142,8 @@
 		gap: 1rem;
 		padding: 0.75rem 0.9rem;
 		border-radius: 1rem;
-		background: rgba(255, 255, 255, 0.62);
-		border: 1px solid var(--outline);
+		/* color/background/border set inline via plateStyle() */
+		border: 1px solid;
 	}
 
 	@media (max-width: 40rem) {

@@ -17,22 +17,13 @@
 	class:bumper={plate.kind === 'bumper'}
 	style={`--plate-size:${size}px; --plate-color:${plate.color}; --plate-text:${plate.textColor}; --plate-edge:${plate.edgeColor}; --plate-thickness:${plate.thickness}px;`}
 >
-	<div class="plate-body" aria-hidden="true"></div>
 	<svg viewBox={`0 0 ${viewBoxSize} ${viewBoxSize}`} role="img" aria-label={plate.label}>
-		<defs>
-			<radialGradient id={`plate-gradient-${plate.shortLabel}`} cx="35%" cy="30%">
-				<stop offset="0%" stop-color={plate.accentColor} />
-				<stop offset="100%" stop-color={plate.color} />
-			</radialGradient>
-		</defs>
-
-		<circle cx="110" cy="110" r={plate.radius} fill={`url(#plate-gradient-${plate.shortLabel})`} />
-		<circle cx="110" cy="110" r={plate.radius - 12} fill="transparent" stroke={plate.accentColor} stroke-width="10" />
+		<circle cx="110" cy="110" r={plate.radius} fill={plate.color} />
+		<circle cx="110" cy="110" r={plate.radius - 12} fill="transparent" stroke={plate.accentColor} stroke-width="8" />
 		{#if plate.kind === 'bumper'}
-			<circle cx="110" cy="110" r={plate.radius - 22} fill="transparent" stroke="#2d2d2d" stroke-width="4" />
-			<circle cx="110" cy="110" r={plate.radius - 32} fill="transparent" stroke="#111111" stroke-width="8" />
+			<circle cx="110" cy="110" r={plate.radius - 28} fill="transparent" stroke="#2a2a2a" stroke-width="6" />
 		{/if}
-		<circle cx="110" cy="110" r={plate.ringRadius} fill="#f6efe7" stroke="#d6c6bb" stroke-width="8" />
+		<circle cx="110" cy="110" r={plate.ringRadius} fill="#efebe6" stroke="#c9beb4" stroke-width="7" />
 		<text x="110" y="106" text-anchor="middle">{plate.shortLabel}</text>
 		<text x="110" y="132" text-anchor="middle" class="unit">kg</text>
 	</svg>
@@ -46,34 +37,18 @@
 	figure {
 		margin: 0;
 		position: relative;
-		width: calc(var(--plate-size) + var(--plate-thickness));
+		width: var(--plate-size);
 		height: var(--plate-size);
-		filter: drop-shadow(0 16px 20px rgba(60, 29, 20, 0.16));
+		filter: drop-shadow(0 10px 14px rgba(60, 29, 20, 0.12));
 	}
 
 	figure.stacked {
-		filter: drop-shadow(0 10px 16px rgba(60, 29, 20, 0.2));
+		filter: drop-shadow(0 8px 12px rgba(60, 29, 20, 0.14));
 	}
 
-	.plate-body,
 	svg {
-		position: absolute;
-		top: 0;
-		left: 0;
 		height: 100%;
-	}
-
-	.plate-body {
-		width: var(--plate-thickness);
-		left: calc(100% - var(--plate-thickness));
-		border-radius: 0 999px 999px 0;
-		background: linear-gradient(180deg, var(--plate-edge), #3a3a3a 42%, var(--plate-edge));
-		box-shadow: inset -2px 0 0 rgba(255, 255, 255, 0.06);
-	}
-
-	svg {
 		width: var(--plate-size);
-		height: 100%;
 		display: block;
 	}
 
@@ -82,7 +57,7 @@
 		font-size: 30px;
 		font-weight: 800;
 		fill: var(--plate-text);
-		letter-spacing: -0.04em;
+		letter-spacing: -0.03em;
 	}
 
 	text.unit {
@@ -104,6 +79,6 @@
 	}
 
 	figure.bumper text {
-		text-shadow: 0 1px 1px rgba(0, 0, 0, 0.45);
+		text-shadow: 0 1px 1px rgba(0, 0, 0, 0.3);
 	}
 </style>

@@ -37,13 +37,11 @@
 </svelte:head>
 
 <section class="calculator-shell">
-	<header class="section-heading">
-		<p class="eyebrow">Target mode</p>
-		<h2>Plan a total weight</h2>
-		<p>Pick a bar, enter a target, and get the exact one-side plate stack or the nearest achievable total.</p>
-	</header>
-
 	<div class="target-layout">
+		<!-- Result card is DOM-first → on mobile it appears at top above controls.
+		     On desktop the 2-col CSS puts .control-card on the left via order:-1. -->
+		<ResultCard {result} />
+
 		<section class="control-card">
 			<BarSelector bind:value={selectedBar} onChange={(nextValue) => (selectedBar = nextValue)} />
 
@@ -53,13 +51,7 @@
 				helper="Common targets are one tap away. Decimal values are supported."
 				onValueChange={(nextValue) => (targetValue = nextValue)}
 			/>
-
-			<div class="control-card__hint">
-				<small>Supports bumper plates of 5, 10, 15, and 20 kg plus change plates from 0.5 to 2.5 kg.</small>
-			</div>
 		</section>
-
-		<ResultCard {result} />
 	</div>
 </section>
 
@@ -79,21 +71,15 @@
 		box-shadow: var(--shadow);
 	}
 
-	.control-card__hint {
-		padding: 0.9rem 1rem;
-		border-radius: 1rem;
-		background: rgba(255, 255, 255, 0.6);
-		border: 1px solid var(--outline);
-	}
-
-	small {
-		color: var(--ink-soft);
-	}
-
 	@media (min-width: 62rem) {
 		.target-layout {
 			grid-template-columns: minmax(20rem, 24rem) minmax(0, 1fr);
 			align-items: start;
+		}
+
+		/* Controls go in left column visually even though ResultCard is first in DOM */
+		.control-card {
+			order: -1;
 		}
 	}
 </style>

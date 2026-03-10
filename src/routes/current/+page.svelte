@@ -54,59 +54,79 @@
 </svelte:head>
 
 <section class="calculator-shell">
-	<header class="section-heading">
-		<p class="eyebrow">Current mode</p>
-		<h2>Measure what is already loaded</h2>
-		<p>Tap the plates sitting on one side of the bar. The app mirrors them and calculates the full loaded weight.</p>
-	</header>
-
-	<div class="current-layout">
-		<section class="control-card">
-			<div class="control-card__header">
-				<BarSelector bind:value={selectedBar} onChange={(nextValue) => (selectedBar = nextValue)} label="Active bar" />
-				<button type="button" class="clear-button" onclick={clearAll}>Clear side</button>
-			</div>
-
-			<PlatePicker selectedPlates={oneSidePlates} onAdd={addPlate} onRemove={removePlate} />
-		</section>
-
-		<section class="result-card">
-			<div class="result-card__header">
-				<div>
-					<p class="eyebrow">Current load</p>
-					<h3>{formatWeight(summary.totalWeight)}</h3>
-				</div>
-				<span>{oneSidePlates.length} plates on one side</span>
-			</div>
-
-			<div class="result-card__metrics">
-				<div>
-					<small>Bar</small>
-					<strong>{formatWeight(summary.barWeight)}</strong>
-				</div>
-				<div>
-					<small>One side</small>
-					<strong>{formatWeight(summary.oneSideWeight)}</strong>
-				</div>
-				<div>
-					<small>Total</small>
-					<strong>{formatWeight(summary.totalWeight)}</strong>
-				</div>
-			</div>
-
-			<PlateStackPreview barWeight={summary.barWeight} plates={groupedPlates} />
-		</section>
+	<!-- Sticky total strip — always visible as user taps plates -->
+	<div class="totals-strip" aria-live="polite" aria-label="Running total">
+		<strong class="totals-strip__weight">{formatWeight(summary.totalWeight)}</strong>
+		<div class="totals-strip__meta">
+			<span>{formatWeight(summary.barWeight)} bar</span>
+			<span class="sep">·</span>
+			<span>{formatWeight(summary.oneSideWeight)} per side</span>
+			<span class="sep">·</span>
+			<span>{oneSidePlates.length} plates</span>
+		</div>
 	</div>
+
+	<!-- Controls: bar selector + plate picker -->
+	<section class="control-card">
+		<div class="control-header">
+			<BarSelector bind:value={selectedBar} onChange={(nextValue) => (selectedBar = nextValue)} label="Active bar" />
+			<button type="button" class="clear-btn" onclick={clearAll}>Clear</button>
+		</div>
+
+		<PlatePicker selectedPlates={oneSidePlates} onAdd={addPlate} onRemove={removePlate} />
+	</section>
+
+	<!-- Barbell visualization — below the fold, scroll to see -->
+	<section class="viz-card">
+		<PlateStackPreview barWeight={summary.barWeight} plates={groupedPlates} />
+	</section>
 </section>
 
 <style>
-	.current-layout {
+	.calculator-shell {
 		display: grid;
-		gap: 1rem;
+		gap: 0.85rem;
+	}
+
+	/* Sticky total pill — follows the user as they scroll the plate picker */
+	.totals-strip {
+		position: sticky;
+		top: 0.5rem;
+		z-index: 5;
+		display: flex;
+		align-items: baseline;
+		gap: 0.9rem;
+		padding: 0.85rem 1.2rem;
+		background: rgba(255, 250, 245, 0.92);
+		backdrop-filter: blur(20px);
+		border: 1px solid var(--outline);
+		border-radius: var(--radius-xl);
+		box-shadow: var(--shadow);
+		flex-wrap: wrap;
+	}
+
+	.totals-strip__weight {
+		font-family: 'Archivo', sans-serif;
+		font-size: clamp(1.8rem, 5vw, 2.4rem);
+		line-height: 1;
+		color: var(--ink-strong);
+	}
+
+	.totals-strip__meta {
+		display: flex;
+		gap: 0.45rem;
+		align-items: center;
+		color: var(--ink-soft);
+		font-size: 0.88rem;
+		flex-wrap: wrap;
+	}
+
+	.sep {
+		opacity: 0.35;
 	}
 
 	.control-card,
-	.result-card {
+	.viz-card {
 		display: grid;
 		gap: 1.1rem;
 		padding: 1.2rem;
@@ -116,87 +136,46 @@
 		box-shadow: var(--shadow);
 	}
 
-	.control-card__header,
-	.result-card__header {
+	.control-header {
 		display: flex;
 		justify-content: space-between;
+		align-items: center;
 		gap: 1rem;
-		align-items: start;
 	}
 
-	.clear-button,
-	span {
+	.clear-btn {
+		flex-shrink: 0;
 		border-radius: 999px;
-		padding: 0.7rem 0.95rem;
+		padding: 0.6rem 1rem;
 		font: inherit;
 		font-weight: 700;
-	}
-
-	.clear-button {
 		border: 1px solid var(--outline);
 		background: rgba(255, 255, 255, 0.68);
 		cursor: pointer;
-	}
-
-	h3 {
-		margin: 0;
-		font-family: 'Archivo', sans-serif;
-		font-size: clamp(1.8rem, 4vw, 2.6rem);
-		line-height: 0.95;
-	}
-
-	span {
-		background: rgba(15, 157, 135, 0.14);
-		color: #126857;
-	}
-
-	.result-card__metrics {
-		display: grid;
-		grid-template-columns: repeat(3, minmax(0, 1fr));
-		gap: 0.75rem;
-	}
-
-	.result-card__metrics div {
-		display: grid;
-		gap: 0.35rem;
-		padding: 0.85rem;
-		border-radius: 1.2rem;
-		background: rgba(255, 255, 255, 0.72);
-		border: 1px solid var(--outline);
-	}
-
-	small {
-		color: var(--ink-soft);
-		font-size: 0.78rem;
-		text-transform: uppercase;
-		letter-spacing: 0.08em;
-	}
-
-	strong {
-		font-family: 'Archivo', sans-serif;
+		color: var(--ink-strong);
 	}
 
 	@media (min-width: 62rem) {
-		.current-layout {
-			grid-template-columns: minmax(22rem, 1.15fr) minmax(0, 0.85fr);
+		/* On desktop: controls left, (total + viz) right as a side panel */
+		.calculator-shell {
+			grid-template-columns: minmax(22rem, 1.2fr) minmax(0, 0.8fr);
+			grid-template-rows: auto 1fr;
 			align-items: start;
 		}
-	}
 
-	@media (max-width: 44rem) {
-		.control-card__header,
-		.result-card__header,
-		.result-card__metrics {
-			grid-template-columns: 1fr;
+		.totals-strip {
+			grid-column: 2;
+			grid-row: 1;
 		}
 
-		.control-card__header,
-		.result-card__header {
-			display: grid;
+		.control-card {
+			grid-column: 1;
+			grid-row: 1 / 3;
 		}
 
-		.result-card__metrics {
-			display: grid;
+		.viz-card {
+			grid-column: 2;
+			grid-row: 2;
 		}
 	}
 </style>

@@ -55,7 +55,8 @@ p {
 .app-shell {
 	width: min(100%, 72rem);
 	margin: 0 auto;
-	padding: 1rem 1rem 3rem;
+	/* Extra bottom padding so fixed nav doesn't cover content */
+	padding: 1rem 1rem calc(5rem + env(safe-area-inset-bottom, 0px));
 	box-sizing: border-box;
 }
 
@@ -93,10 +94,14 @@ p {
 	border: 1px solid var(--outline);
 	border-radius: 999px;
 	box-shadow: var(--shadow);
-	position: sticky;
-	top: 1rem;
+	/* Fixed bottom tab bar */
+	position: fixed;
+	bottom: max(0.75rem, env(safe-area-inset-bottom));
+	left: 50%;
+	transform: translateX(-50%);
+	width: calc(min(100vw, 72rem) - 2rem);
+	max-width: 38rem;
 	z-index: 10;
-	margin-bottom: 1.25rem;
 }
 
 .primary-nav a {
@@ -141,6 +146,7 @@ p {
 	gap: 0.75rem;
 }
 
+.hero-copy h1,
 .hero-copy h2,
 .section-heading h2 {
 	font-size: clamp(2rem, 4vw, 3rem);
