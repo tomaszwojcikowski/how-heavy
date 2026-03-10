@@ -217,19 +217,19 @@
 		font-family: 'Archivo', sans-serif;
 		font-size: 0.95rem;
 		font-weight: 800;
-		color: var(--ink-strong);
+		color: var(--text-primary);
 	}
 
 	.bar-label small {
 		font-size: 0.7rem;
 		text-transform: uppercase;
 		letter-spacing: 0.06em;
-		color: var(--ink-soft);
+		color: var(--text-secondary);
 	}
 
 	.empty-note {
 		margin: 0;
-		color: var(--ink-soft);
+		color: var(--text-secondary);
 		font-size: 0.9rem;
 	}
 </style>

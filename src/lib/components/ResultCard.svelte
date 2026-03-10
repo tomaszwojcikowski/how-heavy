@@ -85,6 +85,7 @@
 		font-family: 'Archivo', sans-serif;
 		font-size: clamp(1.8rem, 4vw, 2.6rem);
 		line-height: 1.02;
+		letter-spacing: var(--tracking-tight);
 	}
 
 	.result-card__status {
@@ -97,7 +98,8 @@
 		font-size: 0.82rem;
 		font-weight: 800;
 		text-transform: uppercase;
-		letter-spacing: 0.08em;
+		letter-spacing: 0.05em;
+		line-height: var(--leading-label);
 		background: rgba(15, 157, 135, 0.16);
 		color: #0d5a4d;
 	}
@@ -114,8 +116,10 @@
 
 	.result-card__message {
 		margin: 0;
-		color: var(--ink-muted);
+		color: var(--text-secondary);
 		font-size: var(--type-body-md);
+		line-height: var(--leading-surface);
+		letter-spacing: var(--tracking-body);
 	}
 
 	.result-card__metrics {
@@ -134,10 +138,11 @@
 	}
 
 	small {
-		color: var(--ink-muted);
+		color: var(--text-secondary);
 		font-size: var(--type-label);
 		text-transform: uppercase;
-		letter-spacing: 0.08em;
+		letter-spacing: 0.06em;
+		line-height: var(--leading-label);
 	}
 
 	strong {

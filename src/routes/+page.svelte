@@ -61,12 +61,15 @@
 
 	.mode-card h2 {
 		font-size: var(--type-title);
-		line-height: 1.15;
+		line-height: 1.05;
+		letter-spacing: var(--tracking-tight);
 	}
 
 	.mode-card p:not(.eyebrow) {
 		font-size: var(--type-body-md);
-		color: var(--ink-muted);
+		color: var(--text-secondary);
+		line-height: var(--leading-surface);
+		letter-spacing: var(--tracking-body);
 	}
 
 	.mode-card md-filled-button,
@@ -93,7 +96,9 @@
 		box-shadow: var(--shadow);
 		backdrop-filter: blur(18px);
 		font-size: var(--type-body-md);
-		color: var(--ink-muted);
+		color: var(--text-secondary);
+		line-height: var(--leading-surface);
+		letter-spacing: var(--tracking-body);
 	}
 
 	.feature-icon {

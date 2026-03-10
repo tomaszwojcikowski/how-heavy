@@ -98,11 +98,11 @@
 	.plate-choice__meta span {
 		font-weight: 700;
 		font-size: 0.88rem;
-		color: var(--ink-strong);
+		color: var(--text-primary);
 	}
 
 	.plate-choice__meta small {
-		color: var(--ink-muted);
+		color: var(--text-secondary);
 		font-size: 0.78rem;
 	}
 
@@ -121,7 +121,7 @@
 		border-radius: 8px;
 		border: 1px solid var(--outline);
 		background: var(--surface-2);
-		color: var(--ink-soft);
+		color: var(--text-primary);
 		cursor: pointer;
 	}
 
@@ -145,7 +145,7 @@
 	.plate-choice__action:disabled {
 		background: rgba(95, 67, 60, 0.08);
 		border-color: rgba(95, 67, 60, 0.14);
-		color: var(--ink-faint);
+		color: var(--text-tertiary);
 		opacity: 0.72;
 		cursor: not-allowed;
 	}

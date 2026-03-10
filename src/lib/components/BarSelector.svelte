@@ -30,7 +30,7 @@
 	.bar-selector__label {
 		margin: 0;
 		font-weight: 700;
-		color: var(--ink-soft);
+		color: var(--text-primary);
 	}
 
 	md-segmented-button-set {

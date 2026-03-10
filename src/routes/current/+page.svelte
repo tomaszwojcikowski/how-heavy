@@ -238,15 +238,17 @@
 		font-family: 'Archivo', sans-serif;
 		font-size: clamp(1.8rem, 5vw, 2.4rem);
 		line-height: 1;
-		color: var(--ink-strong);
+		color: var(--text-primary);
 	}
 
 	.totals-strip__meta {
 		display: flex;
 		gap: 0.45rem;
 		align-items: center;
-		color: var(--ink-muted);
+		color: var(--text-secondary);
 		font-size: 0.88rem;
+		line-height: 1.24;
+		letter-spacing: var(--tracking-body);
 		flex-wrap: wrap;
 	}
 
@@ -280,12 +282,12 @@
 		border: 1px solid var(--outline);
 		background: var(--surface-4);
 		cursor: pointer;
-		color: var(--ink-soft);
+		color: var(--text-primary);
 	}
 
 	.clear-btn:disabled {
 		opacity: 0.7;
-		color: var(--ink-faint);
+		color: var(--text-tertiary);
 		cursor: not-allowed;
 	}
 
