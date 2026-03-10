@@ -5,7 +5,7 @@
 	import BarSelector from '$lib/components/BarSelector.svelte';
 	import ResultCard from '$lib/components/ResultCard.svelte';
 	import WeightKeypad from '$lib/components/WeightKeypad.svelte';
-	import { modeLabels } from '$lib/site';
+	import { modeDescriptions, modeLabels } from '$lib/site';
 	import { loadCalculatorState, saveTargetState } from '$lib/stores/calculator';
 	import type { BarWeight } from '$lib/types/gym';
 	import { resolveTargetLoad } from '$lib/utils/calculations';
@@ -39,6 +39,11 @@
 
 <section class="calculator-shell">
 	{#if hydrated}
+		<header class="page-header">
+			<p class="eyebrow">{modeLabels.findPlates}</p>
+			<p class="page-header__desc">{modeDescriptions.findPlates}</p>
+		</header>
+
 		<div class="target-layout">
 			<!-- Result card is DOM-first → on mobile it appears at top above controls.
 			     On desktop the 2-col CSS puts .control-card on the left via order:-1. -->
@@ -98,6 +103,19 @@
 	.target-layout {
 		display: grid;
 		gap: 1rem;
+	}
+
+	.page-header {
+		display: grid;
+		gap: 0.2rem;
+		padding: 0 0.25rem;
+	}
+
+	.page-header__desc {
+		font-size: var(--type-body-md);
+		color: var(--text-secondary);
+		line-height: var(--leading-surface);
+		letter-spacing: var(--tracking-body);
 	}
 
 	.control-card {

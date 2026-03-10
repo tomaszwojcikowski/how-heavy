@@ -1,8 +1,7 @@
 <script lang="ts">
 	import PlateStackPreview from '$lib/components/PlateStackPreview.svelte';
 	import { formatWeight } from '$lib/utils/formatting';
-	import type { TargetLoadResult } from '$lib/types/gym';
-	import { PLATE_MAP } from '$lib/utils/plates';
+	import type { PlateCount, TargetLoadResult } from '$lib/types/gym';
 
 	export let result: TargetLoadResult;
 
@@ -13,17 +12,27 @@
 		invalid: { icon: 'error', label: 'Check Input', tone: 'warning' }
 	};
 
-	function plateStyle(weight: number): string {
-		const p = PLATE_MAP[weight.toString() as keyof typeof PLATE_MAP];
-		return `background:${p.color};color:${p.textColor};border-color:${p.edgeColor}`;
+	function formatPlatesPerSide(plates: PlateCount[]): string {
+		if (plates.length === 0) return '—';
+		return plates.map((p) => (p.count > 1 ? `${p.count}×${p.weight}` : String(p.weight))).join(' + ') + ' kg';
+	}
+
+	let copied = false;
+
+	function copyWeight() {
+		const text = formatWeight(result.resolvedTotal ?? result.requestedTotal);
+		navigator.clipboard.writeText(text).then(() => {
+			copied = true;
+			setTimeout(() => (copied = false), 2000);
+		});
 	}
 </script>
 
 <section class="result-card" aria-live="polite">
 	<div class="result-card__header">
-		<div>
-			<p class="eyebrow">Recommendation</p>
-			<h3>{formatWeight(result.resolvedTotal ?? result.requestedTotal)}</h3>
+		<div class="result-card__headline">
+			<p class="eyebrow">Load per side</p>
+			<h3>{formatPlatesPerSide(result.plates)}</h3>
 		</div>
 		<div class="result-card__status" class:rounded={statusMeta[result.status].tone === 'rounded'} class:warning={statusMeta[result.status].tone === 'warning'}>
 			<span class="material-symbols-rounded result-card__status-icon" aria-hidden="true">{statusMeta[result.status].icon}</span>
@@ -35,12 +44,12 @@
 
 	<div class="result-card__metrics">
 		<div>
-			<small>Requested</small>
-			<strong>{formatWeight(result.requestedTotal)}</strong>
+			<small>Total</small>
+			<strong>{formatWeight(result.resolvedTotal ?? result.requestedTotal)}</strong>
 		</div>
 		<div>
-			<small>Per side</small>
-			<strong>{formatWeight(result.oneSideWeight)}</strong>
+			<small>Requested</small>
+			<strong>{formatWeight(result.requestedTotal)}</strong>
 		</div>
 		<div>
 			<small>Adjustment</small>
@@ -50,16 +59,12 @@
 
 	<PlateStackPreview barWeight={result.barWeight} plates={result.plates} />
 
-	{#if result.plates.length > 0}
-		<ul class="result-card__list">
-			{#each result.plates as plate (plate.weight)}
-				<li style={plateStyle(plate.weight)}>
-					<span>{plate.weight} kg</span>
-					<strong>×{plate.count} per side</strong>
-				</li>
-			{/each}
-		</ul>
-	{/if}
+	<div class="result-card__actions">
+		<button type="button" class="copy-btn" onclick={copyWeight} aria-label="Copy total weight to clipboard">
+			<span class="material-symbols-rounded" aria-hidden="true">{copied ? 'check' : 'content_copy'}</span>
+			{copied ? 'Copied' : 'Copy weight'}
+		</button>
+	</div>
 </section>
 
 <style>
@@ -80,16 +85,22 @@
 		align-items: start;
 	}
 
+	.result-card__headline {
+		min-width: 0;
+	}
+
 	h3 {
 		margin: 0;
 		font-family: 'Archivo', sans-serif;
-		font-size: clamp(1.8rem, 4vw, 2.6rem);
-		line-height: 1.02;
+		font-size: clamp(1.5rem, 3.5vw, 2.2rem);
+		line-height: 1.06;
 		letter-spacing: var(--tracking-tight);
+		word-break: break-word;
 	}
 
 	.result-card__status {
 		align-self: start;
+		flex-shrink: 0;
 		display: inline-flex;
 		align-items: center;
 		gap: 0.35rem;
@@ -149,22 +160,33 @@
 		font-family: 'Archivo', sans-serif;
 	}
 
-	.result-card__list {
-		list-style: none;
-		margin: 0;
-		padding: 0;
-		display: grid;
-		gap: 0.6rem;
+	.result-card__actions {
+		display: flex;
 	}
 
-	.result-card__list li {
-		display: flex;
-		justify-content: space-between;
-		gap: 1rem;
-		padding: 0.75rem 0.9rem;
-		border-radius: 6px;
-		/* color/background/border set inline via plateStyle() */
-		border: 1px solid;
+	.copy-btn {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.4rem;
+		padding: 0.55rem 1rem;
+		border-radius: 8px;
+		border: 1px solid var(--outline);
+		background: var(--md-sys-color-surface-container-lowest);
+		color: var(--text-secondary);
+		font-size: var(--type-body-sm);
+		font-weight: 600;
+		cursor: pointer;
+		transition: color 0.15s ease, background 0.15s ease;
+	}
+
+	.copy-btn:hover {
+		color: var(--text-primary);
+		background: var(--surface-2);
+	}
+
+	.copy-btn .material-symbols-rounded {
+		font-size: 1.1rem;
+		font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
 	}
 
 	@media (max-width: 40rem) {

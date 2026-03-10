@@ -24,11 +24,6 @@
 	</main>
 
 	<nav class="primary-nav" aria-label="Primary">
-		<a class:active={page.url.pathname === `${base}/`} href={resolve('/')}>
-			<span class="nav-icon material-symbols-rounded" aria-hidden="true">home</span>
-			<span class="nav-label">Home</span>
-			<md-ripple></md-ripple>
-		</a>
 		<a class:active={page.url.pathname === `${base}/target/`} href={resolve('/target')}>
 			<span class="nav-icon material-symbols-rounded" aria-hidden="true">sports_score</span>
 			<span class="nav-label">{modeLabels.findPlates}</span>

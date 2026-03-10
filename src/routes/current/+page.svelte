@@ -5,11 +5,18 @@
 	import BarSelector from '$lib/components/BarSelector.svelte';
 	import PlatePicker from '$lib/components/PlatePicker.svelte';
 	import PlateStackPreview from '$lib/components/PlateStackPreview.svelte';
-	import { modeLabels } from '$lib/site';
+	import { modeDescriptions, modeLabels } from '$lib/site';
 	import { loadCalculatorState, saveCurrentState } from '$lib/stores/calculator';
 	import type { BarWeight, PlateWeight } from '$lib/types/gym';
 	import { calculateCurrentLoad, summarizePlateCounts } from '$lib/utils/calculations';
 	import { formatWeight } from '$lib/utils/formatting';
+
+	const QUICK_PRESETS: { label: string; icon: string; plates: PlateWeight[] }[] = [
+		{ label: 'Empty bar', icon: 'fitness_center', plates: [] },
+		{ label: '1 plate/side', icon: 'looks_one', plates: [20] },
+		{ label: '2 plates/side', icon: 'looks_two', plates: [20, 20] },
+		{ label: '3 plates/side', icon: 'looks_3', plates: [20, 20, 20] }
+	];
 
 	let selectedBar: BarWeight = 20;
 	let oneSidePlates: PlateWeight[] = [];
@@ -138,15 +145,21 @@
 
 <section class="calculator-shell">
 	{#if hydrated}
+		<header class="page-header">
+			<p class="eyebrow">{modeLabels.countPlates}</p>
+			<p class="page-header__desc">{modeDescriptions.countPlates}</p>
+		</header>
+
 		<!-- Sticky total strip — always visible as user taps plates -->
 		<div class="totals-strip" aria-live="polite" aria-label="Running total">
 			<strong class="totals-strip__weight">{formatWeight(summary.totalWeight)}</strong>
 			<div class="totals-strip__meta">
-				<span>{formatWeight(summary.barWeight)} bar</span>
+				<span class="totals-strip__label">Total loaded</span>
 				<span class="sep">·</span>
-				<span>{formatWeight(summary.oneSideWeight)} per side</span>
+				<span class="totals-strip__label">Per side</span>
+				<strong class="totals-strip__value">{formatWeight(summary.oneSideWeight)}</strong>
 				<span class="sep">·</span>
-				<span>{oneSidePlates.length} plates</span>
+				<span class="totals-strip__label">{formatWeight(summary.barWeight)} bar</span>
 			</div>
 		</div>
 
@@ -165,6 +178,19 @@
 				</button>
 			</div>
 
+			<div class="preset-strip" role="group" aria-label="Quick setup presets">
+				{#each QUICK_PRESETS as preset}
+					<button
+						type="button"
+						class="preset-btn"
+						onclick={() => applyPlateChange([...preset.plates], `Loaded: ${preset.label}.`)}
+					>
+						<span class="material-symbols-rounded" aria-hidden="true">{preset.icon}</span>
+						{preset.label}
+					</button>
+				{/each}
+			</div>
+
 			<PlatePicker selectedPlates={oneSidePlates} onAdd={addPlate} onRemove={removePlate} />
 		</section>
 
@@ -173,6 +199,7 @@
 			<PlateStackPreview
 				barWeight={summary.barWeight}
 				plates={groupedPlates}
+				onRemovePlate={removePlate}
 				emptyMessage="Tap plates above to build your barbell."
 			/>
 		</section>
@@ -217,6 +244,19 @@
 		gap: 0.85rem;
 	}
 
+	.page-header {
+		display: grid;
+		gap: 0.2rem;
+		padding: 0 0.25rem;
+	}
+
+	.page-header__desc {
+		font-size: var(--type-body-md);
+		color: var(--text-secondary);
+		line-height: var(--leading-surface);
+		letter-spacing: var(--tracking-body);
+	}
+
 	/* Sticky total pill — follows the user as they scroll the plate picker */
 	.totals-strip {
 		position: sticky;
@@ -252,6 +292,19 @@
 		flex-wrap: wrap;
 	}
 
+	.totals-strip__label {
+		color: var(--text-tertiary);
+		font-size: var(--type-label);
+		text-transform: uppercase;
+		letter-spacing: var(--tracking-label);
+	}
+
+	.totals-strip__value {
+		color: var(--text-primary);
+		font-family: 'Archivo', sans-serif;
+		font-size: 1rem;
+	}
+
 	.sep {
 		opacity: 0.35;
 	}
@@ -272,6 +325,37 @@
 		justify-content: space-between;
 		align-items: center;
 		gap: 1rem;
+	}
+
+	.preset-strip {
+		display: flex;
+		gap: 0.5rem;
+		flex-wrap: wrap;
+	}
+
+	.preset-btn {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.3rem;
+		padding: 0.45rem 0.75rem;
+		border-radius: 8px;
+		border: 1px solid var(--outline);
+		background: var(--md-sys-color-surface-container-lowest);
+		color: var(--text-secondary);
+		font-size: var(--type-body-sm);
+		font-weight: 600;
+		cursor: pointer;
+		transition: color 0.14s ease, background 0.14s ease;
+	}
+
+	.preset-btn:hover {
+		color: var(--text-primary);
+		background: var(--surface-2);
+	}
+
+	.preset-btn .material-symbols-rounded {
+		font-size: 1rem;
+		font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
 	}
 
 	.clear-btn {

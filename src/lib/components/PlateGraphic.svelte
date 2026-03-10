@@ -24,8 +24,6 @@
 			<circle cx="110" cy="110" r={plate.radius - 28} fill="transparent" stroke="#2a2a2a" stroke-width="6" />
 		{/if}
 		<circle cx="110" cy="110" r={plate.ringRadius} fill="#efebe6" stroke="#c9beb4" stroke-width="7" />
-		<text x="110" y="106" text-anchor="middle">{plate.shortLabel}</text>
-		<text x="110" y="132" text-anchor="middle" class="unit">kg</text>
 	</svg>
 
 	{#if count > 1}
@@ -52,20 +50,6 @@
 		display: block;
 	}
 
-	text {
-		font-family: 'Archivo', sans-serif;
-		font-size: 30px;
-		font-weight: 800;
-		fill: var(--plate-text);
-		letter-spacing: -0.03em;
-	}
-
-	text.unit {
-		font-size: 18px;
-		letter-spacing: 0.08em;
-		text-transform: uppercase;
-	}
-
 	figcaption {
 		position: absolute;
 		right: -0.2rem;
@@ -78,7 +62,7 @@
 		font-weight: 700;
 	}
 
-	figure.bumper text {
-		text-shadow: 0 1px 1px rgba(0, 0, 0, 0.3);
+	figure.bumper svg {
+		filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.06));
 	}
 </style>

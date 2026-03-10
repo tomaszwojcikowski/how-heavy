@@ -8,6 +8,7 @@
 	export let barWeight: BarWeight = 20;
 	export let plates: PlateCount[] = [];
 	export let emptyMessage = 'No plates needed — the empty bar already matches.';
+	export let onRemovePlate: ((weight: PlateWeight) => void) | null = null;
 
 	// heavy → light, used for both sides (left arm uses row-reverse CSS)
 	$: expandedPlates = plates.flatMap((plate) => Array.from({ length: plate.count }, () => plate.weight));
@@ -34,7 +35,7 @@
 
 <div class="stack-shell">
 	<div class="stack-heading">
-		<p>Bar visualization</p>
+		<p>Bar visualization{onRemovePlate ? ' — tap a plate to remove' : ''}</p>
 		<strong>{formatWeight(barWeight)} bar</strong>
 	</div>
 
@@ -46,14 +47,20 @@
 			<!-- Left arm: DOM order heavy→light + sleeve + cap; row-reverse flips visual to cap→sleeve→light→heavy→center -->
 			<div class="arm arm--left" aria-label="Left side">
 				{#each expandedPlates as weight, i (`left-${weight}-${i}`)}
-					<div
+					<!-- svelte-ignore a11y_no_static_element_interactions -->
+					<svelte:element
+						this={onRemovePlate ? 'button' : 'div'}
+						type={onRemovePlate ? 'button' : undefined}
 						class="plate"
+						class:plate--interactive={onRemovePlate}
 						style="width:{plateThickness(weight)}px;height:{plateHeight(weight)}px;background:{plateColor(weight)};border-color:{plateEdge(weight)}"
+						onclick={onRemovePlate ? () => onRemovePlate(weight) : undefined}
+						aria-label={onRemovePlate ? `Remove ${weight} kg plate` : undefined}
 						in:scale={{ duration: 180, start: 0.8 }}
 						out:scale={{ duration: 140, start: 0.85 }}
 					>
 						<span>{weight}</span>
-					</div>
+					</svelte:element>
 				{/each}
 				<div class="sleeve" aria-hidden="true"></div>
 				<div class="end-cap" aria-hidden="true"></div>
@@ -68,14 +75,20 @@
 			<!-- Right arm: sleeve + cap at the end; visual order heavy→light→sleeve→cap from center -->
 			<div class="arm arm--right" aria-label="Right side">
 				{#each expandedPlates as weight, i (`right-${weight}-${i}`)}
-					<div
+					<!-- svelte-ignore a11y_no_static_element_interactions -->
+					<svelte:element
+						this={onRemovePlate ? 'button' : 'div'}
+						type={onRemovePlate ? 'button' : undefined}
 						class="plate"
+						class:plate--interactive={onRemovePlate}
 						style="width:{plateThickness(weight)}px;height:{plateHeight(weight)}px;background:{plateColor(weight)};border-color:{plateEdge(weight)}"
+						onclick={onRemovePlate ? () => onRemovePlate(weight) : undefined}
+						aria-label={onRemovePlate ? `Remove ${weight} kg plate` : undefined}
 						in:scale={{ duration: 180, start: 0.8 }}
 						out:scale={{ duration: 140, start: 0.85 }}
 					>
 						<span>{weight}</span>
-					</div>
+					</svelte:element>
 				{/each}
 				<div class="sleeve" aria-hidden="true"></div>
 				<div class="end-cap" aria-hidden="true"></div>
@@ -171,6 +184,24 @@
 		align-items: center;
 		justify-content: center;
 		box-shadow: inset 1px 0 0 rgba(255, 255, 255, 0.06);
+		padding: 0;
+		background: none;
+		cursor: default;
+	}
+
+	.plate.plate--interactive {
+		cursor: pointer;
+		transition: opacity 0.12s ease, transform 0.12s ease;
+	}
+
+	.plate.plate--interactive:hover {
+		opacity: 0.72;
+		transform: scaleY(0.94);
+	}
+
+	.plate.plate--interactive:active {
+		opacity: 0.55;
+		transform: scaleY(0.9);
 	}
 
 	.plate span {

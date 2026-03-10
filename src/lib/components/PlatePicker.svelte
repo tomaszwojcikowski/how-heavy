@@ -15,6 +15,27 @@
 	function graphicSize(weight: PlateWeight): number {
 		return weight >= 5 ? 96 : 78;
 	}
+
+	let repeatTimeout: ReturnType<typeof setTimeout> | null = null;
+	let repeatInterval: ReturnType<typeof setInterval> | null = null;
+
+	function startHold(action: () => void) {
+		action();
+		repeatTimeout = setTimeout(() => {
+			repeatInterval = setInterval(action, 110);
+		}, 460);
+	}
+
+	function endHold() {
+		if (repeatTimeout !== null) {
+			clearTimeout(repeatTimeout);
+			repeatTimeout = null;
+		}
+		if (repeatInterval !== null) {
+			clearInterval(repeatInterval);
+			repeatInterval = null;
+		}
+	}
 </script>
 
 <div class="plate-picker">
@@ -22,16 +43,17 @@
 		{#each PLATE_DEFINITIONS as plate (plate.weight)}
 			{@const count = selectedCounts.find((item) => item.weight === plate.weight)?.count ?? 0}
 			<div class="plate-choice">
-				<PlateGraphic weight={plate.weight} size={graphicSize(plate.weight)} count={count} />
-				<div class="plate-choice__meta">
-					<span>{plate.weight} kg</span>
-					<small>{count} on the bar</small>
-				</div>
+			<strong class="plate-choice__label" aria-label="{plate.weight} kilograms">{plate.weight} <span>kg</span></strong>
+			<PlateGraphic weight={plate.weight} size={graphicSize(plate.weight)} count={count} />
 				<div class="plate-choice__actions">
 					<button
 						type="button"
 						class="plate-choice__action plate-choice__action--remove"
-						onclick={() => onRemove(plate.weight)}
+						onpointerdown={() => count > 0 && startHold(() => onRemove(plate.weight))}
+						onpointerup={endHold}
+						onpointerleave={endHold}
+						onpointercancel={endHold}
+						onclick={(e: MouseEvent) => { if (e.detail === 0 && count > 0) onRemove(plate.weight); }}
 						disabled={count === 0}
 						aria-label={`Remove ${plate.weight} kilogram plate`}
 					>
@@ -40,7 +62,11 @@
 					<button
 						type="button"
 						class="plate-choice__action plate-choice__action--add"
-						onclick={() => onAdd(plate.weight)}
+						onpointerdown={() => startHold(() => onAdd(plate.weight))}
+						onpointerup={endHold}
+						onpointerleave={endHold}
+						onpointercancel={endHold}
+						onclick={(e: MouseEvent) => { if (e.detail === 0) onAdd(plate.weight); }}
 						aria-label={`Add ${plate.weight} kilogram plate`}
 					>
 						<span class="material-symbols-rounded" aria-hidden="true">add</span>
@@ -80,30 +106,31 @@
 
 	.plate-choice {
 		display: grid;
-		gap: 0.75rem;
+		gap: 0.6rem;
 		justify-items: center;
-		padding: 0.9rem 0.75rem;
+		padding: 0.75rem 0.75rem 0.85rem;
 		border-radius: 10px;
 		border: 1px solid var(--outline);
 		background: var(--surface-4);
 		box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45);
 	}
 
-	.plate-choice__meta {
-		display: grid;
-		gap: 0.15rem;
-		justify-items: center;
-	}
-
-	.plate-choice__meta span {
-		font-weight: 700;
-		font-size: 0.88rem;
+	.plate-choice__label {
+		font-family: 'Archivo', sans-serif;
+		font-size: 1.05rem;
+		font-weight: 800;
+		letter-spacing: var(--tracking-tight);
 		color: var(--text-primary);
+		line-height: 1;
+		align-self: start;
 	}
 
-	.plate-choice__meta small {
-		color: var(--text-secondary);
-		font-size: 0.78rem;
+	.plate-choice__label span {
+		font-size: 0.72rem;
+		font-weight: 600;
+		letter-spacing: 0.04em;
+		color: var(--text-tertiary);
+		vertical-align: 0.1em;
 	}
 
 	.plate-choice__actions {
