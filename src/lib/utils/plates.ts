@@ -1,4 +1,4 @@
-import { SUPPORTED_BAR_WEIGHTS, SUPPORTED_PLATE_WEIGHTS, type BarWeight, type PlateDefinition, type PlateWeight, type PlateWeightKey } from '$lib/types/gym';
+import { SUPPORTED_BAR_WEIGHTS, SUPPORTED_PLATE_WEIGHTS, type BarWeight, type PlateCount, type PlateDefinition, type PlateWeight, type PlateWeightKey } from '$lib/types/gym';
 
 const QUARTER_KILO_UNITS = 4;
 
@@ -191,4 +191,100 @@ export function isSupportedBarWeight(weight: number): weight is BarWeight {
 
 export function isSupportedPlateWeight(weight: number): weight is PlateWeight {
 	return SUPPORTED_PLATE_WEIGHTS.includes(weight as PlateWeight);
+}
+
+export interface PlateLookupOptions {
+	/** Maximum number of a single change-plate weight allowed per side. Bumpers are unlimited. */
+	maxChangePerSide: number;
+	/**
+	 * Index order (into PLATE_DEFINITIONS) used as a final tiebreaker.
+	 * Plates listed first are preferred. Defaults to definitions order (heaviest first).
+	 */
+	tiebreakOrder?: readonly number[];
+	/** When true, combinations with more than 2 of a change plate per side are penalised. */
+	penalizeCrowdedStacks?: boolean;
+}
+
+/**
+ * Build a lazy-growing bounded coin-change DP table for plate combinations.
+ * Returns a lookup function: given a side weight in quarter-kilo units,
+ * returns the optimal PlateCount array or null if the weight isn't achievable.
+ */
+export function createPlateLookupTable(
+	options: PlateLookupOptions
+): (sideUnits: number) => PlateCount[] | null {
+	const {
+		maxChangePerSide,
+		tiebreakOrder = PLATE_DEFINITIONS.map((_, i) => i),
+		penalizeCrowdedStacks = false
+	} = options;
+
+	const entries = PLATE_DEFINITIONS.map((p, index) => ({
+		weight: p.weight as PlateWeight,
+		units: p.units,
+		maxPerSide: p.kind === 'change' ? maxChangePerSide : Number.POSITIVE_INFINITY,
+		isChange: p.kind === 'change',
+		index
+	}));
+
+	const changeIndices = entries.filter((e) => e.isChange).map((e) => e.index);
+
+	type Vec = number[];
+	const table: Array<Vec | null> = [Array(entries.length).fill(0) as Vec];
+
+	function compare(a: Vec, b: Vec): number {
+		const aTotal = a.reduce((s, n) => s + n, 0);
+		const bTotal = b.reduce((s, n) => s + n, 0);
+		if (aTotal !== bTotal) return aTotal - bTotal;
+
+		const aChange = changeIndices.reduce((s, i) => s + a[i], 0);
+		const bChange = changeIndices.reduce((s, i) => s + b[i], 0);
+		if (aChange !== bChange) return aChange - bChange;
+
+		if (penalizeCrowdedStacks) {
+			const aCrowded = changeIndices.reduce((s, i) => s + Math.max(0, a[i] - 2), 0);
+			const bCrowded = changeIndices.reduce((s, i) => s + Math.max(0, b[i] - 2), 0);
+			if (aCrowded !== bCrowded) return aCrowded - bCrowded;
+		}
+
+		for (const i of changeIndices) {
+			if (a[i] !== b[i]) return b[i] - a[i];
+		}
+
+		for (const i of tiebreakOrder) {
+			if (a[i] !== b[i]) return b[i] - a[i];
+		}
+
+		return 0;
+	}
+
+	function grow(maxUnits: number): void {
+		for (let units = table.length; units <= maxUnits; units++) {
+			let best: Vec | null = null;
+
+			for (const entry of entries) {
+				const remainder = units - entry.units;
+				if (remainder < 0 || table[remainder] === null) continue;
+
+				const candidate = [...table[remainder]!];
+				if (candidate[entry.index] + 1 > entry.maxPerSide) continue;
+				candidate[entry.index] += 1;
+
+				if (!best || compare(candidate, best) < 0) best = candidate;
+			}
+
+			table[units] = best;
+		}
+	}
+
+	return function lookup(sideUnits: number): PlateCount[] | null {
+		if (sideUnits === 0) return [];
+		if (sideUnits < 0) return null;
+		grow(sideUnits);
+		const vec = table[sideUnits];
+		if (!vec) return null;
+		return vec
+			.map((count, i) => ({ weight: entries[i].weight, count }))
+			.filter((p) => p.count > 0);
+	};
 }

@@ -1,5 +1,5 @@
-import { PLATE_DEFINITIONS, fromQuarterKiloUnits, toQuarterKiloUnits } from '$lib/utils/plates';
-import type { BarWeight, PlateCount, PlateWeight, TargetLoadResult } from '$lib/types/gym';
+import { fromQuarterKiloUnits, toQuarterKiloUnits, createPlateLookupTable } from '$lib/utils/plates';
+import type { BarWeight, PlateCount, TargetLoadResult } from '$lib/types/gym';
 
 export interface SetStep {
 	id: number;
@@ -70,79 +70,8 @@ export function buildRoundedWarmupSteps(oneRm: number, barWeight: BarWeight): Se
 
 // ─── Plate lookup table (max 2 change plates per weight per side) ────────────
 
-const MAX_CHANGE_PER_SIDE = 2;
-
-const SET_PLATES = PLATE_DEFINITIONS.map((p, index) => ({
-	weight: p.weight as PlateWeight,
-	units: p.units,
-	maxPerSide: p.kind === 'change' ? MAX_CHANGE_PER_SIDE : Number.POSITIVE_INFINITY,
-	isChange: p.kind === 'change',
-	index
-}));
-
-const CHANGE_INDICES = SET_PLATES.filter((p) => p.isChange).map((p) => p.index);
-
 // Tiebreak: prefer heavier plates to keep the bar consistent across sets.
-const TIEBREAK_ORDER = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
-
-type PlateVector = number[];
-
-/** DP lookup: sideUnits → best plate-count vector, or null if not achievable. */
-const SIDE_TABLE: Array<PlateVector | null> = [Array(SET_PLATES.length).fill(0) as PlateVector];
-
-function compareVectors(a: PlateVector, b: PlateVector): number {
-	const aTotal = a.reduce((s, n) => s + n, 0);
-	const bTotal = b.reduce((s, n) => s + n, 0);
-	if (aTotal !== bTotal) return aTotal - bTotal;
-
-	const aChange = CHANGE_INDICES.reduce((s, i) => s + a[i], 0);
-	const bChange = CHANGE_INDICES.reduce((s, i) => s + b[i], 0);
-	if (aChange !== bChange) return aChange - bChange;
-
-	for (const i of CHANGE_INDICES) {
-		if (a[i] !== b[i]) return b[i] - a[i];
-	}
-
-	for (const i of TIEBREAK_ORDER) {
-		if (a[i] !== b[i]) return b[i] - a[i];
-	}
-
-	return 0;
-}
-
-function buildTable(maxUnits: number): void {
-	for (let units = SIDE_TABLE.length; units <= maxUnits; units++) {
-		let best: PlateVector | null = null;
-
-		for (const plate of SET_PLATES) {
-			const remainder = units - plate.units;
-			if (remainder < 0 || SIDE_TABLE[remainder] === null) continue;
-
-			const candidate = [...SIDE_TABLE[remainder]!];
-			if (candidate[plate.index] + 1 > plate.maxPerSide) continue;
-			candidate[plate.index] += 1;
-
-			if (!best || compareVectors(candidate, best) < 0) {
-				best = candidate;
-			}
-		}
-
-		SIDE_TABLE[units] = best;
-	}
-}
-
-function vectorToPlates(vec: PlateVector): PlateCount[] {
-	return vec
-		.map((count, i) => ({ weight: SET_PLATES[i].weight, count }))
-		.filter((p) => p.count > 0);
-}
-
-function lookupSideWeight(sideUnits: number): PlateCount[] | null {
-	if (sideUnits === 0) return [];
-	if (sideUnits < 0) return null;
-	buildTable(sideUnits);
-	return SIDE_TABLE[sideUnits] ? vectorToPlates(SIDE_TABLE[sideUnits]!) : null;
-}
+const lookupSideUnits = createPlateLookupTable({ maxChangePerSide: 2 });
 
 // ─── Target resolution for sets ──────────────────────────────────────────────
 
@@ -184,7 +113,7 @@ function resolveForSets(barWeight: BarWeight, targetTotal: number): TargetLoadRe
 
 		for (const sideUnits of candidates) {
 			if (sideUnits < 0) continue;
-			const plates = lookupSideWeight(sideUnits);
+			const plates = lookupSideUnits(sideUnits);
 			if (plates === null) continue;
 
 			const achievedTotal = fromQuarterKiloUnits(barUnits + sideUnits * 2);
