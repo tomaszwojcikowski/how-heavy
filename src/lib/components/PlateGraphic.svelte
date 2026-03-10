@@ -72,7 +72,7 @@
 		bottom: -0.1rem;
 		background: rgba(47, 26, 23, 0.92);
 		color: #fffaf5;
-		border-radius: 999px;
+		border-radius: 5px;
 		padding: 0.28rem 0.5rem;
 		font-size: 0.82rem;
 		font-weight: 700;

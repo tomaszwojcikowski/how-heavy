@@ -82,7 +82,7 @@
 	span {
 		align-self: start;
 		padding: 0.45rem 0.7rem;
-		border-radius: 999px;
+		border-radius: 6px;
 		font-size: 0.82rem;
 		font-weight: 800;
 		text-transform: uppercase;
@@ -112,7 +112,7 @@
 		display: grid;
 		gap: 0.35rem;
 		padding: 0.85rem;
-		border-radius: 1.2rem;
+		border-radius: 8px;
 		background: rgba(255, 255, 255, 0.72);
 		border: 1px solid var(--outline);
 	}
@@ -141,7 +141,7 @@
 		justify-content: space-between;
 		gap: 1rem;
 		padding: 0.75rem 0.9rem;
-		border-radius: 1rem;
+		border-radius: 6px;
 		/* color/background/border set inline via plateStyle() */
 		border: 1px solid;
 	}

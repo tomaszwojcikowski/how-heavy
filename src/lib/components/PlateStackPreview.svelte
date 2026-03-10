@@ -7,6 +7,7 @@
 
 	export let barWeight: BarWeight = 20;
 	export let plates: PlateCount[] = [];
+	export let emptyMessage = 'No plates needed — the empty bar already matches.';
 
 	// heavy → light, used for both sides (left arm uses row-reverse CSS)
 	$: expandedPlates = plates.flatMap((plate) => Array.from({ length: plate.count }, () => plate.weight));
@@ -83,7 +84,7 @@
 	</div>
 
 	{#if expandedPlates.length === 0}
-		<p class="empty-note">No plates needed — the empty bar already matches.</p>
+		<p class="empty-note">{emptyMessage}</p>
 	{/if}
 </div>
 
@@ -116,6 +117,11 @@
 		overflow-x: auto;
 		overflow-y: visible;
 		padding: 0.5rem 0;
+		scrollbar-width: none;
+	}
+
+	.barbell-wrap::-webkit-scrollbar {
+		display: none;
 	}
 
 	/* Shaft spans full width, centered vertically behind plates */
@@ -199,7 +205,7 @@
 		display: grid;
 		justify-items: center;
 		padding: 0.4rem 0.65rem;
-		border-radius: 999px;
+		border-radius: 6px;
 		background: rgba(255, 255, 255, 0.85);
 		border: 1px solid var(--outline);
 		margin: 0 0.4rem;

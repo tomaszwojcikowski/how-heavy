@@ -56,7 +56,7 @@
 		gap: 0.65rem;
 		justify-items: center;
 		padding: 0.9rem 0.75rem;
-		border-radius: 1.5rem;
+		border-radius: 10px;
 		border: 1px solid var(--outline);
 		background: rgba(255, 255, 255, 0.7);
 		font: inherit;
@@ -80,7 +80,7 @@
 		align-items: center;
 		gap: 0.55rem;
 		padding: 0.7rem 0.9rem;
-		border-radius: 999px;
+		border-radius: 8px;
 		border: 1px solid rgba(255, 111, 60, 0.24);
 		background: rgba(255, 111, 60, 0.1);
 		font: inherit;

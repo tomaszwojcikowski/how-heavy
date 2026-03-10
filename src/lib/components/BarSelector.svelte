@@ -46,7 +46,7 @@
 	button {
 		border: 1px solid var(--outline);
 		background: rgba(255, 255, 255, 0.65);
-		border-radius: 1.25rem;
+		border-radius: 8px;
 		padding: 0.9rem 1rem;
 		display: grid;
 		gap: 0.15rem;

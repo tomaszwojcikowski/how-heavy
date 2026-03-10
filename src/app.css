@@ -12,8 +12,8 @@
 	--accent-secondary: #0f9d87;
 	--accent-tertiary: #3559e0;
 	--shadow: 0 18px 50px rgba(99, 36, 19, 0.12);
-	--radius-xl: 28px;
-	--radius-lg: 20px;
+	--radius-xl: 12px;
+	--radius-lg: 8px;
 	--md-sys-color-primary: #a23c1b;
 	--md-sys-color-on-primary: #ffffff;
 	--md-sys-color-secondary: #166653;
@@ -33,6 +33,19 @@ body {
 body {
 	min-height: 100vh;
 	line-height: 1.5;
+}
+
+button,
+input,
+textarea,
+select {
+	font: inherit;
+}
+
+:is(a, button, input, textarea, select):focus-visible {
+	outline: 3px solid rgba(53, 89, 224, 0.7);
+	outline-offset: 3px;
+	box-shadow: 0 0 0 6px rgba(53, 89, 224, 0.14);
 }
 
 a {
@@ -92,7 +105,7 @@ p {
 	background: var(--surface-3);
 	backdrop-filter: blur(16px);
 	border: 1px solid var(--outline);
-	border-radius: 999px;
+	border-radius: 14px;
 	box-shadow: var(--shadow);
 	/* Fixed bottom tab bar */
 	position: fixed;
@@ -107,7 +120,7 @@ p {
 .primary-nav a {
 	padding: 0.85rem 1rem;
 	text-align: center;
-	border-radius: 999px;
+	border-radius: 10px;
 	font-weight: 700;
 	color: var(--ink-soft);
 	transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
@@ -150,7 +163,7 @@ p {
 .hero-copy h2,
 .section-heading h2 {
 	font-size: clamp(2rem, 4vw, 3rem);
-	line-height: 0.95;
+	line-height: 1.08;
 }
 
 .hero-copy p,
@@ -170,7 +183,7 @@ p {
 	justify-content: center;
 	align-items: center;
 	min-height: 3.25rem;
-	border-radius: 999px;
+	border-radius: 10px;
 	font-weight: 700;
 	padding: 0.75rem 1.1rem;
 	border: 1px solid transparent;
@@ -192,6 +205,73 @@ p {
 .calculator-shell {
 	display: grid;
 	gap: 1rem;
+}
+
+.loading-card {
+	display: grid;
+	gap: 0.9rem;
+	padding: 1.2rem;
+	background: rgba(255, 250, 245, 0.88);
+	border: 1px solid var(--outline);
+	border-radius: var(--radius-xl);
+	box-shadow: var(--shadow);
+	overflow: hidden;
+}
+
+.loading-line,
+.loading-pill,
+.loading-block {
+	position: relative;
+	background: rgba(255, 255, 255, 0.74);
+	border-radius: 6px;
+	overflow: hidden;
+}
+
+.loading-line::after,
+.loading-pill::after,
+.loading-block::after {
+	content: '';
+	position: absolute;
+	inset: 0;
+	transform: translateX(-100%);
+	background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.8), transparent);
+	animation: shimmer 1.15s ease-in-out infinite;
+}
+
+.loading-line {
+	height: 0.95rem;
+	border-radius: 4px;
+}
+
+.loading-pill {
+	height: 2.8rem;
+	border-radius: 8px;
+}
+
+.loading-block {
+	height: 8rem;
+	border-radius: 8px;
+}
+
+.loading-grid {
+	display: grid;
+	gap: 0.75rem;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.loading-grid--3 {
+	grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.loading-stack {
+	display: grid;
+	gap: 0.55rem;
+}
+
+@keyframes shimmer {
+	100% {
+		transform: translateX(100%);
+	}
 }
 
 .feature-grid {
@@ -255,15 +335,24 @@ p {
 	}
 
 	.feature-card,
-		.placeholder-card {
+	.placeholder-card {
 		padding: 1.35rem;
 	}
-	}
+}
 
 @media (max-width: 35rem) {
 	.primary-nav {
-		grid-template-columns: 1fr;
-		border-radius: var(--radius-lg);
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+		gap: 0.45rem;
+		padding: 0.3rem;
+		width: calc(100vw - 1rem);
+		border-radius: 12px;
+		bottom: max(0.5rem, env(safe-area-inset-bottom));
+	}
+
+	.primary-nav a {
+		padding: 0.72rem 0.4rem;
+		font-size: 0.84rem;
 	}
 
 	.hero-actions {
@@ -276,5 +365,50 @@ p {
 
 	.placeholder-row strong {
 		text-align: left;
+	}
+
+	.loading-grid--3 {
+		grid-template-columns: 1fr;
+	}
+}
+
+@media (prefers-color-scheme: dark) {
+	:root {
+		color-scheme: dark;
+		--page-bg: radial-gradient(circle at top, #2d1a16 0%, #221517 34%, #161920 72%, #101318 100%);
+		--surface-1: rgba(34, 28, 28, 0.82);
+		--surface-2: rgba(28, 24, 24, 0.92);
+		--surface-3: rgba(31, 27, 30, 0.8);
+		--outline: rgba(255, 236, 225, 0.12);
+		--ink-strong: #fff4ea;
+		--ink-soft: #d7c0b6;
+		--shadow: 0 18px 50px rgba(0, 0, 0, 0.34);
+	}
+
+	body {
+		background: var(--page-bg);
+	}
+
+	.loading-line,
+	.loading-pill,
+	.loading-block,
+	.primary-nav a,
+	.cta-secondary,
+	.placeholder-card,
+	.feature-card,
+	.hero-card {
+		color: inherit;
+	}
+
+	.loading-line,
+	.loading-pill,
+	.loading-block {
+		background: rgba(255, 255, 255, 0.08);
+	}
+
+	.loading-line::after,
+	.loading-pill::after,
+	.loading-block::after {
+		background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.16), transparent);
 	}
 }

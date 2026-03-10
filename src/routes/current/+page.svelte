@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
-	import { onMount } from 'svelte';
+	import { onDestroy, onMount } from 'svelte';
 
 	import BarSelector from '$lib/components/BarSelector.svelte';
 	import PlatePicker from '$lib/components/PlatePicker.svelte';
@@ -13,6 +13,11 @@
 	let selectedBar: BarWeight = 20;
 	let oneSidePlates: PlateWeight[] = [];
 	let hydrated = false;
+	let clearPending = false;
+	let undoMessage = '';
+	let undoPlates: PlateWeight[] | null = null;
+	let clearResetTimeout: ReturnType<typeof setTimeout> | null = null;
+	let undoTimeout: ReturnType<typeof setTimeout> | null = null;
 
 	onMount(async () => {
 		const state = await loadCalculatorState();
@@ -30,8 +35,61 @@
 		});
 	}
 
+	onDestroy(() => {
+		if (clearResetTimeout) {
+			clearTimeout(clearResetTimeout);
+		}
+
+		if (undoTimeout) {
+			clearTimeout(undoTimeout);
+		}
+	});
+
+	function queueUndo(message: string, previousPlates: PlateWeight[]) {
+		undoMessage = message;
+		undoPlates = previousPlates;
+
+		if (undoTimeout) {
+			clearTimeout(undoTimeout);
+		}
+
+		undoTimeout = setTimeout(() => {
+			undoMessage = '';
+			undoPlates = null;
+		}, 4500);
+	}
+
+	function resetClearIntent() {
+		clearPending = false;
+
+		if (clearResetTimeout) {
+			clearTimeout(clearResetTimeout);
+			clearResetTimeout = null;
+		}
+	}
+
+	function stageClearIntent() {
+		clearPending = true;
+
+		if (clearResetTimeout) {
+			clearTimeout(clearResetTimeout);
+		}
+
+		clearResetTimeout = setTimeout(() => {
+			clearPending = false;
+			clearResetTimeout = null;
+		}, 3000);
+	}
+
+	function applyPlateChange(nextPlates: PlateWeight[], message: string) {
+		const previousPlates = oneSidePlates;
+		oneSidePlates = nextPlates;
+		resetClearIntent();
+		queueUndo(message, previousPlates);
+	}
+
 	function addPlate(weight: PlateWeight) {
-		oneSidePlates = [...oneSidePlates, weight];
+		applyPlateChange([...oneSidePlates, weight], `Added ${formatWeight(weight)} plate.`);
 	}
 
 	function removePlate(weight: PlateWeight) {
@@ -41,11 +99,35 @@
 			return;
 		}
 
-		oneSidePlates = oneSidePlates.toSpliced(plateIndex, 1);
+		applyPlateChange(oneSidePlates.toSpliced(plateIndex, 1), `Removed ${formatWeight(weight)} plate.`);
 	}
 
 	function clearAll() {
-		oneSidePlates = [];
+		if (oneSidePlates.length === 0) {
+			return;
+		}
+
+		if (!clearPending) {
+			stageClearIntent();
+			return;
+		}
+
+		applyPlateChange([], 'Cleared all plates.');
+	}
+
+	function undoLastChange() {
+		if (!undoPlates) {
+			return;
+		}
+
+		oneSidePlates = undoPlates;
+		undoMessage = '';
+		undoPlates = null;
+
+		if (undoTimeout) {
+			clearTimeout(undoTimeout);
+			undoTimeout = null;
+		}
 	}
 </script>
 
@@ -54,32 +136,78 @@
 </svelte:head>
 
 <section class="calculator-shell">
-	<!-- Sticky total strip — always visible as user taps plates -->
-	<div class="totals-strip" aria-live="polite" aria-label="Running total">
-		<strong class="totals-strip__weight">{formatWeight(summary.totalWeight)}</strong>
-		<div class="totals-strip__meta">
-			<span>{formatWeight(summary.barWeight)} bar</span>
-			<span class="sep">·</span>
-			<span>{formatWeight(summary.oneSideWeight)} per side</span>
-			<span class="sep">·</span>
-			<span>{oneSidePlates.length} plates</span>
-		</div>
-	</div>
-
-	<!-- Controls: bar selector + plate picker -->
-	<section class="control-card">
-		<div class="control-header">
-			<BarSelector bind:value={selectedBar} onChange={(nextValue) => (selectedBar = nextValue)} label="Active bar" />
-			<button type="button" class="clear-btn" onclick={clearAll}>Clear</button>
+	{#if hydrated}
+		<!-- Sticky total strip — always visible as user taps plates -->
+		<div class="totals-strip" aria-live="polite" aria-label="Running total">
+			<strong class="totals-strip__weight">{formatWeight(summary.totalWeight)}</strong>
+			<div class="totals-strip__meta">
+				<span>{formatWeight(summary.barWeight)} bar</span>
+				<span class="sep">·</span>
+				<span>{formatWeight(summary.oneSideWeight)} per side</span>
+				<span class="sep">·</span>
+				<span>{oneSidePlates.length} plates</span>
+			</div>
 		</div>
 
-		<PlatePicker selectedPlates={oneSidePlates} onAdd={addPlate} onRemove={removePlate} />
-	</section>
+		<!-- Controls: bar selector + plate picker -->
+		<section class="control-card">
+			<div class="control-header">
+				<BarSelector bind:value={selectedBar} onChange={(nextValue) => (selectedBar = nextValue)} label="Active bar" />
+				<button
+					type="button"
+					class:clear-btn--confirm={clearPending}
+					class="clear-btn"
+					onclick={clearAll}
+					disabled={oneSidePlates.length === 0}
+				>
+					{clearPending ? 'Tap again to clear' : 'Clear'}
+				</button>
+			</div>
 
-	<!-- Barbell visualization — below the fold, scroll to see -->
-	<section class="viz-card">
-		<PlateStackPreview barWeight={summary.barWeight} plates={groupedPlates} />
-	</section>
+			<PlatePicker selectedPlates={oneSidePlates} onAdd={addPlate} onRemove={removePlate} />
+		</section>
+
+		<!-- Barbell visualization — below the fold, scroll to see -->
+		<section class="viz-card">
+			<PlateStackPreview
+				barWeight={summary.barWeight}
+				plates={groupedPlates}
+				emptyMessage="Tap plates above to build your barbell."
+			/>
+		</section>
+
+		{#if undoMessage}
+			<div class="undo-toast" role="status" aria-live="polite">
+				<span>{undoMessage}</span>
+				<button type="button" class="undo-toast__button" onclick={undoLastChange}>Undo</button>
+			</div>
+		{/if}
+	{:else}
+		<div class="totals-strip loading-card" aria-busy="true" aria-label="Loading saved current setup">
+			<div class="loading-line" style="width: 34%; height: 2.8rem"></div>
+			<div class="loading-line" style="width: 72%"></div>
+		</div>
+
+		<section class="control-card loading-card">
+			<div class="loading-grid">
+				<div class="loading-pill"></div>
+				<div class="loading-pill"></div>
+			</div>
+			<div class="loading-grid loading-grid--3">
+				<div class="loading-block"></div>
+				<div class="loading-block"></div>
+				<div class="loading-block"></div>
+				<div class="loading-block"></div>
+				<div class="loading-block"></div>
+				<div class="loading-block"></div>
+			</div>
+		</section>
+
+		<section class="viz-card loading-card">
+			<div class="loading-line" style="width: 42%"></div>
+			<div class="loading-block" style="height: 10rem"></div>
+		</section>
+	{/if}
 </section>
 
 <style>
@@ -145,14 +273,51 @@
 
 	.clear-btn {
 		flex-shrink: 0;
-		border-radius: 999px;
+		border-radius: 8px;
 		padding: 0.6rem 1rem;
-		font: inherit;
 		font-weight: 700;
 		border: 1px solid var(--outline);
 		background: rgba(255, 255, 255, 0.68);
 		cursor: pointer;
 		color: var(--ink-strong);
+	}
+
+	.clear-btn:disabled {
+		opacity: 0.5;
+		cursor: not-allowed;
+	}
+
+	.clear-btn--confirm {
+		background: rgba(255, 111, 60, 0.14);
+		border-color: rgba(255, 111, 60, 0.32);
+	}
+
+	.undo-toast {
+		position: fixed;
+		left: 50%;
+		bottom: calc(5.8rem + env(safe-area-inset-bottom, 0px));
+		transform: translateX(-50%);
+		display: flex;
+		align-items: center;
+		gap: 0.9rem;
+		width: min(calc(100vw - 2rem), 28rem);
+		padding: 0.9rem 1rem;
+		border-radius: 8px;
+		background: rgba(47, 26, 23, 0.95);
+		color: #fffaf5;
+		box-shadow: 0 18px 40px rgba(0, 0, 0, 0.24);
+		z-index: 11;
+	}
+
+	.undo-toast__button {
+		margin-left: auto;
+		padding: 0.5rem 0.8rem;
+		border-radius: 6px;
+		border: 1px solid rgba(255, 255, 255, 0.18);
+		background: rgba(255, 255, 255, 0.1);
+		color: inherit;
+		cursor: pointer;
+		font-weight: 700;
 	}
 
 	@media (min-width: 62rem) {
@@ -176,6 +341,13 @@
 		.viz-card {
 			grid-column: 2;
 			grid-row: 2;
+		}
+	}
+
+	@media (max-width: 40rem) {
+		.undo-toast {
+			width: calc(100vw - 1rem);
+			bottom: calc(5.4rem + env(safe-area-inset-bottom, 0px));
 		}
 	}
 </style>

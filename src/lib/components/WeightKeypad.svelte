@@ -54,7 +54,7 @@
 		box-sizing: border-box;
 		border: 1px solid var(--outline);
 		background: rgba(255, 255, 255, 0.72);
-		border-radius: 1.25rem;
+		border-radius: 8px;
 		padding: 1rem 1.1rem;
 		font: inherit;
 		font-size: 1.2rem;
@@ -77,7 +77,7 @@
 	button {
 		border: 1px solid var(--outline);
 		background: rgba(255, 255, 255, 0.7);
-		border-radius: 999px;
+		border-radius: 8px;
 		padding: 0.7rem 0.95rem;
 		font: inherit;
 		font-weight: 700;
