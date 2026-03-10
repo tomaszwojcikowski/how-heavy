@@ -126,6 +126,8 @@
 		border: 1px solid var(--outline);
 		border-radius: var(--radius-xl);
 		box-shadow: var(--shadow);
+		/* Controls appear before the result card on all screen sizes */
+		order: -1;
 	}
 
 	.target-loading-card {
@@ -137,11 +139,6 @@
 		.target-layout {
 			grid-template-columns: minmax(20rem, 24rem) minmax(0, 1fr);
 			align-items: start;
-		}
-
-		/* Controls go in left column visually even though ResultCard is first in DOM */
-		.control-card {
-			order: -1;
 		}
 	}
 </style>

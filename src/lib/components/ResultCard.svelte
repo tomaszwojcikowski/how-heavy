@@ -6,10 +6,10 @@
 	export let result: TargetLoadResult;
 
 	const statusMeta: Record<TargetLoadResult['status'], { icon: string; label: string; tone: 'exact' | 'rounded' | 'warning' }> = {
-		exact: { icon: 'check_circle', label: 'Exact Match', tone: 'exact' },
-		rounded: { icon: 'published_with_changes', label: 'Nearest Match', tone: 'rounded' },
-		'below-bar': { icon: 'warning', label: 'Below Bar', tone: 'warning' },
-		invalid: { icon: 'error', label: 'Check Input', tone: 'warning' }
+		exact: { icon: 'check_circle', label: 'Exact match', tone: 'exact' },
+		rounded: { icon: 'published_with_changes', label: 'Nearest match', tone: 'rounded' },
+		'below-bar': { icon: 'warning', label: 'Below bar', tone: 'warning' },
+		invalid: { icon: 'error', label: 'Check input', tone: 'warning' }
 	};
 
 	function formatPlatesPerSide(plates: PlateCount[]): string {
@@ -17,11 +17,27 @@
 		return plates.map((p) => (p.count > 1 ? `${p.count}×${p.weight}` : String(p.weight))).join(' + ') + ' kg';
 	}
 
+	$: hasValidResult = result.status === 'exact' || result.status === 'rounded';
+	$: isRounded = result.status === 'rounded';
+	$: isBelowBar = result.status === 'below-bar';
+	$: headlineText = hasValidResult
+		? result.plates.length === 0
+			? 'Empty bar'
+			: formatPlatesPerSide(result.plates)
+		: `${formatWeight(result.barWeight)} minimum`;
+	$: eyebrowText = hasValidResult
+		? result.plates.length === 0
+			? 'No plates needed'
+			: 'Plates per side'
+		: 'Below bar weight';
+
 	let copied = false;
 
 	function copyWeight() {
-		const text = formatWeight(result.resolvedTotal ?? result.requestedTotal);
-		navigator.clipboard.writeText(text).then(() => {
+		const total = formatWeight(result.resolvedTotal ?? result.requestedTotal);
+		const breakdown =
+			result.plates.length > 0 ? ' (' + formatPlatesPerSide(result.plates) + ' per side)' : '';
+		navigator.clipboard.writeText(total + breakdown).then(() => {
 			copied = true;
 			setTimeout(() => (copied = false), 2000);
 		});
@@ -29,42 +45,70 @@
 </script>
 
 <section class="result-card" aria-live="polite">
-	<div class="result-card__header">
-		<div class="result-card__headline">
-			<p class="eyebrow">Load per side</p>
-			<h3>{formatPlatesPerSide(result.plates)}</h3>
+	{#if result.status === 'invalid'}
+		<div class="result-placeholder">
+			<span class="material-symbols-rounded result-placeholder__icon" aria-hidden="true">calculate</span>
+			<p class="result-placeholder__title">Ready to calculate</p>
+			<p class="result-placeholder__hint">Enter a target weight and choose a bar to see which plates to load per side</p>
 		</div>
-		<div class="result-card__status" class:rounded={statusMeta[result.status].tone === 'rounded'} class:warning={statusMeta[result.status].tone === 'warning'}>
-			<span class="material-symbols-rounded result-card__status-icon" aria-hidden="true">{statusMeta[result.status].icon}</span>
-			<span>{statusMeta[result.status].label}</span>
+	{:else}
+		<div class="result-card__header">
+			<div class="result-card__headline">
+				<p class="eyebrow">{eyebrowText}</p>
+				<h3>{headlineText}</h3>
+			</div>
+			<div
+				class="result-card__status"
+				class:rounded={statusMeta[result.status].tone === 'rounded'}
+				class:warning={statusMeta[result.status].tone === 'warning'}
+			>
+				<span class="material-symbols-rounded result-card__status-icon" aria-hidden="true"
+					>{statusMeta[result.status].icon}</span
+				>
+				<span>{statusMeta[result.status].label}</span>
+			</div>
 		</div>
-	</div>
 
-	<p class="result-card__message">{result.message}</p>
+		{#if isRounded || isBelowBar}
+			<p class="result-card__message">{result.message}</p>
+		{/if}
 
-	<div class="result-card__metrics">
-		<div>
-			<small>Total</small>
-			<strong>{formatWeight(result.resolvedTotal ?? result.requestedTotal)}</strong>
-		</div>
-		<div>
-			<small>Requested</small>
-			<strong>{formatWeight(result.requestedTotal)}</strong>
-		</div>
-		<div>
-			<small>Adjustment</small>
-			<strong>{formatWeight(result.delta)}</strong>
-		</div>
-	</div>
+		{#if hasValidResult}
+			<div class="result-card__metrics" class:result-card__metrics--2col={isRounded}>
+				{#if isRounded}
+					<div>
+						<small>Requested</small>
+						<strong>{formatWeight(result.requestedTotal)}</strong>
+					</div>
+					<div>
+						<small>Loaded</small>
+						<strong>{formatWeight(result.resolvedTotal)}</strong>
+					</div>
+				{:else}
+					<div>
+						<small>Total loaded</small>
+						<strong>{formatWeight(result.resolvedTotal)}</strong>
+					</div>
+				{/if}
+			</div>
 
-	<PlateStackPreview barWeight={result.barWeight} plates={result.plates} />
+			<PlateStackPreview barWeight={result.barWeight} plates={result.plates} />
 
-	<div class="result-card__actions">
-		<button type="button" class="copy-btn" onclick={copyWeight} aria-label="Copy total weight to clipboard">
-			<span class="material-symbols-rounded" aria-hidden="true">{copied ? 'check' : 'content_copy'}</span>
-			{copied ? 'Copied' : 'Copy weight'}
-		</button>
-	</div>
+			<div class="result-card__actions">
+				<button
+					type="button"
+					class="copy-btn"
+					onclick={copyWeight}
+					aria-label="Copy weight to clipboard"
+				>
+					<span class="material-symbols-rounded" aria-hidden="true"
+						>{copied ? 'check' : 'content_copy'}</span
+					>
+					{copied ? 'Copied' : 'Copy'}
+				</button>
+			</div>
+		{/if}
+	{/if}
 </section>
 
 <style>
@@ -133,10 +177,42 @@
 		letter-spacing: var(--tracking-body);
 	}
 
+	.result-placeholder {
+		display: grid;
+		place-items: center;
+		gap: 0.5rem;
+		padding: 2.5rem 1rem;
+		text-align: center;
+	}
+
+	.result-placeholder__icon {
+		font-size: 2.75rem;
+		color: var(--text-tertiary);
+		font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 48;
+		margin-bottom: 0.25rem;
+	}
+
+	.result-placeholder__title {
+		font-weight: 700;
+		color: var(--text-primary);
+		font-size: var(--type-body-lg);
+	}
+
+	.result-placeholder__hint {
+		color: var(--text-secondary);
+		font-size: var(--type-body-sm);
+		line-height: var(--leading-surface);
+		max-width: 26ch;
+	}
+
 	.result-card__metrics {
 		display: grid;
-		grid-template-columns: repeat(3, minmax(0, 1fr));
+		grid-template-columns: 1fr;
 		gap: 0.75rem;
+	}
+
+	.result-card__metrics--2col {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
 	}
 
 	.result-card__metrics div {
@@ -189,9 +265,5 @@
 		font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
 	}
 
-	@media (max-width: 40rem) {
-		.result-card__metrics {
-			grid-template-columns: 1fr;
-		}
-	}
+
 </style>

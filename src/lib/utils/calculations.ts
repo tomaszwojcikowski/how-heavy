@@ -3,6 +3,10 @@ import type { BarWeight, CurrentLoadSummary, PlateCount, PlateWeight, TargetLoad
 
 const SEARCH_STEP_UNITS = 2;
 
+// Tiebreaker preference order (indices into PLATE_DEFINITIONS): prefer 15 kg, 10 kg before 20 kg.
+// PLATE_DEFINITIONS: [20=0, 15=1, 10=2, 5=3, 2.5=4, 2=5, 1.5=6, 1.25=7, 1=8, 0.5=9]
+const FINDER_TIEBREAK_ORDER = [1, 2, 0, 3, 4, 5, 6, 7, 8, 9];
+
 function normalizeWeight(value: number): number {
 	return Number.parseFloat(value.toFixed(2));
 }
@@ -15,7 +19,7 @@ function compareCombinationCounts(candidate: number[], best: number[]): number {
 		return candidatePlateCount - bestPlateCount;
 	}
 
-	for (let index = 0; index < candidate.length; index += 1) {
+	for (const index of FINDER_TIEBREAK_ORDER) {
 		if (candidate[index] !== best[index]) {
 			return best[index] - candidate[index];
 		}
