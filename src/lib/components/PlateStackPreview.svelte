@@ -34,11 +34,6 @@
 </script>
 
 <div class="stack-shell">
-	<div class="stack-heading">
-		<p>Bar visualization{onRemovePlate ? ' — tap a plate to remove' : ''}</p>
-		<strong>{formatWeight(barWeight)} bar</strong>
-	</div>
-
 	<div class="barbell-wrap" aria-label={`Barbell loaded with ${formatWeight(barWeight)} bar`}>
 		<!-- Shaft runs behind everything, centered vertically -->
 		<div class="shaft" aria-hidden="true"></div>
@@ -105,23 +100,6 @@
 	.stack-shell {
 		display: grid;
 		gap: 1rem;
-	}
-
-	.stack-heading {
-		display: flex;
-		justify-content: space-between;
-		gap: 1rem;
-		align-items: baseline;
-	}
-
-	.stack-heading p {
-		font-size: 0.78rem;
-		letter-spacing: 0.08em;
-		text-transform: uppercase;
-	}
-
-	.stack-heading strong {
-		font-family: 'Archivo', sans-serif;
 	}
 
 	/* Outer container: shaft is absolute, row is relative on top */

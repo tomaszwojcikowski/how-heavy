@@ -1,5 +1,5 @@
 import { getPlateCombinationForSideWeight, resolveTargetLoad } from '$lib/utils/calculations';
-import { fromQuarterKiloUnits, toQuarterKiloUnits } from '$lib/utils/plates';
+import { PLATE_MAP, fromQuarterKiloUnits, toQuarterKiloUnits } from '$lib/utils/plates';
 import type { BarWeight, PlateCount, PlateWeight, TargetLoadResult } from '$lib/types/gym';
 
 export interface SetStep {
@@ -42,6 +42,46 @@ function addPlatesForDelta(delta: number): PlateCount[] | null {
 		if (combo !== null) return combo;
 	}
 	return null;
+}
+
+/** True for bumper plates (5 kg+) — these are kept on the bar between sets. */
+function isBumperPlate(weight: PlateWeight): boolean {
+	return PLATE_MAP[weight.toString() as keyof typeof PLATE_MAP]?.kind === 'bumper';
+}
+
+/**
+ * Build a result keeping all bumper plates from `lockedBumpers` in place and
+ * computing a fresh small-plate combination for the remaining side weight.
+ * Returns null when the remaining weight isn't achievable.
+ */
+function buildResultLockingBumpers(
+	barWeight: BarWeight,
+	targetTotal: number,
+	targetSideWeight: number,
+	lockedBumpers: PlateCount[]
+): TargetLoadResult | null {
+	const bumperWeight = lockedBumpers.reduce((s, p) => s + p.weight * p.count, 0);
+	const remaining = Number.parseFloat((targetSideWeight - bumperWeight).toFixed(4));
+	if (remaining < 0) return null;
+	const remainderCombo = remaining > 0.001 ? getPlateCombinationForSideWeight(remaining) : [];
+	if (remainderCombo === null) return null;
+	const plates = mergePlates(lockedBumpers, remainderCombo);
+	const achievedSide = plates.reduce((s, p) => s + p.weight * p.count, 0);
+	const achievedTotal = fromQuarterKiloUnits(toQuarterKiloUnits(barWeight + achievedSide * 2));
+	const isExact = Math.abs(achievedTotal - targetTotal) < 0.01;
+	return {
+		status: isExact ? 'exact' : 'rounded',
+		barWeight,
+		requestedTotal: targetTotal,
+		resolvedTotal: achievedTotal,
+		exact: isExact,
+		oneSideWeight: achievedSide,
+		delta: Number.parseFloat((achievedTotal - targetTotal).toFixed(2)),
+		plates,
+		message: isExact
+			? 'Exact plate loading available.'
+			: `Nearest achievable: ${achievedTotal} kg.`
+	};
 }
 
 /**
@@ -154,8 +194,18 @@ export function computeSmartSetSequence(
 			continue;
 		}
 
-		// ── Weight going UP: add-only (never remove anything) ─────────────────────
+		// ── Weight going UP: lock bumpers, freely rerack change plates ────────────
 		if (delta > 0.01) {
+			// Keep all bumper plates from previous step; recompute small plates fresh.
+			// This allows change plates (2.5, 1.25 kg etc.) to be reracked for a
+			// cleaner bar while bumper plates (5 kg+) are never removed going up.
+			const prevBumpers = prev.plates.filter((p) => isBumperPlate(p.weight));
+			const bumperLockedResult = buildResultLockingBumpers(barWeight, targetTotal, targetSideWeight, prevBumpers);
+			if (bumperLockedResult !== null) {
+				results.push(bumperLockedResult);
+				continue;
+			}
+			// Fallback: pure add-only (should rarely be needed)
 			const deltaPlates = addPlatesForDelta(delta);
 			if (deltaPlates !== null) {
 				const achievedDelta = deltaPlates.reduce((s, p) => s + p.weight * p.count, 0);
@@ -180,8 +230,38 @@ export function computeSmartSetSequence(
 			}
 		}
 
-		// ── Weight going DOWN: remove smallest plates first (keep heavy ones) ─────
+		// ── Weight going DOWN: keep bumpers, rerack change plates first ───────────
 		if (delta < -0.01) {
+			const prevBumpers = prev.plates.filter((p) => isBumperPlate(p.weight));
+			const bumperWeight = prevBumpers.reduce((s, p) => s + p.weight * p.count, 0);
+
+			if (targetSideWeight >= bumperWeight) {
+				// Target is still above total bumper weight — keep all bumpers and
+				// only adjust the small change plates.
+				const remaining = Number.parseFloat((targetSideWeight - bumperWeight).toFixed(4));
+				const prevChange = prev.plates.filter((p) => !isBumperPlate(p.weight));
+				const changeSubset = remaining > 0.001 ? findSubsetCombo(remaining, prevChange) : [];
+				const plates = mergePlates(prevBumpers, changeSubset);
+				const achievedSide = plates.reduce((s, p) => s + p.weight * p.count, 0);
+				const achievedTotal = fromQuarterKiloUnits(toQuarterKiloUnits(barWeight + achievedSide * 2));
+				const isExact = Math.abs(achievedTotal - targetTotal) < 0.01;
+				results.push({
+					status: isExact ? 'exact' : 'rounded',
+					barWeight,
+					requestedTotal: targetTotal,
+					resolvedTotal: achievedTotal,
+					exact: isExact,
+					oneSideWeight: achievedSide,
+					delta: Number.parseFloat((achievedTotal - targetTotal).toFixed(2)),
+					plates,
+					message: isExact
+						? 'Exact plate loading available.'
+						: `Nearest achievable: ${achievedTotal} kg.`
+				});
+				continue;
+			}
+
+			// Target is below total bumper weight — must remove some bumpers too.
 			const subsetCombo = findSubsetCombo(targetSideWeight, prev.plates);
 			const subsetSide = subsetCombo.reduce((s, p) => s + p.weight * p.count, 0);
 			const subsetTotal = fromQuarterKiloUnits(toQuarterKiloUnits(barWeight + subsetSide * 2));
