@@ -131,15 +131,15 @@
 	}
 
 	.plate-choice__action--add {
-		background: rgba(255, 111, 60, 0.18);
-		border-color: rgba(255, 111, 60, 0.36);
-		color: #8a3517;
+		background: var(--tone-primary-surface);
+		border-color: var(--tone-primary-border);
+		color: var(--tone-primary-text);
 	}
 
 	.plate-choice__action--remove {
-		background: rgba(53, 89, 224, 0.14);
-		border-color: rgba(53, 89, 224, 0.28);
-		color: #2842a5;
+		background: var(--tone-tertiary-surface);
+		border-color: var(--tone-tertiary-border);
+		color: var(--tone-tertiary-text);
 	}
 
 	.plate-choice__action:disabled {

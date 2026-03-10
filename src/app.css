@@ -78,6 +78,16 @@
 		color-mix(in srgb, var(--md-sys-color-primary) 72%, var(--md-sys-color-tertiary) 28%)
 	);
 	--interactive-primary-shadow: 0 10px 24px color-mix(in srgb, var(--md-sys-color-primary) 28%, transparent);
+	/* Tonal accent pairs — surface/border/text derived from MD3 color roles, auto-adapt in dark mode */
+	--tone-primary-surface: color-mix(in srgb, var(--md-sys-color-primary-container) 72%, var(--md-sys-color-surface-container-lowest));
+	--tone-primary-border: color-mix(in srgb, var(--md-sys-color-primary) 30%, transparent);
+	--tone-primary-text: var(--md-sys-color-on-primary-container);
+	--tone-secondary-surface: color-mix(in srgb, var(--md-sys-color-secondary) 14%, var(--md-sys-color-surface-container-lowest));
+	--tone-secondary-border: color-mix(in srgb, var(--md-sys-color-secondary) 28%, transparent);
+	--tone-secondary-text: color-mix(in srgb, var(--md-sys-color-secondary) 80%, var(--md-sys-color-on-surface));
+	--tone-tertiary-surface: color-mix(in srgb, var(--md-sys-color-tertiary-container) 72%, var(--md-sys-color-surface-container-lowest));
+	--tone-tertiary-border: color-mix(in srgb, var(--md-sys-color-tertiary) 24%, transparent);
+	--tone-tertiary-text: var(--md-sys-color-on-tertiary-container);
 	--md-ref-typeface-plain: 'DM Sans', sans-serif;
 	--md-ref-typeface-brand: 'Archivo', sans-serif;
 	--md-sys-shape-corner-extra-small: 4px;
@@ -310,7 +320,7 @@ p {
 	display: grid;
 	gap: 0.9rem;
 	padding: 1.2rem;
-	background: rgba(255, 250, 245, 0.88);
+	background: var(--surface-1);
 	border: 1px solid var(--outline);
 	border-radius: var(--radius-xl);
 	box-shadow: var(--shadow);
@@ -321,7 +331,7 @@ p {
 .loading-pill,
 .loading-block {
 	position: relative;
-	background: rgba(255, 255, 255, 0.74);
+	background: color-mix(in srgb, var(--md-sys-color-surface-container-lowest) 80%, transparent);
 	border-radius: 6px;
 	overflow: hidden;
 }

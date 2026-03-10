@@ -104,7 +104,7 @@
 		display: grid;
 		gap: 1.25rem;
 		padding: 1.2rem;
-		background: rgba(255, 250, 245, 0.88);
+		background: var(--surface-1);
 		border: 1px solid var(--outline);
 		border-radius: var(--radius-xl);
 		box-shadow: var(--shadow);

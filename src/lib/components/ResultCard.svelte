@@ -67,7 +67,7 @@
 		display: grid;
 		gap: 1rem;
 		padding: 1.2rem;
-		background: rgba(255, 250, 245, 0.88);
+		background: var(--surface-1);
 		border: 1px solid var(--outline);
 		border-radius: var(--radius-xl);
 		box-shadow: var(--shadow);
@@ -100,14 +100,14 @@
 		text-transform: uppercase;
 		letter-spacing: 0.05em;
 		line-height: var(--leading-label);
-		background: rgba(15, 157, 135, 0.16);
-		color: #0d5a4d;
+		background: var(--tone-secondary-surface);
+		color: var(--tone-secondary-text);
 	}
 
 	.result-card__status.rounded,
 	.result-card__status.warning {
-		background: rgba(255, 111, 60, 0.14);
-		color: #7a2f15;
+		background: var(--tone-primary-surface);
+		color: var(--tone-primary-text);
 	}
 
 	.result-card__status-icon {
@@ -133,7 +133,7 @@
 		gap: 0.35rem;
 		padding: 0.85rem;
 		border-radius: 8px;
-		background: rgba(255, 255, 255, 0.72);
+		background: var(--md-sys-color-surface-container-lowest);
 		border: 1px solid var(--outline);
 	}
 

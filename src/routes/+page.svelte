@@ -56,7 +56,7 @@
 	}
 
 	.mode-card--primary {
-		background: linear-gradient(180deg, rgba(255, 255, 255, 0.74), rgba(255, 219, 207, 0.72));
+		background: linear-gradient(180deg, var(--md-sys-color-surface-container-lowest), color-mix(in srgb, var(--md-sys-color-primary-container) 80%, var(--md-sys-color-surface-container-lowest)));
 	}
 
 	.mode-card h2 {

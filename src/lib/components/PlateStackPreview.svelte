@@ -206,7 +206,7 @@
 		justify-items: center;
 		padding: 0.4rem 0.65rem;
 		border-radius: 6px;
-		background: rgba(255, 255, 255, 0.85);
+		background: var(--md-sys-color-surface-container-lowest);
 		border: 1px solid var(--outline);
 		margin: 0 0.4rem;
 		flex-shrink: 0;

@@ -226,7 +226,7 @@
 		align-items: baseline;
 		gap: 0.9rem;
 		padding: 0.85rem 1.2rem;
-		background: rgba(255, 250, 245, 0.92);
+		background: color-mix(in srgb, var(--surface-1) 92%, transparent);
 		backdrop-filter: blur(20px);
 		border: 1px solid var(--outline);
 		border-radius: var(--radius-xl);
@@ -261,7 +261,7 @@
 		display: grid;
 		gap: 1.1rem;
 		padding: 1.2rem;
-		background: rgba(255, 250, 245, 0.88);
+		background: var(--surface-1);
 		border: 1px solid var(--outline);
 		border-radius: var(--radius-xl);
 		box-shadow: var(--shadow);
@@ -292,9 +292,9 @@
 	}
 
 	.clear-btn--confirm {
-		background: rgba(255, 111, 60, 0.18);
-		border-color: rgba(255, 111, 60, 0.36);
-		color: #8a3517;
+		background: var(--tone-primary-surface);
+		border-color: var(--tone-primary-border);
+		color: var(--tone-primary-text);
 	}
 
 	.undo-toast {
@@ -308,8 +308,8 @@
 		width: min(calc(100vw - 2rem), 28rem);
 		padding: 0.9rem 1rem;
 		border-radius: 8px;
-		background: rgba(47, 26, 23, 0.95);
-		color: #fffaf5;
+		background: var(--md-sys-color-inverse-surface);
+		color: var(--md-sys-color-inverse-on-surface);
 		box-shadow: 0 18px 40px rgba(0, 0, 0, 0.24);
 		z-index: 11;
 	}
@@ -318,8 +318,8 @@
 		margin-left: auto;
 		padding: 0.5rem 0.8rem;
 		border-radius: 6px;
-		border: 1px solid rgba(255, 255, 255, 0.18);
-		background: rgba(255, 255, 255, 0.1);
+		border: 1px solid color-mix(in srgb, var(--md-sys-color-inverse-on-surface) 18%, transparent);
+		background: color-mix(in srgb, var(--md-sys-color-inverse-on-surface) 10%, transparent);
 		color: inherit;
 		cursor: pointer;
 		font-weight: 700;
