@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { calculateCurrentLoad, calculateOneSideWeight, getPlateCombinationForSideWeight, resolveTargetLoad } from './calculations';
+import { calculateCurrentLoad, calculateOneSideWeight, getPlateCombinationForSideWeight, resolveTargetLoad, summarizePlateCounts } from './calculations';
 
 describe('plate calculation engine', () => {
 	it('picks a practical exact load for a target total', () => {
@@ -42,5 +42,13 @@ describe('plate calculation engine', () => {
 
 	it('keeps the one-side weight calculation precise', () => {
 		expect(calculateOneSideWeight([2.5, 1.25, 0.5])).toBe(4.25);
+	});
+
+	it('groups repeated plates in display order', () => {
+		expect(summarizePlateCounts([2.5, 20, 2.5, 1])).toEqual([
+			{ weight: 20, count: 1 },
+			{ weight: 2.5, count: 2 },
+			{ weight: 1, count: 1 }
+		]);
 	});
 });

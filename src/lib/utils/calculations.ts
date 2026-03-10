@@ -85,6 +85,13 @@ export function calculateOneSideWeight(plates: readonly PlateWeight[]): number {
 	return normalizeWeight(plates.reduce((sum, plateWeight) => sum + plateWeight, 0));
 }
 
+export function summarizePlateCounts(plates: readonly PlateWeight[]): PlateCount[] {
+	return PLATE_DEFINITIONS.map((definition) => ({
+		weight: definition.weight,
+		count: plates.filter((plate) => plate === definition.weight).length
+	})).filter((plate): plate is PlateCount => plate.count > 0);
+}
+
 export function calculateCurrentLoad(barWeight: BarWeight, plates: readonly PlateWeight[]): CurrentLoadSummary {
 	const oneSideWeight = calculateOneSideWeight(plates);
 
