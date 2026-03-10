@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { scale } from 'svelte/transition';
+
 	import PlateGraphic from '$lib/components/PlateGraphic.svelte';
 	import type { PlateCount, PlateWeight } from '$lib/types/gym';
 	import { PLATE_MAP } from '$lib/utils/plates';
@@ -20,7 +22,7 @@
 	{:else}
 		<div class="stack-plates" aria-label="Recommended one-side plate stack">
 			{#each expandedPlates as weight, index (`${weight}-${index}`)}
-				<div class="stack-plate" style={`--stack-offset:${index * -16}px;`}>
+				<div class="stack-plate" style={`--stack-offset:${index * -16}px;`} in:scale={{ duration: 180, start: 0.8 }} out:scale={{ duration: 140, start: 0.85 }}>
 					<PlateGraphic {weight} size={graphicSize(weight)} stacked={true} />
 				</div>
 			{/each}

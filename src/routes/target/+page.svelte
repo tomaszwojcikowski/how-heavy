@@ -1,7 +1,11 @@
 <script lang="ts">
+	import { browser } from '$app/environment';
+	import { onMount } from 'svelte';
+
 	import BarSelector from '$lib/components/BarSelector.svelte';
 	import ResultCard from '$lib/components/ResultCard.svelte';
 	import WeightKeypad from '$lib/components/WeightKeypad.svelte';
+	import { loadCalculatorState, saveTargetState } from '$lib/stores/calculator';
 	import type { BarWeight } from '$lib/types/gym';
 	import { resolveTargetLoad } from '$lib/utils/calculations';
 
@@ -9,9 +13,23 @@
 
 	let selectedBar: BarWeight = 20;
 	let targetValue = '100';
+	let hydrated = false;
+
+	onMount(async () => {
+		const state = await loadCalculatorState();
+		selectedBar = state.target.barWeight;
+		targetValue = state.target.value;
+		hydrated = true;
+	});
 
 	$: parsedTarget = Number.parseFloat(targetValue.replace(',', '.'));
 	$: result = resolveTargetLoad(selectedBar, parsedTarget);
+	$: if (browser && hydrated) {
+		void saveTargetState({
+			barWeight: selectedBar,
+			value: targetValue
+		});
+	}
 </script>
 
 <svelte:head>

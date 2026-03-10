@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { scale } from 'svelte/transition';
+
 	import PlateGraphic from '$lib/components/PlateGraphic.svelte';
 	import type { PlateWeight } from '$lib/types/gym';
 	import { PLATE_DEFINITIONS } from '$lib/utils/plates';
@@ -28,7 +30,7 @@
 	{#if selectedCounts.length > 0}
 		<div class="plate-picker__selected">
 			{#each selectedCounts as plate (plate.weight)}
-				<button type="button" class="selected-pill" onclick={() => onRemove(plate.weight)}>
+				<button type="button" class="selected-pill" onclick={() => onRemove(plate.weight)} in:scale={{ duration: 160, start: 0.85 }} out:scale={{ duration: 120, start: 0.9 }}>
 					<span>{plate.weight} kg</span>
 					<strong>x{plate.count}</strong>
 				</button>

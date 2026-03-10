@@ -1,16 +1,34 @@
 <script lang="ts">
+	import { browser } from '$app/environment';
+	import { onMount } from 'svelte';
+
 	import BarSelector from '$lib/components/BarSelector.svelte';
 	import PlatePicker from '$lib/components/PlatePicker.svelte';
 	import PlateStackPreview from '$lib/components/PlateStackPreview.svelte';
+	import { loadCalculatorState, saveCurrentState } from '$lib/stores/calculator';
 	import type { BarWeight, PlateWeight } from '$lib/types/gym';
 	import { calculateCurrentLoad, summarizePlateCounts } from '$lib/utils/calculations';
 	import { formatWeight } from '$lib/utils/formatting';
 
 	let selectedBar: BarWeight = 20;
 	let oneSidePlates: PlateWeight[] = [];
+	let hydrated = false;
+
+	onMount(async () => {
+		const state = await loadCalculatorState();
+		selectedBar = state.current.barWeight;
+		oneSidePlates = state.current.plates;
+		hydrated = true;
+	});
 
 	$: summary = calculateCurrentLoad(selectedBar, oneSidePlates);
 	$: groupedPlates = summarizePlateCounts(oneSidePlates);
+	$: if (browser && hydrated) {
+		void saveCurrentState({
+			barWeight: selectedBar,
+			plates: oneSidePlates
+		});
+	}
 
 	function addPlate(weight: PlateWeight) {
 		oneSidePlates = [...oneSidePlates, weight];
