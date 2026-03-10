@@ -10,6 +10,7 @@
 	const viewBoxSize = 220;
 
 	$: plate = PLATE_MAP[weight.toString() as keyof typeof PLATE_MAP];
+	$: rimColor = plate.rimColor;
 </script>
 
 <figure
@@ -18,11 +19,22 @@
 	style={`--plate-size:${size}px; --plate-color:${plate.color}; --plate-text:${plate.textColor}; --plate-edge:${plate.edgeColor}; --plate-thickness:${plate.thickness}px;`}
 >
 	<svg viewBox={`0 0 ${viewBoxSize} ${viewBoxSize}`} role="img" aria-label={plate.label}>
-		<circle cx="110" cy="110" r={plate.radius} fill={plate.color} />
-		<circle cx="110" cy="110" r={plate.radius - 12} fill="transparent" stroke={plate.accentColor} stroke-width="8" />
-		{#if plate.kind === 'bumper'}
-			<circle cx="110" cy="110" r={plate.radius - 28} fill="transparent" stroke="#2a2a2a" stroke-width="6" />
+		{#if plate.kind === 'bumper' && rimColor}
+			<!-- Bumper plate: colored outer rim band, rubber ring texture, center hub -->
+			<!-- Base rubber fill -->
+			<circle cx="110" cy="110" r={plate.radius} fill={plate.color} />
+			<!-- Colored competition rim band -->
+			<circle cx="110" cy="110" r={plate.radius - 7} fill="transparent" stroke={rimColor} stroke-width="13" />
+			<!-- Inner dark rubber ring (raised lip detail) -->
+			<circle cx="110" cy="110" r={plate.radius - 26} fill="transparent" stroke="#2a2a2a" stroke-width="5" />
+			<!-- Second rubber groove ring -->
+			<circle cx="110" cy="110" r={plate.radius - 42} fill="transparent" stroke="rgba(255,255,255,0.07)" stroke-width="4" />
+		{:else}
+			<!-- Change plate: solid fill + accent ring -->
+			<circle cx="110" cy="110" r={plate.radius} fill={plate.color} />
+			<circle cx="110" cy="110" r={plate.radius - 9} fill="transparent" stroke={plate.accentColor} stroke-width="7" />
 		{/if}
+		<!-- Center hub (shared) -->
 		<circle cx="110" cy="110" r={plate.ringRadius} fill="#efebe6" stroke="#c9beb4" stroke-width="7" />
 	</svg>
 

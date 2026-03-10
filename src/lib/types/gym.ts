@@ -17,6 +17,7 @@ export interface PlateDefinition {
 	accentColor: string;
 	textColor: string;
 	edgeColor: string;
+	rimColor?: string;
 	radius: number;
 	ringRadius: number;
 	thickness: number;
