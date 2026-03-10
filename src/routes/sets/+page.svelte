@@ -108,8 +108,14 @@
 		<div class="orm-block">
 			<div class="orm-copy">
 				<p class="orm-label">1 Rep Max</p>
-				<p class="orm-helper">Use the same stepper style as your set percentages. Fine-tune by 2.5 kg or type directly.</p>
+				<p class="orm-helper">
+					Adjust in 2.5 kg steps or type directly.
+					{#if Number.isFinite(parsedOneRm) && parsedOneRm <= selectedBar}
+						Must be above the {selectedBar} kg bar.
+					{/if}
+				</p>
 			</div>
+
 			<PercentageStepper
 				value={oneRmValue}
 				label="One rep max in kilograms"
@@ -248,12 +254,12 @@
 
 	.orm-block {
 		display: grid;
-		gap: 0.55rem;
+		gap: 0.65rem;
 	}
 
 	.orm-copy {
 		display: grid;
-		gap: 0.2rem;
+		gap: 0.18rem;
 	}
 
 	.orm-label {

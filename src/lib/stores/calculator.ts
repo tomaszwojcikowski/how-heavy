@@ -1,8 +1,10 @@
+import { browser } from '$app/environment';
 import { get, set } from 'idb-keyval';
 
 import type { BarWeight, PlateWeight } from '$lib/types/gym';
 
 const STORAGE_KEY = 'how-heavy:calculator-state';
+const THEME_STORAGE_KEY = 'how-heavy:preferred-bar-weight';
 
 interface PersistedCalculatorState {
 	preferences: {
@@ -85,6 +87,11 @@ export async function loadCalculatorState(): Promise<PersistedCalculatorState> {
 
 export async function patchCalculatorState(patch: CalculatorStatePatch): Promise<void> {
 	const currentState = await loadCalculatorState();
+	const nextPreferredBarWeight = patch.preferences?.preferredBarWeight ?? currentState.preferences.preferredBarWeight;
+
+	if (browser && typeof window.localStorage !== 'undefined') {
+		window.localStorage.setItem(THEME_STORAGE_KEY, String(nextPreferredBarWeight));
+	}
 
 	await set(STORAGE_KEY, {
 		preferences: {
