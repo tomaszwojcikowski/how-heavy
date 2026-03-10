@@ -38,16 +38,10 @@
 	--theme-inverse-surface: #293845;
 	--theme-inverse-on-surface: #ecf3fa;
 	--theme-inverse-primary: #a8c8ff;
-	--page-bg: radial-gradient(
-		circle at top,
-		var(--theme-page-glow) 0%,
-		var(--md-sys-color-surface-container-low) 24%,
-		var(--md-sys-color-primary-container) 58%,
-		var(--md-sys-color-tertiary-container) 100%
-	);
+	--page-bg: var(--texture-noise-muted), var(--theme-background);
 	--shadow: 0 18px 50px var(--theme-shadow-color);
-	--radius-xl: 12px;
-	--radius-lg: 8px;
+	--radius-xl: 16px;
+	--radius-lg: 10px;
 	--type-display: clamp(2.2rem, 5vw, 4rem);
 	--type-headline: clamp(1.9rem, 4vw, 3rem);
 	--type-title: 1.15rem;
@@ -109,11 +103,9 @@
 	--text-tertiary: var(--theme-surface-text-tertiary);
 	--focus-ring-color: color-mix(in srgb, var(--md-sys-color-tertiary) 76%, white 24%);
 	--focus-ring-shadow: color-mix(in srgb, var(--md-sys-color-tertiary) 18%, transparent);
-	--interactive-primary: linear-gradient(
-		135deg,
-		var(--md-sys-color-primary),
-		color-mix(in srgb, var(--md-sys-color-primary) 72%, var(--md-sys-color-tertiary) 28%)
-	);
+	--texture-noise: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0.14 0 0 0 0'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)'/%3E%3C/svg%3E");
+	--texture-noise-muted: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0.05 0 0 0 0'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)'/%3E%3C/svg%3E");
+	--interactive-primary: var(--texture-noise), var(--md-sys-color-primary);
 	--interactive-primary-shadow: 0 10px 24px color-mix(in srgb, var(--md-sys-color-primary) 28%, transparent);
 	/* Tonal accent pairs — surface/border/text derived from MD3 color roles, auto-adapt in dark mode */
 	--tone-primary-surface: color-mix(in srgb, var(--md-sys-color-primary-container) 72%, var(--md-sys-color-surface-container-lowest));
@@ -204,10 +196,7 @@ body::before {
 	inset: 0;
 	pointer-events: none;
 	opacity: 0;
-	background:
-		radial-gradient(circle at 18% 18%, color-mix(in srgb, var(--theme-page-glow) 78%, white 22%) 0%, transparent 42%),
-		radial-gradient(circle at 82% 20%, color-mix(in srgb, var(--accent-tertiary) 18%, transparent) 0%, transparent 36%),
-		radial-gradient(circle at 50% 100%, color-mix(in srgb, var(--accent-primary) 12%, transparent) 0%, transparent 42%);
+	background: var(--theme-page-glow);
 	transition: opacity 240ms var(--md-sys-motion-easing-standard);
 	z-index: 0;
 }
@@ -292,7 +281,7 @@ p {
 	background: var(--surface-3);
 	backdrop-filter: blur(16px);
 	border: 1px solid var(--outline);
-	border-radius: 14px;
+	border-radius: 18px;
 	box-shadow: var(--shadow);
 	/* Fixed bottom tab bar */
 	position: fixed;
@@ -307,11 +296,8 @@ p {
 .primary-nav a {
 	padding: 0.6rem 0.5rem;
 	text-align: center;
-	border-radius: 10px;
-	font-weight: 700;
-	color: var(--text-secondary);
+	border-radius: 12px;
 	transition:
-		background-color var(--md-sys-motion-duration-short2) var(--md-sys-motion-easing-standard),
 		color var(--md-sys-motion-duration-short2) var(--md-sys-motion-easing-standard),
 		transform var(--md-sys-motion-duration-short2) var(--md-sys-motion-easing-standard),
 		box-shadow var(--md-sys-motion-duration-short2) var(--md-sys-motion-easing-standard);

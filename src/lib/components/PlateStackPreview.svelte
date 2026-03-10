@@ -149,7 +149,15 @@
 		top: 50%;
 		height: 0.5rem;
 		transform: translateY(-50%);
-		background: linear-gradient(180deg, var(--shaft-highlight), var(--shaft-color));
+		background:
+			repeating-linear-gradient(
+				90deg,
+				transparent,
+				transparent 5px,
+				rgba(255, 255, 255, 0.14) 5px,
+				rgba(255, 255, 255, 0.14) 6px
+			),
+			var(--shaft-color);
 		border-radius: 999px;
 		z-index: 0;
 		box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18), 0 1px 2px rgba(0, 0, 0, 0.14);
@@ -229,7 +237,7 @@
 		flex-shrink: 0;
 		width: 1.2rem;
 		height: 0.75rem;
-		background: linear-gradient(180deg, color-mix(in srgb, var(--sleeve-color) 78%, white 22%), var(--sleeve-color));
+		background: var(--sleeve-color);
 		border-radius: 2px;
 	}
 
@@ -238,7 +246,7 @@
 		flex-shrink: 0;
 		width: 0.35rem;
 		height: 1.75rem;
-		background: linear-gradient(180deg, color-mix(in srgb, var(--end-cap-color) 80%, white 20%), var(--end-cap-color));
+		background: var(--end-cap-color);
 		border-radius: 2px;
 	}
 

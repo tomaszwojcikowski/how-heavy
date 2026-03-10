@@ -163,7 +163,12 @@
 						class="template-btn"
 						onclick={() => applyTemplate(template)}
 					>
-						<span>{template.label}</span>
+						<div class="template-btn__header">
+							<span>{template.label}</span>
+							{#if selectedTemplateId === template.id}
+								<span class="material-symbols-rounded template-btn__check" aria-hidden="true">check</span>
+							{/if}
+						</div>
 						<small>{template.description}</small>
 					</button>
 				{/each}
@@ -176,6 +181,7 @@
 		{#each steps as step, stepIndex (step.id)}
 			{@const computed = computedSteps.find((c) => c.id === step.id)}
 			<div class="step-card"
+				class:step-card--resolved={computed?.result.status === 'exact' || computed?.result.status === 'rounded'}
 				in:fly={{ y: 20, duration: 220, easing: cubicOut }}
 				out:scale={{ duration: 160, start: 0.94 }}
 				animate:flip={{ duration: 280, easing: cubicOut }}
@@ -359,6 +365,20 @@
 		color: var(--text-primary);
 	}
 
+	.template-btn__header {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 0.4rem;
+	}
+
+	.template-btn__check {
+		font-size: 1rem !important;
+		font-variation-settings: 'FILL' 1, 'wght' 600, 'GRAD' 0, 'opsz' 20 !important;
+		color: var(--tone-secondary-text);
+		flex-shrink: 0;
+	}
+
 	.template-btn small {
 		font-size: 0.76rem;
 		line-height: 1.35;
@@ -414,6 +434,10 @@
 		border-radius: var(--radius-xl);
 		box-shadow: var(--shadow);
 		transition: box-shadow 180ms cubic-bezier(0.2, 0, 0, 1);
+	}
+
+	.step-card--resolved {
+		box-shadow: var(--shadow), inset 3px 0 0 var(--accent-secondary);
 	}
 
 	.step-card__header {
@@ -521,19 +545,20 @@
 		gap: 0.5rem;
 		padding: 0.85rem;
 		border-radius: var(--radius-xl);
-		border: 1.5px dashed var(--outline);
-		background: transparent;
+		border: 1px solid var(--outline);
+		background: color-mix(in srgb, var(--md-sys-color-surface-container-lowest) 84%, transparent);
 		color: var(--text-secondary);
 		font-size: var(--type-body-md);
 		font-weight: 600;
 		cursor: pointer;
-		transition: background 0.12s ease, color 0.12s ease, border-color 0.12s ease;
+		transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
 	}
 
 	.add-step-btn:hover {
-		background: var(--surface-1);
-		color: var(--text-primary);
-		border-color: var(--accent-primary);
+		background: var(--tone-secondary-surface);
+		border-color: var(--tone-secondary-border);
+		color: var(--tone-secondary-text);
+		box-shadow: var(--shadow);
 	}
 
 	.add-step-btn .material-symbols-rounded {

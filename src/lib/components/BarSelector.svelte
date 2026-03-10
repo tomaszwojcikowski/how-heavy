@@ -102,11 +102,11 @@
 	}
 
 	.bar-option--20 .bar-option__theme-dot {
-		background: linear-gradient(180deg, #4a97ef, #1565c0);
+		background: #1565c0;
 	}
 
 	.bar-option--15 .bar-option__theme-dot {
-		background: linear-gradient(180deg, #ef6ba4, #c2185b);
+		background: #c2185b;
 	}
 
 	.bar-option:hover {

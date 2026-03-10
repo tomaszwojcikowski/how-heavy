@@ -108,11 +108,7 @@
 	}
 
 	.stepper-value--bar {
-		background: linear-gradient(
-			180deg,
-			color-mix(in srgb, var(--tone-tertiary-surface) 90%, white 10%),
-			var(--md-sys-color-surface-container-lowest)
-		);
+		background: var(--texture-noise-muted), var(--tone-tertiary-surface);
 	}
 
 	.stepper-label {

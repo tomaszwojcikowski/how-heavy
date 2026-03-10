@@ -87,11 +87,7 @@
 		padding: 0.85rem 1rem;
 		border-radius: var(--radius-xl);
 		border: 1px solid var(--outline);
-		background: linear-gradient(
-			180deg,
-			color-mix(in srgb, var(--tone-tertiary-surface) 72%, white 28%),
-			var(--surface-4, var(--surface-1))
-		);
+		background: var(--texture-noise-muted), var(--tone-tertiary-surface);
 	}
 
 	.preference-copy {
@@ -128,7 +124,7 @@
 	}
 
 	.mode-card--primary {
-		background: linear-gradient(180deg, var(--md-sys-color-surface-container-lowest), color-mix(in srgb, var(--md-sys-color-primary-container) 80%, var(--md-sys-color-surface-container-lowest)));
+		background: var(--texture-noise-muted), var(--md-sys-color-primary-container);
 	}
 
 	.mode-card h2 {

@@ -74,17 +74,13 @@
 					{@const count = selectedCounts.find((item) => item.weight === plate.weight)?.count ?? 0}
 					{@const maxCount = getMaxPlateCountPerSide(plate.weight)}
 					{@const atMaxCount = count >= maxCount}
-					<div class:plate-choice--change={group.key === 'change'} class="plate-choice">
-						<div class="plate-choice__count" aria-live="polite">
-							{#if count > 0}
-								{count} loaded
-							{:else if Number.isFinite(maxCount)}
-								{maxCount} / side max
-							{:else}
-								Tap to load
-							{/if}
-						</div>
+					<div class:plate-choice--change={group.key === 'change'} class:plate-choice--loaded={count > 0} class="plate-choice">
+					<div class="plate-choice__header">
 						<strong class="plate-choice__label" aria-label="{plate.weight} kilograms">{plate.weight} <span>kg</span></strong>
+						{#if count > 0}
+						<div class="plate-choice__count" aria-live="polite">{count} loaded</div>
+					{/if}
+					</div>
 						<PlateGraphic weight={plate.weight} size={graphicSize(plate.weight)} count={count} />
 						<div class="plate-choice__actions">
 							<button
@@ -157,11 +153,11 @@
 	}
 
 	.plate-picker__section[data-kind='bumper'] {
-		background: linear-gradient(180deg, color-mix(in srgb, var(--tone-primary-surface) 52%, white 48%), var(--surface-4));
+		background: var(--texture-noise-muted), var(--tone-primary-surface);
 	}
 
 	.plate-picker__section[data-kind='change'] {
-		background: linear-gradient(180deg, color-mix(in srgb, var(--tone-secondary-surface) 56%, white 44%), var(--surface-4));
+		background: var(--texture-noise-muted), var(--tone-secondary-surface);
 	}
 
 	.plate-picker__section-copy {
@@ -216,8 +212,15 @@
 		border: 1px solid var(--outline);
 		background: var(--surface-4);
 		box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45);
-		position: relative;
 		transition: transform 120ms cubic-bezier(0.2, 0, 0, 1), box-shadow 160ms cubic-bezier(0.2, 0, 0, 1);
+	}
+
+	.plate-choice__header {
+		display: flex;
+		align-items: baseline;
+		justify-content: space-between;
+		gap: 0.35rem;
+		width: 100%;
 	}
 
 	.plate-choice--change {
@@ -225,16 +228,21 @@
 	}
 
 	.plate-choice__count {
-		position: absolute;
-		top: 0.5rem;
-		right: 0.5rem;
-		padding: 0.18rem 0.42rem;
+		padding: 0.15rem 0.38rem;
 		border-radius: 999px;
 		background: color-mix(in srgb, var(--md-sys-color-surface-container-lowest) 88%, transparent);
 		border: 1px solid color-mix(in srgb, var(--outline) 82%, transparent);
-		font-size: 0.68rem;
+		font-size: 0.65rem;
 		font-weight: 700;
+		white-space: nowrap;
 		color: var(--text-secondary);
+		flex-shrink: 0;
+	}
+
+	.plate-choice--loaded .plate-choice__count {
+		background: var(--tone-secondary-surface);
+		border-color: var(--tone-secondary-border);
+		color: var(--tone-secondary-text);
 	}
 
 	.plate-choice__label {

@@ -418,20 +418,21 @@
 		display: inline-flex;
 		align-items: center;
 		gap: 0.3rem;
-		padding: 0.45rem 0.75rem;
-		border-radius: 8px;
+		padding: 0.45rem 0.85rem;
+		border-radius: 999px;
 		border: 1px solid var(--outline);
 		background: var(--md-sys-color-surface-container-lowest);
 		color: var(--text-secondary);
 		font-size: var(--type-body-sm);
 		font-weight: 600;
 		cursor: pointer;
-		transition: color 0.14s ease, background 0.14s ease;
+		transition: color 0.14s ease, background 0.14s ease, border-color 0.14s ease;
 	}
 
 	.preset-btn:hover {
 		color: var(--text-primary);
-		background: var(--surface-2);
+		background: var(--tone-secondary-surface);
+		border-color: var(--tone-secondary-border);
 	}
 
 	.preset-btn .material-symbols-rounded {

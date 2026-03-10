@@ -158,10 +158,11 @@
 		display: inline-flex;
 		align-items: center;
 		gap: 0.35rem;
-		padding: 0.45rem 0.7rem;
-		border-radius: 6px;
-		font-size: 0.82rem;
-		font-weight: 800;
+		padding: 0.4rem 0.75rem 0.4rem 0.6rem;
+		border-radius: 999px;
+		border: 1px solid var(--tone-secondary-border);
+		font-size: 0.78rem;
+		font-weight: 700;
 		text-transform: uppercase;
 		letter-spacing: 0.05em;
 		line-height: var(--leading-label);
@@ -172,11 +173,13 @@
 	.result-card__status.rounded,
 	.result-card__status.warning {
 		background: var(--tone-primary-surface);
+		border-color: var(--tone-primary-border);
 		color: var(--tone-primary-text);
 	}
 
 	.result-card__status-icon {
-		font-size: 1rem;
+		font-size: 0.95rem;
+		font-variation-settings: 'FILL' 1, 'wght' 500, 'GRAD' 0, 'opsz' 20;
 	}
 
 	.result-card__message {
@@ -255,19 +258,19 @@
 		align-items: center;
 		gap: 0.4rem;
 		padding: 0.55rem 1rem;
-		border-radius: 8px;
-		border: 1px solid var(--outline);
-		background: var(--md-sys-color-surface-container-lowest);
-		color: var(--text-secondary);
+		border-radius: 999px;
+		border: 1px solid var(--tone-secondary-border);
+		background: var(--tone-secondary-surface);
+		color: var(--tone-secondary-text);
 		font-size: var(--type-body-sm);
-		font-weight: 600;
+		font-weight: 700;
 		cursor: pointer;
-		transition: color 0.15s ease, background 0.15s ease;
+		transition: background 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
 	}
 
 	.copy-btn:hover {
-		color: var(--text-primary);
-		background: var(--surface-2);
+		background: color-mix(in srgb, var(--tone-secondary-surface) 88%, white 12%);
+		box-shadow: 0 4px 14px color-mix(in srgb, var(--accent-secondary) 18%, transparent);
 	}
 
 	.copy-btn .material-symbols-rounded {
