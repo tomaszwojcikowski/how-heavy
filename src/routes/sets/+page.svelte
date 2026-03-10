@@ -1,12 +1,11 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
-	import { afterUpdate } from 'svelte';
 	import { onMount } from 'svelte';
 	import { fly, scale } from 'svelte/transition';
 	import { flip } from 'svelte/animate';
 	import { cubicOut } from 'svelte/easing';
 
-	import BarWeightStepper from '$lib/components/BarWeightStepper.svelte';
+	import BarSelector from '$lib/components/BarSelector.svelte';
 	import PercentageStepper from '$lib/components/PercentageStepper.svelte';
 	import PlateStackPreview from '$lib/components/PlateStackPreview.svelte';
 	import { modeDescriptions, modeLabels } from '$lib/site';
@@ -18,11 +17,9 @@
 
 	const DEFAULT_PERCENTAGES = ['60', '70', '80', '85', '90'];
 	const MAX_STEPS = 10;
-	type TextFieldElement = HTMLElement & { value: string };
 
 	let selectedBar: BarWeight = 20;
 	let oneRmValue = '100';
-	let oneRmFieldEl: TextFieldElement | undefined;
 	let hydrated = false;
 
 	let steps: Array<{ id: number; percentage: string }> = DEFAULT_PERCENTAGES.map((p, i) => ({
@@ -30,12 +27,6 @@
 		percentage: p
 	}));
 	let nextId = DEFAULT_PERCENTAGES.length + 1;
-
-	afterUpdate(() => {
-		if (oneRmFieldEl) {
-			oneRmFieldEl.value = oneRmValue;
-		}
-	});
 
 	onMount(async () => {
 		const state = await loadCalculatorState();
@@ -105,28 +96,32 @@
 	<!-- 1RM setup card -->
 	<section class="setup-card">
 		<div class="setup-field">
-			<BarWeightStepper value={selectedBar} onChange={(v) => (selectedBar = v)} />
+			<BarSelector
+				value={selectedBar}
+				onChange={(v) => (selectedBar = v)}
+				label="Default bar"
+				helper="Changing this also updates the shared default bar."
+				subtle={true}
+			/>
 		</div>
 
-		<div class="orm-row">
-			<button type="button" class="adj-btn" onclick={() => adjustOneRm(-2.5)} aria-label="Decrease by 2.5 kg">
-				<span class="material-symbols-rounded" aria-hidden="true">remove</span>
-				<span class="adj-label">2.5</span>
-			</button>
-			<md-outlined-text-field
-				bind:this={oneRmFieldEl}
-				type="text"
-				label="1 Rep Max (1RM)"
-				suffix-text="kg"
-				inputmode="decimal"
+		<div class="orm-block">
+			<div class="orm-copy">
+				<p class="orm-label">1 Rep Max</p>
+				<p class="orm-helper">Use the same stepper style as your set percentages. Fine-tune by 2.5 kg or type directly.</p>
+			</div>
+			<PercentageStepper
+				value={oneRmValue}
+				label="One rep max in kilograms"
+				unit="kg"
 				placeholder="100"
-				supporting-text="Your one-rep max — percentages are calculated from this."
-				oninput={(e: Event) => (oneRmValue = (e.currentTarget as TextFieldElement).value)}
-			></md-outlined-text-field>
-			<button type="button" class="adj-btn" onclick={() => adjustOneRm(2.5)} aria-label="Increase by 2.5 kg">
-				<span class="material-symbols-rounded" aria-hidden="true">add</span>
-				<span class="adj-label">2.5</span>
-			</button>
+				step={2.5}
+				min={0}
+				max={500}
+				decrementLabel="Decrease one rep max by 2.5 kilograms"
+				incrementLabel="Increase one rep max by 2.5 kilograms"
+				onChange={(value) => (oneRmValue = value)}
+			/>
 		</div>
 	</section>
 
@@ -251,47 +246,28 @@
 		gap: 0.5rem;
 	}
 
-	.orm-row {
-		display: flex;
-		align-items: stretch;
-		gap: 0.5rem;
+	.orm-block {
+		display: grid;
+		gap: 0.55rem;
 	}
 
-	.orm-row md-outlined-text-field {
-		flex: 1;
-		min-width: 0;
+	.orm-copy {
+		display: grid;
+		gap: 0.2rem;
 	}
 
-	.adj-btn {
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		justify-content: center;
-		gap: 0.1rem;
-		padding: 0.5rem 0.7rem;
-		border-radius: var(--radius-md, 8px);
-		border: 1px solid var(--outline);
-		background: var(--md-sys-color-surface-container-lowest);
-		color: var(--text-primary);
-		cursor: pointer;
-		flex-shrink: 0;
-		transition: background 0.12s ease;
-		font-variant-numeric: tabular-nums;
-	}
-
-	.adj-btn:hover { background: var(--surface-2); }
-	.adj-btn:active { background: var(--surface-3); }
-
-	.adj-btn .material-symbols-rounded {
-		font-size: 1.15rem;
-		font-variation-settings: 'FILL' 0, 'wght' 500, 'GRAD' 0, 'opsz' 24;
-	}
-
-	.adj-label {
-		font-size: 0.68rem;
+	.orm-label {
+		margin: 0;
+		font-size: var(--type-body-sm);
 		font-weight: 700;
+		color: var(--text-primary);
+	}
+
+	.orm-helper {
+		margin: 0;
+		font-size: 0.8rem;
 		color: var(--text-secondary);
-		line-height: 1;
+		line-height: 1.35;
 	}
 
 	/* Steps */

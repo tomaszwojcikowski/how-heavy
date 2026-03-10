@@ -169,7 +169,13 @@
 		<!-- Controls: bar selector + plate picker -->
 		<section class="control-card">
 			<div class="control-header">
-				<BarSelector bind:value={selectedBar} onChange={(nextValue) => (selectedBar = nextValue)} label="Active bar" />
+				<BarSelector
+					bind:value={selectedBar}
+					onChange={(nextValue) => (selectedBar = nextValue)}
+					label="Default bar"
+					helper="Updates the shared bar preference for every calculator."
+					subtle={true}
+				/>
 				<button
 					type="button"
 					class:clear-btn--confirm={clearPending}

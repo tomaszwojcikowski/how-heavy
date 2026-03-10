@@ -36,15 +36,17 @@
 		<p>{tagline}</p>
 	</div>
 
-	<section class="preference-card">
+	<section class="preference-strip">
 		<div class="preference-copy">
-			<p class="eyebrow">Your Default Bar</p>
-			<h2>{selectedBar} kg setup</h2>
-			<p>Choose your usual bar once. The app keeps it as the default, remembers the theme, and carries it into every calculator.</p>
+			<p class="eyebrow">Default Bar</p>
+			<h2>{selectedBar} kg</h2>
+			<p>Used as the starting bar across the app.</p>
 		</div>
 
 		<BarSelector
-			label="Use this bar across the app"
+			label="Default setup"
+			helper="You can still switch it inside any calculator."
+			subtle={true}
 			bind:value={selectedBar}
 			onChange={(nextValue) => (selectedBar = nextValue)}
 		/>
@@ -77,32 +79,34 @@
 </ul>
 
 <style>
-	.preference-card {
-		display: grid;
+	.preference-strip {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
 		gap: 1rem;
-		padding: 1rem;
+		padding: 0.85rem 1rem;
 		border-radius: var(--radius-xl);
 		border: 1px solid var(--outline);
 		background: linear-gradient(
 			180deg,
-			color-mix(in srgb, var(--tone-tertiary-surface) 88%, white 12%),
+			color-mix(in srgb, var(--tone-tertiary-surface) 72%, white 28%),
 			var(--surface-4, var(--surface-1))
 		);
 	}
 
 	.preference-copy {
 		display: grid;
-		gap: 0.35rem;
+		gap: 0.18rem;
 	}
 
 	.preference-copy h2 {
-		font-size: var(--type-title);
+		font-size: 1rem;
 		line-height: 1.05;
 		letter-spacing: var(--tracking-tight);
 	}
 
 	.preference-copy p:not(.eyebrow) {
-		font-size: var(--type-body-md);
+		font-size: var(--type-body-sm);
 		color: var(--text-secondary);
 		line-height: var(--leading-surface);
 		letter-spacing: var(--tracking-body);
@@ -177,6 +181,11 @@
 	}
 
 	@media (max-width: 42rem) {
+		.preference-strip {
+			display: grid;
+			justify-content: stretch;
+		}
+
 		.mode-grid {
 			grid-template-columns: 1fr;
 		}

@@ -53,7 +53,13 @@
 			<ResultCard {result} />
 
 			<section class="control-card">
-				<BarSelector bind:value={selectedBar} onChange={(nextValue) => (selectedBar = nextValue)} />
+				<BarSelector
+					label="Default bar"
+					helper="Changing this updates the start bar for all calculators."
+					subtle={true}
+					bind:value={selectedBar}
+					onChange={(nextValue) => (selectedBar = nextValue)}
+				/>
 
 				<WeightKeypad
 					value={targetValue}

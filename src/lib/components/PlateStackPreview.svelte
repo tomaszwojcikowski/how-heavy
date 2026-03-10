@@ -31,12 +31,31 @@
 	function plateEdge(weight: PlateWeight): string {
 		return PLATE_MAP[weight.toString() as keyof typeof PLATE_MAP].edgeColor;
 	}
+
+	$: barPalette =
+		barWeight === 20
+			? {
+				shaft: '#b3261e',
+				shaftHighlight: '#e46962',
+				sleeve: '#d84a42',
+				endCap: '#7f1712'
+			}
+			: {
+				shaft: '#1f1f1f',
+				shaftHighlight: '#545454',
+				sleeve: '#333333',
+				endCap: '#0b0b0b'
+			};
 </script>
 
 <div class="stack-shell">
 	<div class="barbell-wrap" aria-label={`Barbell loaded with ${formatWeight(barWeight)} bar`}>
 		<!-- Shaft runs behind everything, centered vertically -->
-		<div class="shaft" aria-hidden="true"></div>
+		<div
+			class="shaft"
+			style={`--shaft-color:${barPalette.shaft};--shaft-highlight:${barPalette.shaftHighlight};`}
+			aria-hidden="true"
+		></div>
 
 		<div class="barbell-row">
 			<!-- Left arm: DOM order heavy→light + sleeve + cap; row-reverse flips visual to cap→sleeve→light→heavy→center -->
@@ -57,8 +76,8 @@
 						<span>{weight}</span>
 					</svelte:element>
 				{/each}
-				<div class="sleeve" aria-hidden="true"></div>
-				<div class="end-cap" aria-hidden="true"></div>
+				<div class="sleeve" style={`--sleeve-color:${barPalette.sleeve};`} aria-hidden="true"></div>
+				<div class="end-cap" style={`--end-cap-color:${barPalette.endCap};`} aria-hidden="true"></div>
 			</div>
 
 			<!-- Center label -->
@@ -85,8 +104,8 @@
 						<span>{weight}</span>
 					</svelte:element>
 				{/each}
-				<div class="sleeve" aria-hidden="true"></div>
-				<div class="end-cap" aria-hidden="true"></div>
+				<div class="sleeve" style={`--sleeve-color:${barPalette.sleeve};`} aria-hidden="true"></div>
+				<div class="end-cap" style={`--end-cap-color:${barPalette.endCap};`} aria-hidden="true"></div>
 			</div>
 		</div>
 	</div>
@@ -122,9 +141,10 @@
 		top: 50%;
 		height: 0.5rem;
 		transform: translateY(-50%);
-		background: #b6aea6;
+		background: linear-gradient(180deg, var(--shaft-highlight), var(--shaft-color));
 		border-radius: 999px;
 		z-index: 0;
+		box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18), 0 1px 2px rgba(0, 0, 0, 0.14);
 	}
 
 	/* Always-horizontal flex row */
@@ -196,7 +216,7 @@
 		flex-shrink: 0;
 		width: 1.2rem;
 		height: 0.75rem;
-		background: #c7beb6;
+		background: linear-gradient(180deg, color-mix(in srgb, var(--sleeve-color) 78%, white 22%), var(--sleeve-color));
 		border-radius: 2px;
 	}
 
@@ -205,7 +225,7 @@
 		flex-shrink: 0;
 		width: 0.35rem;
 		height: 1.75rem;
-		background: #aaa39b;
+		background: linear-gradient(180deg, color-mix(in srgb, var(--end-cap-color) 80%, white 20%), var(--end-cap-color));
 		border-radius: 2px;
 	}
 

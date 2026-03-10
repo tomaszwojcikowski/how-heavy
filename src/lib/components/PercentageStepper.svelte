@@ -7,6 +7,10 @@
 	export let step: number = 5;
 	export let min: number = 1;
 	export let max: number = 200;
+	export let unit: string = '%';
+	export let placeholder: string = '80';
+	export let decrementLabel: string = 'Decrease percentage';
+	export let incrementLabel: string = 'Increase percentage';
 
 	function increment() {
 		const current = Number.parseFloat(value);
@@ -33,7 +37,7 @@
 			type="button"
 			class="stepper-btn"
 			onclick={decrement}
-			aria-label="Decrease percentage"
+			aria-label={decrementLabel}
 			tabindex="0"
 		>
 			<span class="material-symbols-rounded" aria-hidden="true">remove</span>
@@ -47,18 +51,18 @@
 				{value}
 				{min}
 				{max}
-				placeholder="80"
+				placeholder={placeholder}
 				oninput={handleInput}
 				aria-label={label}
 			/>
-			<span class="stepper-unit" aria-hidden="true">%</span>
+			<span class="stepper-unit" aria-hidden="true">{unit}</span>
 		</div>
 
 		<button
 			type="button"
 			class="stepper-btn"
 			onclick={increment}
-			aria-label="Increase percentage"
+			aria-label={incrementLabel}
 			tabindex="0"
 		>
 			<span class="material-symbols-rounded" aria-hidden="true">add</span>
