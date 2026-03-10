@@ -3,8 +3,8 @@
 	import { onMount } from 'svelte';
 
 	import BarSelector from '$lib/components/BarSelector.svelte';
+	import PercentageStepper from '$lib/components/PercentageStepper.svelte';
 	import ResultCard from '$lib/components/ResultCard.svelte';
-	import WeightKeypad from '$lib/components/WeightKeypad.svelte';
 	import { modeDescriptions, modeLabels } from '$lib/site';
 	import { loadCalculatorState, saveTargetState } from '$lib/stores/calculator';
 	import type { BarWeight } from '$lib/types/gym';
@@ -61,12 +61,38 @@
 					onChange={(nextValue) => (selectedBar = nextValue)}
 				/>
 
-				<WeightKeypad
-					value={targetValue}
-					presets={presets}
-					helper="Enter a total weight to get the plates needed on each side."
-					onValueChange={(nextValue) => (targetValue = nextValue)}
-				/>
+				<div class="target-block">
+					<div class="target-copy">
+						<p class="target-label">Target total</p>
+						<p class="target-helper">Adjust in 2.5 kg steps or type directly.</p>
+					</div>
+
+					<PercentageStepper
+						value={targetValue}
+						label="Target total in kilograms"
+						unit="kg"
+						placeholder="100"
+						step={2.5}
+						min={0}
+						max={500}
+						decrementLabel="Decrease target total by 2.5 kilograms"
+						incrementLabel="Increase target total by 2.5 kilograms"
+						onChange={(nextValue) => (targetValue = nextValue)}
+					/>
+
+					<div class="target-presets" role="group" aria-label="Common target presets">
+						{#each presets as preset (preset)}
+							<button
+								type="button"
+								class:target-preset--selected={parsedTarget === preset}
+								class="target-preset"
+								onclick={() => (targetValue = String(preset))}
+							>
+								{preset}
+							</button>
+						{/each}
+					</div>
+				</div>
 			</section>
 		</div>
 	{:else}
@@ -137,6 +163,65 @@
 		box-shadow: var(--shadow);
 		/* Controls appear before the result card on all screen sizes */
 		order: -1;
+	}
+
+	.target-block {
+		display: grid;
+		gap: 0.7rem;
+	}
+
+	.target-copy {
+		display: grid;
+		gap: 0.18rem;
+	}
+
+	.target-label {
+		margin: 0;
+		font-size: var(--type-body-sm);
+		font-weight: 700;
+		color: var(--text-primary);
+	}
+
+	.target-helper {
+		margin: 0;
+		font-size: 0.8rem;
+		color: var(--text-secondary);
+		line-height: 1.35;
+	}
+
+	.target-presets {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.45rem;
+	}
+
+	.target-preset {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		padding: 0.35rem 0.7rem;
+		border-radius: 999px;
+		border: 1px solid var(--outline);
+		background: transparent;
+		color: var(--text-secondary);
+		font-size: 0.78rem;
+		font-weight: 700;
+		cursor: pointer;
+		transition:
+			background 120ms cubic-bezier(0.2, 0, 0, 1),
+			border-color 120ms cubic-bezier(0.2, 0, 0, 1),
+			color 120ms cubic-bezier(0.2, 0, 0, 1);
+	}
+
+	.target-preset:hover {
+		background: color-mix(in srgb, var(--tone-tertiary-surface) 64%, white 36%);
+		color: var(--text-primary);
+	}
+
+	.target-preset--selected {
+		background: var(--tone-tertiary-surface);
+		border-color: color-mix(in srgb, var(--tone-tertiary-border) 76%, transparent);
+		color: var(--tone-tertiary-text);
 	}
 
 	.target-loading-card {
