@@ -10,6 +10,7 @@
 	import type { BarWeight, PlateWeight } from '$lib/types/gym';
 	import { calculateCurrentLoad, summarizePlateCounts } from '$lib/utils/calculations';
 	import { formatWeight } from '$lib/utils/formatting';
+	import { applyBarTheme } from '$lib/utils/theme';
 
 	const QUICK_PRESETS: { label: string; icon: string; plates: PlateWeight[] }[] = [
 		{ label: 'Empty bar', icon: 'fitness_center', plates: [] },
@@ -29,14 +30,16 @@
 
 	onMount(async () => {
 		const state = await loadCalculatorState();
-		selectedBar = state.current.barWeight;
+		selectedBar = state.preferences.preferredBarWeight;
 		oneSidePlates = state.current.plates;
+		applyBarTheme(selectedBar);
 		hydrated = true;
 	});
 
 	$: summary = calculateCurrentLoad(selectedBar, oneSidePlates);
 	$: groupedPlates = summarizePlateCounts(oneSidePlates);
 	$: if (browser && hydrated) {
+		applyBarTheme(selectedBar);
 		void saveCurrentState({
 			barWeight: selectedBar,
 			plates: oneSidePlates
@@ -179,7 +182,7 @@
 			</div>
 
 			<div class="preset-strip" role="group" aria-label="Quick setup presets">
-				{#each QUICK_PRESETS as preset}
+				{#each QUICK_PRESETS as preset (preset.label)}
 					<button
 						type="button"
 						class="preset-btn"

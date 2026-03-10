@@ -2,6 +2,9 @@ import { PLATE_DEFINITIONS, fromQuarterKiloUnits, isSupportedBarWeight, toQuarte
 import type { BarWeight, CurrentLoadSummary, PlateCount, PlateWeight, TargetLoadResult } from '$lib/types/gym';
 
 const SEARCH_STEP_UNITS = 2;
+type PlateCombinationVector = number[];
+
+const PLATE_LOOKUP_TABLE: Array<PlateCombinationVector | null> = [Array.from({ length: PLATE_DEFINITIONS.length }, () => 0)];
 
 // Tiebreaker preference order (indices into PLATE_DEFINITIONS): prefer 15 kg, 10 kg before 20 kg.
 // PLATE_DEFINITIONS: [20=0, 15=1, 10=2, 5=3, 2.5=4, 2=5, 1.5=6, 1.25=7, 1=8, 0.5=9]
@@ -38,6 +41,53 @@ function alignRequestedUnits(barUnits: number, targetUnits: number): number {
 	return targetUnits - parityOffset;
 }
 
+function ensurePlateLookupTable(targetUnits: number): void {
+	for (let units = PLATE_LOOKUP_TABLE.length; units <= targetUnits; units += 1) {
+		let bestCombination: PlateCombinationVector | null = null;
+
+		for (let index = 0; index < PLATE_DEFINITIONS.length; index += 1) {
+			const plate = PLATE_DEFINITIONS[index];
+			const remainder = units - plate.units;
+
+			if (remainder < 0 || PLATE_LOOKUP_TABLE[remainder] === null) {
+				continue;
+			}
+
+			const candidate = [...(PLATE_LOOKUP_TABLE[remainder] as PlateCombinationVector)];
+			candidate[index] += 1;
+
+			if (!bestCombination || compareCombinationCounts(candidate, bestCombination) < 0) {
+				bestCombination = candidate;
+			}
+		}
+
+		PLATE_LOOKUP_TABLE[units] = bestCombination;
+	}
+}
+
+function mapCombinationVectorToPlateCounts(combination: PlateCombinationVector): PlateCount[] {
+	return combination
+		.map((count, index) => ({ weight: PLATE_DEFINITIONS[index].weight, count }))
+		.filter((plate): plate is PlateCount => plate.count > 0);
+}
+
+function getPlateCombinationForTotalUnits(barUnits: number, totalUnits: number): PlateCount[] | null {
+	if (totalUnits < barUnits || (totalUnits - barUnits) % 2 !== 0) {
+		return null;
+	}
+
+	const sideUnits = (totalUnits - barUnits) / 2;
+	ensurePlateLookupTable(sideUnits);
+
+	const combination = PLATE_LOOKUP_TABLE[sideUnits];
+
+	if (!combination) {
+		return null;
+	}
+
+	return mapCombinationVectorToPlateCounts(combination);
+}
+
 export function getPlateCombinationForSideWeight(sideWeight: number): PlateCount[] | null {
 	if (!Number.isFinite(sideWeight) || sideWeight < 0) {
 		return null;
@@ -49,40 +99,15 @@ export function getPlateCombinationForSideWeight(sideWeight: number): PlateCount
 		return [];
 	}
 
-	const combinations: Array<number[] | null> = Array.from({ length: targetUnits + 1 }, () => null);
-	combinations[0] = Array.from({ length: PLATE_DEFINITIONS.length }, () => 0);
+	ensurePlateLookupTable(targetUnits);
 
-	for (let units = 1; units <= targetUnits; units += 1) {
-		let bestCombination: number[] | null = null;
-
-		for (let index = 0; index < PLATE_DEFINITIONS.length; index += 1) {
-			const plate = PLATE_DEFINITIONS[index];
-			const remainder = units - plate.units;
-
-			if (remainder < 0 || combinations[remainder] === null) {
-				continue;
-			}
-
-			const candidate = [...(combinations[remainder] as number[])];
-			candidate[index] += 1;
-
-			if (!bestCombination || compareCombinationCounts(candidate, bestCombination) < 0) {
-				bestCombination = candidate;
-			}
-		}
-
-		combinations[units] = bestCombination;
-	}
-
-	const resolvedCombination = combinations[targetUnits];
+	const resolvedCombination = PLATE_LOOKUP_TABLE[targetUnits];
 
 	if (!resolvedCombination) {
 		return null;
 	}
 
-	return resolvedCombination
-		.map((count, index) => ({ weight: PLATE_DEFINITIONS[index].weight, count }))
-		.filter((plate): plate is PlateCount => plate.count > 0);
+	return mapCombinationVectorToPlateCounts(resolvedCombination);
 }
 
 export function calculateOneSideWeight(plates: readonly PlateWeight[]): number {
@@ -159,10 +184,10 @@ export function resolveTargetLoad(barWeight: BarWeight, requestedTotal: number):
 		const lowerCandidate = lowerAlignedUnits - delta;
 
 		if (lowerCandidate >= barUnits) {
-			const lowerSideWeight = fromQuarterKiloUnits((lowerCandidate - barUnits) / 2);
-			const lowerCombination = getPlateCombinationForSideWeight(lowerSideWeight);
+			const lowerCombination = getPlateCombinationForTotalUnits(barUnits, lowerCandidate);
 
 			if (lowerCombination) {
+				const lowerSideWeight = fromQuarterKiloUnits((lowerCandidate - barUnits) / 2);
 				const resolvedTotal = fromQuarterKiloUnits(lowerCandidate);
 
 				return {
@@ -183,10 +208,10 @@ export function resolveTargetLoad(barWeight: BarWeight, requestedTotal: number):
 		}
 
 		const upperCandidate = upperAlignedUnits + delta;
-		const upperSideWeight = fromQuarterKiloUnits((upperCandidate - barUnits) / 2);
-		const upperCombination = getPlateCombinationForSideWeight(upperSideWeight);
+		const upperCombination = getPlateCombinationForTotalUnits(barUnits, upperCandidate);
 
 		if (upperCombination) {
+			const upperSideWeight = fromQuarterKiloUnits((upperCandidate - barUnits) / 2);
 			const resolvedTotal = fromQuarterKiloUnits(upperCandidate);
 
 			return {

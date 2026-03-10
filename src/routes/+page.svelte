@@ -1,6 +1,29 @@
+
 <script lang="ts">
+	import { browser } from '$app/environment';
 	import { resolve } from '$app/paths';
+	import { onMount } from 'svelte';
+
+	import BarSelector from '$lib/components/BarSelector.svelte';
 	import { appName, featureHighlights, modeDescriptions, modeLabels, tagline } from '$lib/site';
+	import { loadCalculatorState, savePreferredBarWeight } from '$lib/stores/calculator';
+	import type { BarWeight } from '$lib/types/gym';
+	import { applyBarTheme } from '$lib/utils/theme';
+
+	let selectedBar: BarWeight = 20;
+	let hydrated = false;
+
+	onMount(async () => {
+		const state = await loadCalculatorState();
+		selectedBar = state.preferences.preferredBarWeight;
+		applyBarTheme(selectedBar);
+		hydrated = true;
+	});
+
+	$: if (browser && hydrated) {
+		applyBarTheme(selectedBar);
+		void savePreferredBarWeight(selectedBar);
+	}
 </script>
 
 <svelte:head>
@@ -12,6 +35,20 @@
 		<h1>{appName}</h1>
 		<p>{tagline}</p>
 	</div>
+
+	<section class="preference-card">
+		<div class="preference-copy">
+			<p class="eyebrow">Your Default Bar</p>
+			<h2>{selectedBar} kg setup</h2>
+			<p>Choose your usual bar once. The app keeps it as the default, remembers the theme, and carries it into every calculator.</p>
+		</div>
+
+		<BarSelector
+			label="Use this bar across the app"
+			bind:value={selectedBar}
+			onChange={(nextValue) => (selectedBar = nextValue)}
+		/>
+	</section>
 
 	<div class="mode-grid">
 		<section class="mode-card mode-card--primary">
@@ -31,7 +68,7 @@
 </section>
 
 <ul class="feature-list">
-	{#each featureHighlights as highlight}
+	{#each featureHighlights as highlight (highlight)}
 		<li>
 			<span class="feature-icon material-symbols-rounded" aria-hidden="true">check_circle</span>
 			<span>{highlight}</span>
@@ -40,6 +77,37 @@
 </ul>
 
 <style>
+	.preference-card {
+		display: grid;
+		gap: 1rem;
+		padding: 1rem;
+		border-radius: var(--radius-xl);
+		border: 1px solid var(--outline);
+		background: linear-gradient(
+			180deg,
+			color-mix(in srgb, var(--tone-tertiary-surface) 88%, white 12%),
+			var(--surface-4, var(--surface-1))
+		);
+	}
+
+	.preference-copy {
+		display: grid;
+		gap: 0.35rem;
+	}
+
+	.preference-copy h2 {
+		font-size: var(--type-title);
+		line-height: 1.05;
+		letter-spacing: var(--tracking-tight);
+	}
+
+	.preference-copy p:not(.eyebrow) {
+		font-size: var(--type-body-md);
+		color: var(--text-secondary);
+		line-height: var(--leading-surface);
+		letter-spacing: var(--tracking-body);
+	}
+
 	.mode-grid {
 		display: grid;
 		grid-template-columns: repeat(2, minmax(0, 1fr));

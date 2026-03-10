@@ -9,6 +9,7 @@
 	import { loadCalculatorState, saveTargetState } from '$lib/stores/calculator';
 	import type { BarWeight } from '$lib/types/gym';
 	import { resolveTargetLoad } from '$lib/utils/calculations';
+	import { applyBarTheme } from '$lib/utils/theme';
 
 	const presets = [40, 60, 80, 100, 120, 140];
 
@@ -18,14 +19,16 @@
 
 	onMount(async () => {
 		const state = await loadCalculatorState();
-		selectedBar = state.target.barWeight;
+		selectedBar = state.preferences.preferredBarWeight;
 		targetValue = state.target.value;
+		applyBarTheme(selectedBar);
 		hydrated = true;
 	});
 
 	$: parsedTarget = Number.parseFloat(targetValue.replace(',', '.'));
 	$: result = resolveTargetLoad(selectedBar, parsedTarget);
 	$: if (browser && hydrated) {
+		applyBarTheme(selectedBar);
 		void saveTargetState({
 			barWeight: selectedBar,
 			value: targetValue

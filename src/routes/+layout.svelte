@@ -2,8 +2,11 @@
 	import { base, resolve } from '$app/paths';
 	import { onNavigate } from '$app/navigation';
 	import { page } from '$app/state';
+	import { onMount } from 'svelte';
 	import favicon from '$lib/assets/favicon.svg';
 	import { modeLabels } from '$lib/site';
+	import { loadCalculatorState } from '$lib/stores/calculator';
+	import { applyBarTheme } from '$lib/utils/theme';
 	import '$lib/material';
 	import '../app.css';
 
@@ -17,6 +20,11 @@
 				await navigation.complete;
 			});
 		});
+	});
+
+	onMount(async () => {
+		const state = await loadCalculatorState();
+		applyBarTheme(state.preferences.preferredBarWeight);
 	});
 </script>
 

@@ -1,23 +1,29 @@
 <script lang="ts">
+	import { browser } from '$app/environment';
 	import { afterUpdate } from 'svelte';
+	import { onMount } from 'svelte';
 	import { fly, scale } from 'svelte/transition';
 	import { flip } from 'svelte/animate';
 	import { cubicOut } from 'svelte/easing';
 
-	import BarSelector from '$lib/components/BarSelector.svelte';
+	import BarWeightStepper from '$lib/components/BarWeightStepper.svelte';
 	import PercentageStepper from '$lib/components/PercentageStepper.svelte';
 	import PlateStackPreview from '$lib/components/PlateStackPreview.svelte';
 	import { modeDescriptions, modeLabels } from '$lib/site';
+	import { loadCalculatorState, saveSetsState } from '$lib/stores/calculator';
 	import { formatWeight } from '$lib/utils/formatting';
 	import { computeSmartSetSequence } from '$lib/utils/sets';
 	import type { BarWeight, PlateCount } from '$lib/types/gym';
+	import { applyBarTheme } from '$lib/utils/theme';
 
 	const DEFAULT_PERCENTAGES = ['60', '70', '80', '85', '90'];
 	const MAX_STEPS = 10;
+	type TextFieldElement = HTMLElement & { value: string };
 
 	let selectedBar: BarWeight = 20;
 	let oneRmValue = '100';
-	let oneRmFieldEl: HTMLElement | undefined;
+	let oneRmFieldEl: TextFieldElement | undefined;
+	let hydrated = false;
 
 	let steps: Array<{ id: number; percentage: string }> = DEFAULT_PERCENTAGES.map((p, i) => ({
 		id: i + 1,
@@ -27,15 +33,35 @@
 
 	afterUpdate(() => {
 		if (oneRmFieldEl) {
-			(oneRmFieldEl as any).value = oneRmValue;
+			oneRmFieldEl.value = oneRmValue;
 		}
+	});
+
+	onMount(async () => {
+		const state = await loadCalculatorState();
+		selectedBar = state.preferences.preferredBarWeight;
+		oneRmValue = state.sets.oneRm;
+		applyBarTheme(selectedBar);
+		hydrated = true;
 	});
 
 	$: parsedOneRm = Number.parseFloat(oneRmValue.replace(',', '.'));
 
-	let computedSteps: ReturnType<typeof computeSmartSetSequence> = [];
-	$: if (Number.isFinite(parsedOneRm) && parsedOneRm > selectedBar) {
-		computedSteps = computeSmartSetSequence(steps, selectedBar, parsedOneRm);
+	let computedSteps: ReturnType<typeof computeSmartSetSequence>;
+	$: {
+		if (!Number.isFinite(parsedOneRm) || parsedOneRm <= selectedBar) {
+			computedSteps = [];
+		} else {
+			computedSteps = computeSmartSetSequence(steps, selectedBar, parsedOneRm);
+		}
+	}
+
+	$: if (browser && hydrated) {
+		applyBarTheme(selectedBar);
+		void saveSetsState({
+			barWeight: selectedBar,
+			oneRm: oneRmValue
+		});
 	}
 
 	function adjustOneRm(delta: number) {
@@ -78,7 +104,9 @@
 
 	<!-- 1RM setup card -->
 	<section class="setup-card">
-		<BarSelector bind:value={selectedBar} onChange={(v) => (selectedBar = v)} />
+		<div class="setup-field">
+			<BarWeightStepper value={selectedBar} onChange={(v) => (selectedBar = v)} />
+		</div>
 
 		<div class="orm-row">
 			<button type="button" class="adj-btn" onclick={() => adjustOneRm(-2.5)} aria-label="Decrease by 2.5 kg">
@@ -93,7 +121,7 @@
 				inputmode="decimal"
 				placeholder="100"
 				supporting-text="Your one-rep max — percentages are calculated from this."
-				oninput={(e: Event) => (oneRmValue = (e.currentTarget as any).value)}
+				oninput={(e: Event) => (oneRmValue = (e.currentTarget as TextFieldElement).value)}
 			></md-outlined-text-field>
 			<button type="button" class="adj-btn" onclick={() => adjustOneRm(2.5)} aria-label="Increase by 2.5 kg">
 				<span class="material-symbols-rounded" aria-hidden="true">add</span>
@@ -216,6 +244,11 @@
 		border-radius: var(--radius-xl);
 		box-shadow: var(--shadow);
 		transition: box-shadow 180ms cubic-bezier(0.2, 0, 0, 1);
+	}
+
+	.setup-field {
+		display: grid;
+		gap: 0.5rem;
 	}
 
 	.orm-row {
