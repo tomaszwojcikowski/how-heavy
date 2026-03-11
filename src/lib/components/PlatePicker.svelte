@@ -315,4 +315,32 @@
 	.plate-picker__selected {
 		display: block;
 	}
+
+	@media (max-width: 40rem) {
+		.plate-picker {
+			gap: 0.75rem;
+		}
+
+		.plate-picker__section {
+			padding: 0.85rem;
+		}
+
+		.plate-picker__section-copy {
+			align-items: center;
+		}
+
+		.plate-picker__section-helper,
+		.plate-picker__section-badge {
+			display: none;
+		}
+
+		.plate-picker__tray {
+			grid-template-columns: repeat(2, minmax(0, 1fr));
+			gap: 0.7rem;
+		}
+
+		.plate-choice {
+			padding: 0.65rem 0.55rem 0.75rem;
+		}
+	}
 </style>

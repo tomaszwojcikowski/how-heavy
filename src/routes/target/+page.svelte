@@ -48,23 +48,21 @@
 		</header>
 
 		<div class="target-layout">
-			<!-- Result card is DOM-first → on mobile it appears at top above controls.
-			     On desktop the 2-col CSS puts .control-card on the left via order:-1. -->
-			<ResultCard {result} />
+			<div class="target-sidebar">
+				<section class="setup-card">
+					<BarSelector
+						label="Bar"
+						helper="Saved across the app."
+						subtle={true}
+						bind:value={selectedBar}
+						onChange={(nextValue) => (selectedBar = nextValue)}
+					/>
+				</section>
 
-			<section class="control-card">
-				<BarSelector
-					label="Default bar"
-					helper="Changing this updates the start bar for all calculators."
-					subtle={true}
-					bind:value={selectedBar}
-					onChange={(nextValue) => (selectedBar = nextValue)}
-				/>
-
-				<div class="target-block">
+				<section class="control-card">
 					<div class="target-copy">
 						<p class="target-label">Target total</p>
-						<p class="target-helper">Adjust in 2.5 kg steps or type directly.</p>
+						<p class="target-helper">Step by 2.5 kg or type a number.</p>
 					</div>
 
 					<PercentageStepper
@@ -90,11 +88,40 @@
 							></md-filter-chip>
 						{/each}
 					</md-chip-set>
-				</div>
-			</section>
+				</section>
+			</div>
+
+			<div class="target-result">
+				<ResultCard {result} />
+			</div>
 		</div>
 	{:else}
 		<div class="target-layout" aria-busy="true" aria-label="Loading saved target setup">
+			<div class="target-sidebar">
+				<section class="setup-card loading-card">
+					<div class="loading-grid">
+						<div class="loading-pill"></div>
+						<div class="loading-pill"></div>
+					</div>
+				</section>
+
+				<section class="control-card loading-card">
+					<div class="loading-stack">
+						<div class="loading-line" style="width: 34%"></div>
+						<div class="loading-line" style="width: 100%; height: 3.35rem"></div>
+						<div class="loading-line" style="width: 72%"></div>
+					</div>
+					<div class="loading-grid loading-grid--3">
+						<div class="loading-pill"></div>
+						<div class="loading-pill"></div>
+						<div class="loading-pill"></div>
+						<div class="loading-pill"></div>
+						<div class="loading-pill"></div>
+						<div class="loading-pill"></div>
+					</div>
+				</section>
+			</div>
+
 			<section class="loading-card target-loading-card">
 				<div class="loading-stack">
 					<div class="loading-line" style="width: 38%"></div>
@@ -108,26 +135,6 @@
 				</div>
 				<div class="loading-block"></div>
 			</section>
-
-			<section class="control-card loading-card">
-				<div class="loading-grid">
-					<div class="loading-pill"></div>
-					<div class="loading-pill"></div>
-				</div>
-				<div class="loading-stack">
-					<div class="loading-line" style="width: 34%"></div>
-					<div class="loading-line" style="width: 100%; height: 3.35rem"></div>
-					<div class="loading-line" style="width: 72%"></div>
-				</div>
-				<div class="loading-grid loading-grid--3">
-					<div class="loading-pill"></div>
-					<div class="loading-pill"></div>
-					<div class="loading-pill"></div>
-					<div class="loading-pill"></div>
-					<div class="loading-pill"></div>
-					<div class="loading-pill"></div>
-				</div>
-			</section>
 		</div>
 	{/if}
 </section>
@@ -135,7 +142,12 @@
 <style>
 	.target-layout {
 		display: grid;
-		gap: 1rem;
+		gap: 0.85rem;
+	}
+
+	.target-sidebar {
+		display: grid;
+		gap: 0.75rem;
 	}
 
 	.page-header {
@@ -151,21 +163,23 @@
 		letter-spacing: var(--tracking-body);
 	}
 
+	.setup-card,
 	.control-card {
 		display: grid;
-		gap: 1.25rem;
+		gap: 0.9rem;
 		padding: 1.2rem;
 		background: var(--surface-1);
 		border: 1px solid var(--outline);
 		border-radius: var(--radius-xl);
 		box-shadow: var(--shadow);
-		/* Controls appear before the result card on all screen sizes */
-		order: -1;
 	}
 
-	.target-block {
+	.setup-card {
+		background: color-mix(in srgb, var(--tone-tertiary-surface) 70%, var(--md-sys-color-surface-container-lowest) 30%);
+	}
+
+	.target-result {
 		display: grid;
-		gap: 0.7rem;
 	}
 
 	.target-copy {
@@ -207,13 +221,25 @@
 	}
 
 	.target-loading-card {
-		min-height: 28rem;
+		min-height: 24rem;
 		align-content: start;
+	}
+
+	@media (max-width: 40rem) {
+		.setup-card,
+		.control-card {
+			padding: 1rem;
+			box-shadow: none;
+		}
+
+		.target-presets {
+			gap: 0.35rem;
+		}
 	}
 
 	@media (min-width: 62rem) {
 		.target-layout {
-			grid-template-columns: minmax(20rem, 24rem) minmax(0, 1fr);
+			grid-template-columns: minmax(18rem, 22rem) minmax(0, 1fr);
 			align-items: start;
 		}
 	}

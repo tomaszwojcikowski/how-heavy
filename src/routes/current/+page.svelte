@@ -169,9 +169,9 @@
 		<div class="totals-strip" aria-live="polite" aria-label="Running total">
 			<strong class="totals-strip__weight">{formatWeight(summary.totalWeight)}</strong>
 			<div class="totals-strip__meta">
-				<span class="totals-strip__label">Total loaded</span>
+				<span class="totals-strip__label">Total</span>
 				<span class="sep">·</span>
-				<span class="totals-strip__label">Per side</span>
+				<span class="totals-strip__label">Side</span>
 				<strong class="totals-strip__value">{formatWeight(summary.oneSideWeight)}</strong>
 				<span class="sep">·</span>
 				<span class="totals-strip__label">{formatWeight(summary.barWeight)}</span>
@@ -192,8 +192,8 @@
 				<BarSelector
 					bind:value={selectedBar}
 					onChange={(nextValue) => (selectedBar = nextValue)}
-					label="Default bar"
-					helper="Updates the shared bar preference for every calculator."
+					label="Bar"
+					helper="Saved across the app."
 					subtle={true}
 				/>
 				<md-outlined-button
@@ -220,7 +220,7 @@
 
 			<div class="mirror-note" role="note" aria-label="Mirrored plate loading">
 				<span class="material-symbols-rounded" aria-hidden="true">compare_arrows</span>
-				<span>Build one side only. The app mirrors the same plates on both sides of the bar.</span>
+				<span>Pick one side only. The other side matches automatically.</span>
 			</div>
 
 			<PlatePicker selectedPlates={oneSidePlates} onAdd={addPlate} onRemove={removePlate} />
@@ -232,8 +232,8 @@
 				barWeight={summary.barWeight}
 				plates={groupedPlates}
 				onRemovePlate={removePlate}
-				emptyMessage="Tap plates above or load a quick setup to build your barbell."
-				emptyHint="Selections are mirrored automatically, so you only ever pick one side."
+				emptyMessage="Tap plates above or load a preset to build the bar."
+				emptyHint="You only need to pick one side."
 			/>
 		</section>
 
@@ -485,6 +485,53 @@
 	}
 
 	@media (max-width: 40rem) {
+		.totals-strip {
+			top: 0;
+			padding: 0.75rem 0.9rem;
+			gap: 0.55rem;
+			border-radius: 14px;
+			box-shadow: none;
+		}
+
+		.totals-strip__meta {
+			width: 100%;
+			gap: 0.35rem;
+			font-size: 0.8rem;
+		}
+
+		.totals-strip__chips {
+			display: none;
+		}
+
+		.control-card,
+		.viz-card {
+			padding: 1rem;
+			gap: 0.9rem;
+			box-shadow: none;
+		}
+
+		.control-header {
+			display: grid;
+			grid-template-columns: 1fr;
+			align-items: stretch;
+		}
+
+		.preset-strip {
+			flex-wrap: nowrap;
+			overflow-x: auto;
+			padding-bottom: 0.2rem;
+			scrollbar-width: none;
+		}
+
+		.preset-strip::-webkit-scrollbar {
+			display: none;
+		}
+
+		.mirror-note {
+			padding: 0.72rem 0.8rem;
+			background: transparent;
+		}
+
 		.undo-toast {
 			width: calc(100vw - 1rem);
 			bottom: calc(5.4rem + env(safe-area-inset-bottom, 0px));

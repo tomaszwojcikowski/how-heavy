@@ -119,8 +119,8 @@
 			<BarSelector
 				value={selectedBar}
 				onChange={(v) => (selectedBar = v)}
-				label="Default bar"
-				helper="Changing this also updates the shared default bar."
+				label="Bar"
+				helper="Saved across the app."
 				subtle={true}
 			/>
 		</div>
@@ -129,9 +129,9 @@
 			<div class="orm-copy">
 				<p class="orm-label">1 Rep Max</p>
 				<p class="orm-helper">
-					Adjust in 2.5 kg steps or type directly.
+					Step by 2.5 kg or type a number.
 					{#if Number.isFinite(parsedOneRm) && parsedOneRm <= selectedBar}
-						Must be above {selectedBar} kg.
+						 Keep it above {selectedBar} kg.
 					{/if}
 				</p>
 			</div>
@@ -152,8 +152,8 @@
 
 		<div class="template-strip" role="group" aria-label="Training set presets">
 			<div class="template-strip__copy">
-				<p class="template-strip__label">Warm-up builder</p>
-				<p class="template-strip__helper">Generate 3 rounded warm-up loads from your current 1RM, then tweak any step.</p>
+				<p class="template-strip__label">Warm-up presets</p>
+				<p class="template-strip__helper">Start with a preset, then edit any set.</p>
 			</div>
 			<div class="template-strip__buttons">
 				{#each SET_TEMPLATES as template (template.id)}
@@ -542,5 +542,38 @@
 		width: 100%;
 		--md-outlined-button-container-shape: var(--radius-xl);
 		--md-outlined-button-container-height: 3.2rem;
+	}
+
+	@media (max-width: 40rem) {
+		.setup-card,
+		.step-card {
+			padding: 1rem;
+			box-shadow: none;
+		}
+
+		.template-strip {
+			gap: 0.6rem;
+		}
+
+		.template-strip__helper {
+			display: none;
+		}
+
+		.template-strip__buttons {
+			grid-template-columns: 1fr;
+		}
+
+		.step-card__header {
+			flex-direction: column;
+			align-items: stretch;
+		}
+
+		.step-card__meta {
+			justify-content: space-between;
+		}
+
+		.step-card__controls {
+			width: 100%;
+		}
 	}
 </style>

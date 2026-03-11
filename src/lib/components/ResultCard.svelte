@@ -9,7 +9,7 @@
 
 	const statusMeta: Record<TargetLoadResult['status'], { icon: string; label: string; tone: 'exact' | 'rounded' | 'warning' }> = {
 		exact: { icon: 'check_circle', label: 'Exact match', tone: 'exact' },
-		rounded: { icon: 'published_with_changes', label: 'Nearest match', tone: 'rounded' },
+		rounded: { icon: 'published_with_changes', label: 'Closest match', tone: 'rounded' },
 		'below-bar': { icon: 'warning', label: 'Below bar', tone: 'warning' },
 		invalid: { icon: 'error', label: 'Check input', tone: 'warning' }
 	};
@@ -26,12 +26,12 @@
 		? result.plates.length === 0
 			? 'Empty bar'
 			: formatPlatesPerSide(result.plates)
-		: `${formatWeight(result.barWeight)} minimum`;
+		: `${formatWeight(result.barWeight)} min`;
 	$: eyebrowText = hasValidResult
 		? result.plates.length === 0
 			? 'No plates needed'
 			: 'Plates per side'
-		: 'Below bar weight';
+		: 'Bar minimum';
 
 	let copied = false;
 
@@ -51,7 +51,7 @@
 		<div class="result-placeholder" transition:fade={{ duration: 150 }}>
 			<span class="material-symbols-rounded result-placeholder__icon" aria-hidden="true">calculate</span>
 			<p class="result-placeholder__title">Ready to calculate</p>
-			<p class="result-placeholder__hint">Enter a target weight and choose a bar to see which plates to load per side</p>
+			<p class="result-placeholder__hint">Enter a total and pick a bar to see the plates per side.</p>
 		</div>
 	{:else}
 		<div class="result-content" in:fly={{ y: 10, duration: 220, easing: cubicOut }} out:fade={{ duration: 100 }}>
@@ -89,7 +89,7 @@
 					</div>
 				{:else}
 					<div>
-						<small>Total loaded</small>
+						<small>Total</small>
 						<strong>{formatWeight(result.resolvedTotal)}</strong>
 					</div>
 				{/if}
@@ -254,6 +254,31 @@
 	:global(.result-card__actions md-filled-tonal-button [slot='icon']) {
 		font-size: 1.1rem;
 		font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+	}
+
+	@media (max-width: 40rem) {
+		.result-card {
+			padding: 1rem;
+			box-shadow: none;
+		}
+
+		.result-card__header {
+			flex-direction: column;
+			align-items: stretch;
+			gap: 0.75rem;
+		}
+
+		:global(.status-chip) {
+			width: fit-content;
+		}
+
+		.result-card__actions {
+			display: grid;
+		}
+
+		:global(.result-card__actions md-filled-tonal-button) {
+			width: 100%;
+		}
 	}
 
 

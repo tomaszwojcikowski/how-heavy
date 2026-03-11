@@ -3,7 +3,7 @@
 	import { BAR_OPTIONS } from '$lib/utils/plates';
 
 	export let label = 'Bar weight';
-	export let helper = 'Changing this updates the default across the app.';
+	export let helper = 'Saved across the app.';
 	export let subtle = false;
 	export let value: BarWeight = 20;
 	export let onChange: (nextValue: BarWeight) => void = () => {};
@@ -66,10 +66,9 @@
 	}
 
 	.bar-selector__options {
-		display: inline-flex;
-		align-items: center;
+		display: grid;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
 		gap: 0.45rem;
-		flex-wrap: wrap;
 	}
 
 	.bar-option {
@@ -77,7 +76,8 @@
 		align-items: baseline;
 		justify-content: center;
 		gap: 0.22rem;
-		min-width: 4.2rem;
+		min-width: 0;
+		width: 100%;
 		padding: 0.55rem 0.8rem;
 		border-radius: 999px;
 		border: 1px solid var(--outline);
@@ -119,10 +119,7 @@
 		background: color-mix(in srgb, var(--tone-tertiary-surface) 88%, white 12%);
 		border-color: color-mix(in srgb, var(--accent-primary) 26%, transparent);
 		color: var(--text-primary);
-		box-shadow:
-			0 10px 24px color-mix(in srgb, var(--accent-primary) 18%, transparent),
-			inset 0 1px 0 rgba(255, 255, 255, 0.42);
-		transform: translateY(-1px) scale(1.01);
+		box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.42);
 	}
 
 	.bar-option:active {
@@ -159,5 +156,19 @@
 
 	.bar-selector--subtle .bar-option__weight {
 		font-size: 0.94rem;
+	}
+
+	@media (max-width: 40rem) {
+		.bar-selector {
+			gap: 0.6rem;
+		}
+
+		.bar-selector__helper {
+			font-size: 0.74rem;
+		}
+
+		.bar-option {
+			padding: 0.52rem 0.7rem;
+		}
 	}
 </style>

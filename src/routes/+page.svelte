@@ -36,37 +36,37 @@
 		<p>{tagline}</p>
 	</div>
 
-	<section class="preference-strip">
-		<div class="preference-copy">
-			<p class="eyebrow">Default Bar</p>
-			<h2>{selectedBar} kg</h2>
-			<p>Used as the starting bar across the app.</p>
-		</div>
-
-		<BarSelector
-			label="Default setup"
-			helper="You can still switch it inside any calculator."
-			subtle={true}
-			bind:value={selectedBar}
-			onChange={(nextValue) => (selectedBar = nextValue)}
-		/>
-	</section>
-
 	<div class="mode-grid">
 		<section class="mode-card mode-card--primary">
-			<p class="eyebrow">Plan A Lift</p>
+			<p class="eyebrow">Pick Plates</p>
 			<h2>{modeLabels.findPlates}</h2>
 			<p>{modeDescriptions.findPlates}</p>
 			<md-filled-button href={resolve('/target')}>Open {modeLabels.findPlates}</md-filled-button>
 		</section>
 
 		<section class="mode-card">
-			<p class="eyebrow">Check The Bar</p>
+			<p class="eyebrow">Read The Bar</p>
 			<h2>{modeLabels.countPlates}</h2>
 			<p>{modeDescriptions.countPlates}</p>
 			<md-filled-tonal-button href={resolve('/current')}>Open {modeLabels.countPlates}</md-filled-tonal-button>
 		</section>
 	</div>
+
+	<section class="preference-strip">
+		<div class="preference-copy">
+			<p class="eyebrow">Default Bar</p>
+			<h2>{selectedBar} kg bar</h2>
+			<p>Used first on every screen.</p>
+		</div>
+
+		<BarSelector
+			label="Bar"
+			helper="You can change it per screen."
+			subtle={true}
+			bind:value={selectedBar}
+			onChange={(nextValue) => (selectedBar = nextValue)}
+		/>
+	</section>
 </section>
 
 <ul class="feature-list">
@@ -80,14 +80,14 @@
 
 <style>
 	.preference-strip {
-		display: flex;
+		display: grid;
+		grid-template-columns: minmax(0, 1fr) minmax(13rem, auto);
 		align-items: center;
-		justify-content: space-between;
-		gap: 1rem;
-		padding: 0.85rem 1rem;
+		gap: 0.9rem;
+		padding: 0.95rem 1rem;
 		border-radius: var(--radius-xl);
 		border: 1px solid var(--outline);
-		background: var(--texture-noise-muted), var(--tone-tertiary-surface);
+		background: color-mix(in srgb, var(--tone-tertiary-surface) 72%, var(--md-sys-color-surface-container-lowest) 28%);
 	}
 
 	.preference-copy {
@@ -116,7 +116,7 @@
 
 	.mode-card {
 		display: grid;
-		gap: 0.7rem;
+		gap: 0.6rem;
 		padding: 1rem;
 		background: var(--surface-4, var(--surface-1));
 		border: 1px solid var(--outline);
@@ -161,8 +161,6 @@
 		background: var(--surface-1);
 		border: 1px solid var(--outline);
 		border-radius: var(--radius-xl);
-		box-shadow: var(--shadow);
-		backdrop-filter: blur(18px);
 		font-size: var(--type-body-md);
 		color: var(--text-secondary);
 		line-height: var(--leading-surface);
@@ -178,12 +176,20 @@
 
 	@media (max-width: 42rem) {
 		.preference-strip {
-			display: grid;
-			justify-content: stretch;
+			grid-template-columns: 1fr;
+			padding: 0.9rem;
 		}
 
 		.mode-grid {
 			grid-template-columns: 1fr;
+		}
+
+		.mode-card {
+			padding: 0.95rem;
+		}
+
+		.feature-list li {
+			padding: 0.8rem 0.9rem;
 		}
 	}
 </style>
