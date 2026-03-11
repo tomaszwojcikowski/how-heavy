@@ -201,12 +201,6 @@
 					<!-- Change pills vs previous step -->
 					{#if stepIndex > 0}
 						<div class="step-diff">
-							{#if computed.upWeightMoveCost > 0}
-								<span class="diff-pill diff-pill--moves">
-									<span class="material-symbols-rounded" aria-hidden="true">swap_vert</span>
-									{computed.upWeightMoveCost} {computed.upWeightMoveCost === 1 ? 'move' : 'moves'} to load
-								</span>
-							{/if}
 							{#if computed.removals.length > 0}
 								<span class="diff-pill diff-pill--remove">
 									<span class="material-symbols-rounded" aria-hidden="true">remove</span>
@@ -468,12 +462,6 @@
 		background: var(--chip-neutral-surface);
 		color: var(--chip-neutral-text);
 		border-color: var(--chip-outline);
-	}
-
-	.diff-pill--moves {
-		background: var(--chip-info-surface);
-		border-color: var(--chip-info-border);
-		color: var(--chip-info-text);
 	}
 
 	/* Placeholders */

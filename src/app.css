@@ -23,8 +23,8 @@
 	--theme-on-surface: #132433;
 	--theme-on-surface-variant: #3b4c5c;
 	--theme-surface-text-primary: #132433;
-	--theme-surface-text-secondary: #3b4c5c;
-	--theme-surface-text-tertiary: #5a7085;
+	--theme-surface-text-secondary: #324758;
+	--theme-surface-text-tertiary: #51697f;
 	--theme-surface-lowest: #ffffff;
 	--theme-surface-low: #ecf4fb;
 	--theme-surface-container: #e6eef6;
@@ -59,7 +59,7 @@
 	--type-body-lg: 1.03rem;
 	--type-body-md: 0.95rem;
 	--type-body-sm: 0.88rem;
-	--type-label: 0.78rem;
+	--type-label: 0.8rem;
 	--leading-tight: 1.06;
 	--leading-copy: 1.48;
 	--leading-surface: 1.34;
@@ -188,8 +188,8 @@
 	--theme-on-surface: #351826;
 	--theme-on-surface-variant: #634252;
 	--theme-surface-text-primary: #351826;
-	--theme-surface-text-secondary: #634252;
-	--theme-surface-text-tertiary: #8a5b71;
+	--theme-surface-text-secondary: #553749;
+	--theme-surface-text-tertiary: #7a5166;
 	--theme-surface-lowest: #ffffff;
 	--theme-surface-low: #fff0f6;
 	--theme-surface-container: #fde8f1;
@@ -218,8 +218,15 @@ body {
 	font-family: 'Roboto Mono', 'Archivo', monospace !important;
 	font-weight: 700 !important;
 	color: var(--text-primary) !important;
-	font-variant-numeric: tabular-nums;
+	font-variant-numeric: tabular-nums lining-nums;
+	font-feature-settings: 'tnum' 1, 'lnum' 1;
 	letter-spacing: -0.02em;
+	text-shadow: 0 1px 1px color-mix(in srgb, var(--theme-shadow-color) 36%, transparent);
+}
+
+:where(input, button, .weight-display) {
+	font-variant-numeric: tabular-nums lining-nums;
+	font-feature-settings: 'tnum' 1, 'lnum' 1;
 }
 
 body {
@@ -820,8 +827,8 @@ p {
 		--surface-4: color-mix(in srgb, var(--md-sys-color-surface-bright) 88%, var(--md-sys-color-surface-container-highest) 12%);
 		--outline: var(--md-sys-color-outline-variant);
 		--text-primary: var(--md-sys-color-on-surface);
-		--text-secondary: var(--md-sys-color-on-surface-variant);
-		--text-tertiary: var(--md-sys-color-outline);
+		--text-secondary: color-mix(in srgb, var(--md-sys-color-on-surface-variant) 88%, white 12%);
+		--text-tertiary: color-mix(in srgb, var(--md-sys-color-outline) 82%, white 18%);
 		--accent-primary: var(--md-sys-color-primary);
 		--accent-secondary: var(--md-sys-color-secondary);
 		--accent-tertiary: var(--md-sys-color-tertiary);

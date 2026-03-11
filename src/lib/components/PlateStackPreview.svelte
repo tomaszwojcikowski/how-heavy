@@ -129,11 +129,6 @@
 				<div class="end-cap" style={`--end-cap-color:${barPalette.endCap};`} aria-hidden="true"></div>
 			</div>
 
-			<!-- Center label -->
-			<div class="bar-label">
-				<span>{barWeight} kg</span>
-			</div>
-
 			<!-- Right arm: sleeve + cap at the end; visual order heavy→light→sleeve→cap from center -->
 			<div class="arm arm--right" aria-label="Right side">
 				{#each renderedPlates as weight, i (`right-${weight}-${i}`)}
@@ -230,6 +225,7 @@
 		flex-direction: row;
 		align-items: center;
 		justify-content: center;
+		gap: clamp(1.8rem, 7vw, 3rem);
 		min-height: 8rem;
 		contain: layout;
 	}
@@ -409,26 +405,6 @@
 		border-radius: 2px;
 	}
 
-	/* Center bar label */
-	.bar-label {
-		display: grid;
-		justify-items: center;
-		padding: 0.4rem 0.65rem;
-		border-radius: 6px;
-		background: var(--md-sys-color-surface-container-lowest);
-		border: 1px solid var(--outline);
-		margin: 0 0.4rem;
-		flex-shrink: 0;
-		white-space: nowrap;
-	}
-
-	.bar-label span {
-		font-family: 'Archivo', sans-serif;
-		font-size: 0.95rem;
-		font-weight: 800;
-		color: var(--text-primary);
-	}
-
 	.empty-state {
 		display: grid;
 		gap: 0.3rem;
@@ -461,9 +437,5 @@
 			filter: saturate(0.88);
 		}
 
-		.bar-label {
-			background: var(--tone-neutral-surface);
-			border-color: var(--chip-outline);
-		}
 	}
 </style>
