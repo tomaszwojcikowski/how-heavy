@@ -8,9 +8,9 @@
 
 	export let result: TargetLoadResult;
 
-	const statusMeta: Record<TargetLoadResult['status'], { icon: string; label: string; tone: 'exact' | 'rounded' | 'warning' }> = {
-		exact: { icon: 'check_circle', label: 'Exact match', tone: 'exact' },
-		rounded: { icon: 'published_with_changes', label: 'Closest match', tone: 'rounded' },
+	const statusMeta: Record<TargetLoadResult['status'], { icon: string; label: string; tone: 'success' | 'info' | 'warning' }> = {
+		exact: { icon: 'check_circle', label: 'Exact match', tone: 'success' },
+		rounded: { icon: 'published_with_changes', label: 'Closest match', tone: 'info' },
 		'below-bar': { icon: 'warning', label: 'Below bar', tone: 'warning' },
 		invalid: { icon: 'error', label: 'Check input', tone: 'warning' }
 	};
@@ -64,7 +64,7 @@
 			</div>
 			<md-assist-chip
 				class="status-chip"
-				class:status-chip--rounded={statusMeta[result.status].tone === 'rounded'}
+				class:status-chip--info={statusMeta[result.status].tone === 'info'}
 				class:status-chip--warning={statusMeta[result.status].tone === 'warning'}
 				label={statusMeta[result.status].label}
 			>
@@ -97,7 +97,7 @@
 				{/if}
 			</div>
 
-			<PlateStackPreview barWeight={result.barWeight} plates={result.plates} />
+			<PlateStackPreview barWeight={result.barWeight} plates={result.plates} viewTransitionName="barbell-preview" />
 
 			<div class="result-card__actions">
 				<md-filled-tonal-button
@@ -119,12 +119,15 @@
 	.result-card {
 		display: grid;
 		gap: 1rem;
-		padding: 1.2rem;
-		background: var(--surface-1);
-		border: 1px solid var(--outline);
+		padding: var(--card-padding);
+		background: var(--surface-card);
+		border: 1px solid var(--border-subtle);
 		border-radius: var(--radius-xl);
-		box-shadow: var(--shadow);
+		box-shadow: var(--shadow-soft);
+		backdrop-filter: blur(18px);
+		-webkit-backdrop-filter: blur(18px);
 		transition: box-shadow 180ms cubic-bezier(0.2, 0, 0, 1);
+		contain: layout paint style;
 	}
 
 	.result-content {
@@ -152,15 +155,11 @@
 		word-break: break-word;
 	}
 
-	.result-card__status {
-		/* removed – using md-assist-chip now */
-	}
-
 	:global(.status-chip) {
-		--md-assist-chip-container-color: var(--tone-secondary-surface);
-		--md-assist-chip-outline-color: var(--tone-secondary-border);
-		--md-assist-chip-label-text-color: var(--tone-secondary-text);
-		--md-assist-chip-icon-color: var(--tone-secondary-text);
+		--md-assist-chip-container-color: var(--chip-success-surface);
+		--md-assist-chip-outline-color: var(--chip-success-border);
+		--md-assist-chip-label-text-color: var(--chip-success-text);
+		--md-assist-chip-icon-color: var(--chip-success-text);
 		--md-assist-chip-label-text-weight: 700;
 		--md-assist-chip-label-text-size: 0.72rem;
 		--md-assist-chip-label-text-transform: uppercase;
@@ -169,12 +168,18 @@
 		flex-shrink: 0;
 	}
 
-	:global(.status-chip--rounded),
+	:global(.status-chip--info) {
+		--md-assist-chip-container-color: var(--chip-info-surface);
+		--md-assist-chip-outline-color: var(--chip-info-border);
+		--md-assist-chip-label-text-color: var(--chip-info-text);
+		--md-assist-chip-icon-color: var(--chip-info-text);
+	}
+
 	:global(.status-chip--warning) {
-		--md-assist-chip-container-color: var(--tone-primary-surface);
-		--md-assist-chip-outline-color: var(--tone-primary-border);
-		--md-assist-chip-label-text-color: var(--tone-primary-text);
-		--md-assist-chip-icon-color: var(--tone-primary-text);
+		--md-assist-chip-container-color: var(--chip-warning-surface);
+		--md-assist-chip-outline-color: var(--chip-warning-border);
+		--md-assist-chip-label-text-color: var(--chip-warning-text);
+		--md-assist-chip-icon-color: var(--chip-warning-text);
 	}
 
 	:global(.status-chip [slot='icon']) {
@@ -232,9 +237,9 @@
 		display: grid;
 		gap: 0.35rem;
 		padding: 0.85rem;
-		border-radius: 8px;
-		background: var(--md-sys-color-surface-container-lowest);
-		border: 1px solid var(--outline);
+		border-radius: var(--radius-lg);
+		background: color-mix(in srgb, var(--md-sys-color-surface-container-lowest) 88%, transparent);
+		border: 1px solid var(--border-subtle);
 	}
 
 	small {
@@ -260,8 +265,8 @@
 
 	@media (max-width: 40rem) {
 		.result-card {
-			padding: 1rem;
-			box-shadow: none;
+			padding: var(--card-padding-mobile);
+			box-shadow: var(--shadow-mobile);
 		}
 
 		.result-card__header {

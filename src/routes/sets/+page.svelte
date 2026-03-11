@@ -284,12 +284,15 @@
 	.setup-card {
 		display: grid;
 		gap: 1.25rem;
-		padding: 1.2rem;
-		background: var(--surface-1);
-		border: 1px solid var(--outline);
+		padding: var(--card-padding);
+		background: var(--surface-card);
+		border: 1px solid var(--border-subtle);
 		border-radius: var(--radius-xl);
-		box-shadow: var(--shadow);
+		box-shadow: var(--shadow-soft);
+		backdrop-filter: blur(18px);
+		-webkit-backdrop-filter: blur(18px);
 		transition: box-shadow 180ms cubic-bezier(0.2, 0, 0, 1);
+		contain: layout style;
 	}
 
 	.setup-field {
@@ -378,11 +381,14 @@
 		display: grid;
 		gap: 0.85rem;
 		padding: 1rem 1.1rem;
-		background: var(--surface-1);
-		border: 1px solid var(--outline);
+		background: var(--surface-card);
+		border: 1px solid var(--border-subtle);
 		border-radius: var(--radius-xl);
-		box-shadow: var(--shadow);
+		box-shadow: var(--shadow-soft);
+		backdrop-filter: blur(18px);
+		-webkit-backdrop-filter: blur(18px);
 		transition: box-shadow 180ms cubic-bezier(0.2, 0, 0, 1);
+		contain: layout style;
 	}
 
 	.step-card--resolved {
@@ -435,6 +441,7 @@
 		gap: 0.3rem;
 		padding: 0.3rem 0.65rem;
 		border-radius: 999px;
+		border: 1px solid transparent;
 		font-size: var(--type-label);
 		font-weight: 700;
 		letter-spacing: 0.02em;
@@ -446,24 +453,27 @@
 	}
 
 	.diff-pill--add {
-		background: var(--tone-secondary-surface);
-		color: var(--tone-secondary-text);
+		background: var(--chip-success-surface);
+		border-color: var(--chip-success-border);
+		color: var(--chip-success-text);
 	}
 
 	.diff-pill--remove {
-		background: var(--tone-primary-surface);
-		color: var(--tone-primary-text);
+		background: var(--chip-warning-surface);
+		border-color: var(--chip-warning-border);
+		color: var(--chip-warning-text);
 	}
 
 	.diff-pill--same {
-		background: var(--md-sys-color-surface-container-lowest);
-		color: var(--text-secondary);
-		border: 1px solid var(--outline);
+		background: var(--chip-neutral-surface);
+		color: var(--chip-neutral-text);
+		border-color: var(--chip-outline);
 	}
 
 	.diff-pill--moves {
-		background: color-mix(in srgb, var(--tone-tertiary-surface) 78%, white 22%);
-		color: var(--tone-tertiary-text);
+		background: var(--chip-info-surface);
+		border-color: var(--chip-info-border);
+		color: var(--chip-info-text);
 	}
 
 	/* Placeholders */
@@ -496,8 +506,8 @@
 	@media (max-width: 40rem) {
 		.setup-card,
 		.step-card {
-			padding: 1rem;
-			box-shadow: none;
+			padding: var(--card-padding-mobile);
+			box-shadow: var(--shadow-mobile);
 		}
 
 		.template-strip {

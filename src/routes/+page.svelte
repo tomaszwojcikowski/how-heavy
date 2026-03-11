@@ -85,10 +85,13 @@
 		grid-template-columns: minmax(0, 1fr) minmax(13rem, auto);
 		align-items: center;
 		gap: 0.9rem;
-		padding: 0.95rem 1rem;
-		border-radius: var(--radius-xl);
-		border: 1px solid var(--outline);
-		background: color-mix(in srgb, var(--tone-tertiary-surface) 72%, var(--md-sys-color-surface-container-lowest) 28%);
+		padding: 1rem;
+		border-radius: var(--radius-lg);
+		border: 1px solid var(--border-subtle);
+		background: color-mix(in srgb, var(--tone-tertiary-surface) 70%, var(--surface-card) 30%);
+		box-shadow: var(--shadow-mobile);
+		backdrop-filter: blur(14px);
+		-webkit-backdrop-filter: blur(14px);
 	}
 
 	.preference-copy {
@@ -119,13 +122,16 @@
 		display: grid;
 		gap: 0.6rem;
 		padding: 1rem;
-		background: var(--surface-4, var(--surface-1));
-		border: 1px solid var(--outline);
-		border-radius: var(--radius-xl);
+		background: color-mix(in srgb, var(--surface-card-strong) 88%, var(--surface-card) 12%);
+		border: 1px solid var(--border-subtle);
+		border-radius: var(--radius-lg);
+		box-shadow: var(--shadow-mobile);
+		backdrop-filter: blur(14px);
+		-webkit-backdrop-filter: blur(14px);
 	}
 
 	.mode-card--primary {
-		background: var(--texture-noise-muted), var(--md-sys-color-primary-container);
+		background: var(--texture-noise-muted), color-mix(in srgb, var(--md-sys-color-primary-container) 78%, var(--surface-card) 22%);
 	}
 
 	.mode-card h2 {
@@ -158,10 +164,13 @@
 		display: flex;
 		align-items: flex-start;
 		gap: 0.8rem;
-		padding: 0.9rem 1rem;
-		background: var(--surface-1);
-		border: 1px solid var(--outline);
+		padding: 1rem;
+		background: var(--surface-card);
+		border: 1px solid var(--border-subtle);
 		border-radius: var(--radius-xl);
+		box-shadow: var(--shadow-mobile);
+		backdrop-filter: blur(14px);
+		-webkit-backdrop-filter: blur(14px);
 		font-size: var(--type-body-md);
 		color: var(--text-secondary);
 		line-height: var(--leading-surface);
@@ -178,7 +187,7 @@
 	@media (max-width: 42rem) {
 		.preference-strip {
 			grid-template-columns: 1fr;
-			padding: 0.9rem;
+			padding: 1rem;
 		}
 
 		.mode-grid {

@@ -153,11 +153,14 @@
 	.control-card {
 		display: grid;
 		gap: 0.9rem;
-		padding: 1.2rem;
-		background: var(--surface-1);
-		border: 1px solid var(--outline);
+		padding: var(--card-padding);
+		background: var(--surface-card);
+		border: 1px solid var(--border-subtle);
 		border-radius: var(--radius-xl);
-		box-shadow: var(--shadow);
+		box-shadow: var(--shadow-soft);
+		backdrop-filter: blur(18px);
+		-webkit-backdrop-filter: blur(18px);
+		contain: layout style;
 	}
 
 	.target-result {
@@ -184,6 +187,7 @@
 		overflow-x: auto;
 		gap: 0.45rem;
 		scrollbar-width: none;
+		overscroll-behavior-x: contain;
 	}
 
 	.target-presets::-webkit-scrollbar {
@@ -192,13 +196,13 @@
 
 	:global(.target-preset) {
 		--md-filter-chip-container-shape: 999px;
-		--md-filter-chip-unselected-container-color: transparent;
-		--md-filter-chip-unselected-outline-color: var(--outline);
-		--md-filter-chip-unselected-label-text-color: var(--text-secondary);
-		--md-filter-chip-selected-container-color: var(--tone-tertiary-surface);
-		--md-filter-chip-selected-outline-color: var(--tone-tertiary-border);
-		--md-filter-chip-selected-label-text-color: var(--tone-tertiary-text);
-		--md-filter-chip-selected-hover-label-text-color: var(--tone-tertiary-text);
+		--md-filter-chip-unselected-container-color: var(--chip-neutral-surface);
+		--md-filter-chip-unselected-outline-color: var(--chip-outline);
+		--md-filter-chip-unselected-label-text-color: var(--chip-neutral-text);
+		--md-filter-chip-selected-container-color: var(--chip-info-surface);
+		--md-filter-chip-selected-outline-color: var(--chip-info-border);
+		--md-filter-chip-selected-label-text-color: var(--chip-info-text);
+		--md-filter-chip-selected-hover-label-text-color: var(--chip-info-text);
 		--md-filter-chip-label-text-size: 0.78rem;
 		--md-filter-chip-label-text-weight: 700;
 	}
@@ -210,8 +214,8 @@
 
 	@media (max-width: 40rem) {
 		.control-card {
-			padding: 1rem;
-			box-shadow: none;
+			padding: var(--card-padding-mobile);
+			box-shadow: var(--shadow-mobile);
 		}
 
 		.target-toolbar {

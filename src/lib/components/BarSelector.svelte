@@ -77,7 +77,12 @@
 	.bar-selector__options {
 		display: grid;
 		grid-template-columns: repeat(2, minmax(0, 1fr));
-		gap: 0.45rem;
+		gap: 0;
+		border-radius: 16px;
+		border: 1px solid var(--border-subtle);
+		background: color-mix(in srgb, var(--md-sys-color-surface-container-lowest) 84%, transparent);
+		box-shadow: var(--shadow-mobile);
+		overflow: hidden;
 	}
 
 	.bar-option {
@@ -87,10 +92,9 @@
 		gap: 0.22rem;
 		min-width: 0;
 		width: 100%;
-		padding: 0.55rem 0.8rem;
-		border-radius: 999px;
-		border: 1px solid var(--outline);
-		background: color-mix(in srgb, var(--md-sys-color-surface-container-lowest) 86%, transparent);
+		padding: 0.7rem 0.85rem;
+		border: 0;
+		background: transparent;
 		color: var(--text-secondary);
 		cursor: pointer;
 		transition:
@@ -101,6 +105,10 @@
 			box-shadow 180ms cubic-bezier(0.2, 0, 0, 1);
 		position: relative;
 		overflow: hidden;
+	}
+
+	.bar-option + .bar-option {
+		border-left: 1px solid var(--border-subtle);
 	}
 
 	.bar-option__theme-dot {
@@ -120,15 +128,16 @@
 	}
 
 	.bar-option:hover {
-		border-color: color-mix(in srgb, var(--accent-primary) 34%, var(--outline));
+		background: color-mix(in srgb, var(--surface-card-strong) 74%, transparent);
 		color: var(--text-primary);
 	}
 
 	.bar-option--selected {
-		background: color-mix(in srgb, var(--tone-tertiary-surface) 88%, white 12%);
-		border-color: color-mix(in srgb, var(--accent-primary) 26%, transparent);
+		background: color-mix(in srgb, var(--tone-tertiary-surface) 82%, white 18%);
 		color: var(--text-primary);
-		box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.42);
+		box-shadow:
+			inset 0 1px 0 rgba(255, 255, 255, 0.42),
+			inset 0 0 0 1px color-mix(in srgb, var(--accent-primary) 24%, transparent);
 	}
 
 	.bar-option:active {
@@ -160,11 +169,15 @@
 
 	.bar-selector--subtle .bar-option {
 		min-width: 3.7rem;
-		padding: 0.4rem 0.68rem;
+		padding: 0.5rem 0.68rem;
 	}
 
 	.bar-selector--subtle .bar-option__weight {
 		font-size: 0.94rem;
+	}
+
+	.bar-selector--subtle .bar-selector__options {
+		border-radius: 14px;
 	}
 
 	@media (max-width: 40rem) {
@@ -177,7 +190,7 @@
 		}
 
 		.bar-option {
-			padding: 0.52rem 0.7rem;
+			padding: 0.62rem 0.72rem;
 		}
 	}
 </style>

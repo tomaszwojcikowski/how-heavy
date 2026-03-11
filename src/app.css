@@ -40,8 +40,19 @@
 	--theme-inverse-primary: #a8c8ff;
 	--page-bg: var(--texture-noise-muted), var(--theme-background);
 	--shadow: 0 18px 50px var(--theme-shadow-color);
+	--shadow-soft: 0 14px 34px color-mix(in srgb, var(--theme-shadow-color) 88%, transparent);
+	--shadow-mobile: 0 1px 3px color-mix(in srgb, var(--theme-shadow-color) 58%, transparent);
+	--shadow-floating: 0 18px 38px color-mix(in srgb, var(--theme-shadow-color) 92%, transparent);
+	--border-subtle: color-mix(in srgb, var(--outline) 84%, white 16%);
+	--surface-card: color-mix(in srgb, var(--surface-1) 94%, var(--md-sys-color-surface-container-lowest) 6%);
+	--surface-card-strong: color-mix(in srgb, var(--surface-2) 88%, var(--md-sys-color-surface-container-lowest) 12%);
+	--surface-floating: color-mix(in srgb, var(--surface-3) 82%, transparent);
+	--surface-floating-solid: color-mix(in srgb, var(--surface-2) 90%, var(--md-sys-color-surface-container-lowest) 10%);
+	--card-padding: 1.2rem;
+	--card-padding-mobile: 1rem;
 	--radius-xl: 16px;
-	--radius-lg: 10px;
+	--radius-lg: 12px;
+	--radius-md: 8px;
 	--type-display: clamp(2.2rem, 5vw, 4rem);
 	--type-headline: clamp(1.9rem, 4vw, 3rem);
 	--type-title: 1.15rem;
@@ -117,6 +128,27 @@
 	--tone-tertiary-surface: color-mix(in srgb, var(--md-sys-color-tertiary-container) 72%, var(--md-sys-color-surface-container-lowest));
 	--tone-tertiary-border: color-mix(in srgb, var(--md-sys-color-tertiary) 24%, transparent);
 	--tone-tertiary-text: var(--md-sys-color-on-tertiary-container);
+	--tone-warning-surface: color-mix(in srgb, var(--md-sys-color-error-container) 74%, var(--md-sys-color-surface-container-lowest));
+	--tone-warning-border: color-mix(in srgb, var(--md-sys-color-error) 28%, transparent);
+	--tone-warning-text: var(--md-sys-color-on-error-container);
+	--tone-neutral-surface: color-mix(in srgb, var(--md-sys-color-surface-container-high) 68%, var(--md-sys-color-surface-container-lowest));
+	--tone-neutral-border: color-mix(in srgb, var(--md-sys-color-outline) 18%, transparent);
+	--tone-neutral-text: color-mix(in srgb, var(--md-sys-color-on-surface) 74%, var(--md-sys-color-on-surface-variant) 26%);
+	--chip-success-surface: var(--tone-secondary-surface);
+	--chip-success-border: var(--tone-secondary-border);
+	--chip-success-text: var(--tone-secondary-text);
+	--chip-info-surface: var(--tone-tertiary-surface);
+	--chip-info-border: var(--tone-tertiary-border);
+	--chip-info-text: var(--tone-tertiary-text);
+	--chip-warning-surface: var(--tone-warning-surface);
+	--chip-warning-border: var(--tone-warning-border);
+	--chip-warning-text: var(--tone-warning-text);
+	--chip-neutral-surface: var(--tone-neutral-surface);
+	--chip-neutral-border: var(--tone-neutral-border);
+	--chip-neutral-text: var(--tone-neutral-text);
+	--chip-outline: color-mix(in srgb, var(--outline) 74%, transparent);
+	--plate-dark-contrast-ring: rgba(255, 255, 255, 0.08);
+	--plate-dark-glow: transparent;
 	--md-ref-typeface-plain: 'DM Sans', sans-serif;
 	--md-ref-typeface-brand: 'Archivo', sans-serif;
 	--md-sys-shape-corner-extra-small: 4px;
@@ -179,6 +211,7 @@ body {
 	min-height: 100%;
 	background: var(--page-bg);
 	color: var(--text-primary);
+	overscroll-behavior-y: none;
 }
 
 .weight-display {
@@ -191,8 +224,10 @@ body {
 
 body {
 	min-height: 100vh;
+	min-height: 100dvh;
 	line-height: var(--leading-copy);
 	position: relative;
+	overflow-x: clip;
 	transition:
 		background 280ms var(--md-sys-motion-easing-emphasized),
 		color 220ms var(--md-sys-motion-easing-standard);
@@ -245,12 +280,14 @@ p {
 
 .app-shell {
 	width: min(100%, 72rem);
+	min-height: 100dvh;
 	margin: 0 auto;
 	/* Extra bottom padding so fixed nav doesn't cover content */
 	padding: 1rem 1rem calc(5rem + env(safe-area-inset-bottom, 0px));
 	box-sizing: border-box;
 	position: relative;
 	z-index: 1;
+	contain: layout;
 }
 
 .topbar {
@@ -286,11 +323,12 @@ p {
 	grid-template-columns: repeat(3, 1fr);
 	gap: 0.65rem;
 	padding: 0.35rem;
-	background: var(--surface-3);
+	background: var(--surface-floating);
 	backdrop-filter: blur(16px);
-	border: 1px solid var(--outline);
+	-webkit-backdrop-filter: blur(16px);
+	border: 1px solid var(--border-subtle);
 	border-radius: 18px;
-	box-shadow: var(--shadow);
+	box-shadow: var(--shadow-floating);
 	/* Fixed bottom tab bar */
 	position: fixed;
 	bottom: max(0.75rem, env(safe-area-inset-bottom));
@@ -299,12 +337,14 @@ p {
 	width: calc(min(100vw, 72rem) - 2rem);
 	max-width: 38rem;
 	z-index: 10;
+	will-change: transform;
+	contain: layout paint style;
 }
 
 .primary-nav a {
 	padding: 0.6rem 0.5rem;
 	text-align: center;
-	border-radius: 12px;
+	border-radius: var(--radius-lg);
 	transition:
 		color var(--md-sys-motion-duration-short2) var(--md-sys-motion-easing-standard),
 		transform var(--md-sys-motion-duration-short2) var(--md-sys-motion-easing-standard),
@@ -360,22 +400,25 @@ p {
 .page-frame {
 	display: grid;
 	gap: 1rem;
+	contain: layout;
 }
 
 .hero-card,
 .feature-card,
 .placeholder-card {
-	background: var(--surface-1);
-	border: 1px solid var(--outline);
+	background: var(--surface-card);
+	border: 1px solid var(--border-subtle);
 	border-radius: var(--radius-xl);
-	box-shadow: var(--shadow);
+	box-shadow: var(--shadow-soft);
 	backdrop-filter: blur(18px);
+	-webkit-backdrop-filter: blur(18px);
+	contain: layout paint style;
 }
 
 .hero-card {
 	display: grid;
 	gap: 1.5rem;
-	padding: 1.4rem;
+	padding: calc(var(--card-padding) + 0.2rem);
 }
 
 .hero-copy {
@@ -411,7 +454,7 @@ p {
 	justify-content: center;
 	align-items: center;
 	min-height: 3.25rem;
-	border-radius: 10px;
+	border-radius: var(--radius-lg);
 	font-weight: 700;
 	padding: 0.75rem 1.1rem;
 	border: 1px solid transparent;
@@ -438,12 +481,15 @@ p {
 .loading-card {
 	display: grid;
 	gap: 0.9rem;
-	padding: 1.2rem;
-	background: var(--surface-1);
-	border: 1px solid var(--outline);
+	padding: var(--card-padding);
+	background: var(--surface-card);
+	border: 1px solid var(--border-subtle);
 	border-radius: var(--radius-xl);
-	box-shadow: var(--shadow);
+	box-shadow: var(--shadow-soft);
+	backdrop-filter: blur(18px);
+	-webkit-backdrop-filter: blur(18px);
 	overflow: hidden;
+	contain: layout paint style;
 }
 
 .loading-line,
@@ -511,6 +557,20 @@ p {
 	animation: var(--md-sys-motion-duration-medium1) var(--md-sys-motion-easing-emphasized) both vt-fade-in;
 }
 
+::view-transition-old(barbell-preview),
+::view-transition-new(barbell-preview) {
+	animation-duration: var(--md-sys-motion-duration-medium2);
+	animation-timing-function: var(--md-sys-motion-easing-emphasized);
+}
+
+::view-transition-old(barbell-preview) {
+	animation-name: vt-barbell-out;
+}
+
+::view-transition-new(barbell-preview) {
+	animation-name: vt-barbell-in;
+}
+
 @keyframes vt-fade-out {
 	to {
 		opacity: 0;
@@ -525,9 +585,25 @@ p {
 	}
 }
 
+@keyframes vt-barbell-out {
+	to {
+		opacity: 0;
+		transform: translateY(0.4rem) scale(0.985);
+	}
+}
+
+@keyframes vt-barbell-in {
+	from {
+		opacity: 0;
+		transform: translateY(0.4rem) scale(0.985);
+	}
+}
+
 @media (prefers-reduced-motion: reduce) {
 	::view-transition-old(root),
-	::view-transition-new(root) {
+	::view-transition-new(root),
+	::view-transition-old(barbell-preview),
+	::view-transition-new(barbell-preview) {
 		animation-duration: 0.01ms;
 	}
 }
@@ -538,7 +614,7 @@ p {
 
 .feature-card,
 .placeholder-card {
-	padding: 1.15rem;
+	padding: var(--card-padding);
 }
 
 .section-heading {
@@ -550,7 +626,7 @@ p {
 .placeholder-card {
 	display: grid;
 	gap: 0.85rem;
-	background: var(--surface-2);
+	background: var(--surface-card-strong);
 }
 
 .placeholder-row {
@@ -620,9 +696,10 @@ p {
 		transform: none;
 		border-radius: 14px;
 		bottom: max(0.5rem, env(safe-area-inset-bottom));
-		background: color-mix(in srgb, var(--surface-3) 94%, transparent);
-		backdrop-filter: blur(10px);
-		box-shadow: 0 10px 28px color-mix(in srgb, var(--theme-shadow-color) 70%, transparent);
+		background: color-mix(in srgb, var(--surface-floating-solid) 92%, transparent);
+		backdrop-filter: blur(12px);
+		-webkit-backdrop-filter: blur(12px);
+		box-shadow: var(--shadow-floating);
 	}
 
 	.primary-nav a {
@@ -650,19 +727,20 @@ p {
 	.feature-card,
 	.placeholder-card,
 	.loading-card {
-		box-shadow: none;
-		backdrop-filter: none;
+		box-shadow: var(--shadow-mobile);
+		backdrop-filter: blur(14px);
+		-webkit-backdrop-filter: blur(14px);
 	}
 
 	.hero-card {
 		gap: 1rem;
-		padding: 1.1rem;
+		padding: calc(var(--card-padding-mobile) + 0.1rem);
 	}
 
 	.feature-card,
 	.placeholder-card,
 	.loading-card {
-		padding: 1rem;
+		padding: var(--card-padding-mobile);
 	}
 
 	.hero-actions {
@@ -679,6 +757,16 @@ p {
 
 	.loading-grid--3 {
 		grid-template-columns: 1fr;
+	}
+}
+
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+	.primary-nav,
+	.hero-card,
+	.feature-card,
+	.placeholder-card,
+	.loading-card {
+		background: var(--surface-floating-solid);
 	}
 }
 
@@ -744,8 +832,27 @@ p {
 			var(--md-sys-color-primary),
 			color-mix(in srgb, var(--md-sys-color-primary) 76%, var(--md-sys-color-tertiary) 24%)
 		);
-		--interactive-primary-shadow: 0 10px 24px color-mix(in srgb, var(--md-sys-color-primary) 24%, transparent);
+		--interactive-primary-shadow: 0 10px 24px color-mix(in srgb, var(--md-sys-color-primary) 24%, transparent), 0 0 24px color-mix(in srgb, var(--md-sys-color-primary) 18%, transparent);
 		--shadow: 0 18px 50px rgba(0, 0, 0, 0.34);
+		--shadow-soft: 0 14px 30px rgba(0, 0, 0, 0.24);
+		--shadow-mobile: 0 1px 3px rgba(0, 0, 0, 0.24);
+		--shadow-floating: 0 20px 44px rgba(0, 0, 0, 0.34);
+		--border-subtle: color-mix(in srgb, var(--outline) 82%, white 18%);
+		--tone-secondary-surface: color-mix(in srgb, var(--md-sys-color-secondary-container) 62%, var(--md-sys-color-surface-container-lowest));
+		--tone-secondary-border: color-mix(in srgb, var(--md-sys-color-secondary) 42%, transparent);
+		--tone-secondary-text: color-mix(in srgb, var(--md-sys-color-on-secondary-container) 92%, white 8%);
+		--tone-tertiary-surface: color-mix(in srgb, var(--md-sys-color-tertiary-container) 64%, var(--md-sys-color-surface-container-lowest));
+		--tone-tertiary-border: color-mix(in srgb, var(--md-sys-color-tertiary) 42%, transparent);
+		--tone-tertiary-text: color-mix(in srgb, var(--md-sys-color-on-tertiary-container) 92%, white 8%);
+		--tone-warning-surface: color-mix(in srgb, var(--md-sys-color-error-container) 62%, var(--md-sys-color-surface-container-lowest));
+		--tone-warning-border: color-mix(in srgb, var(--md-sys-color-error) 42%, transparent);
+		--tone-warning-text: color-mix(in srgb, var(--md-sys-color-on-error-container) 92%, white 8%);
+		--tone-neutral-surface: color-mix(in srgb, var(--md-sys-color-surface-container-high) 84%, var(--md-sys-color-surface-container-lowest));
+		--tone-neutral-border: color-mix(in srgb, var(--md-sys-color-outline) 30%, transparent);
+		--tone-neutral-text: color-mix(in srgb, var(--md-sys-color-on-surface) 86%, var(--md-sys-color-on-surface-variant) 14%);
+		--chip-outline: color-mix(in srgb, var(--md-sys-color-outline) 34%, transparent);
+		--plate-dark-contrast-ring: rgba(255, 255, 255, 0.16);
+		--plate-dark-glow: color-mix(in srgb, var(--md-sys-color-primary) 10%, transparent);
 	}
 
 	body {
@@ -756,11 +863,19 @@ p {
 	.loading-pill,
 	.loading-block,
 	.primary-nav a,
+	.cta-primary,
 	.cta-secondary,
 	.placeholder-card,
 	.feature-card,
 	.hero-card {
 		color: inherit;
+	}
+
+	.cta-primary,
+	.primary-nav a.active {
+		box-shadow:
+			var(--interactive-primary-shadow),
+			0 0 0 1px color-mix(in srgb, var(--md-sys-color-on-primary) 16%, transparent);
 	}
 
 	.loading-line,

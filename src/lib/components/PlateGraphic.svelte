@@ -16,7 +16,7 @@
 <figure
 	class:stacked
 	class:bumper={plate.kind === 'bumper'}
-	style={`--plate-size:${size}px; --plate-color:${plate.color}; --plate-text:${plate.textColor}; --plate-edge:${plate.edgeColor}; --plate-thickness:${plate.thickness}px;`}
+	style={`--plate-size:${size}px; --plate-color:${plate.color}; --plate-text:${plate.textColor}; --plate-edge:${plate.edgeColor}; --plate-thickness:${plate.thickness}px; --plate-rim:${plate.rimColor ?? plate.accentColor};`}
 >
 	<svg viewBox={`0 0 ${viewBoxSize} ${viewBoxSize}`} role="img" aria-label={plate.label}>
 		{#if plate.kind === 'bumper' && rimColor}
@@ -49,7 +49,7 @@
 		position: relative;
 		width: var(--plate-size);
 		height: var(--plate-size);
-		filter: drop-shadow(0 10px 14px rgba(60, 29, 20, 0.12));
+		filter: drop-shadow(0 10px 14px rgba(60, 29, 20, 0.12)) drop-shadow(0 0 0 var(--plate-dark-glow));
 	}
 
 	figure.stacked {
@@ -76,5 +76,24 @@
 
 	figure.bumper svg {
 		filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.06));
+	}
+
+	@media (prefers-color-scheme: dark) {
+		figure {
+			filter: drop-shadow(0 14px 18px rgba(0, 0, 0, 0.34)) drop-shadow(0 0 12px var(--plate-dark-glow));
+		}
+
+		figure.bumper svg {
+			filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.34));
+		}
+
+		figure svg :global(circle) {
+			stroke-linejoin: round;
+		}
+
+		figcaption {
+			background: color-mix(in srgb, var(--surface-floating-solid) 88%, black 12%);
+			box-shadow: 0 0 0 1px var(--plate-dark-contrast-ring);
+		}
 	}
 </style>

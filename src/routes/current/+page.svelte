@@ -235,6 +235,7 @@
 				barWeight={summary.barWeight}
 				plates={groupedPlates}
 				onRemovePlate={removePlate}
+				viewTransitionName="barbell-preview"
 				emptyMessage="Tap plates above or load a preset to build the bar."
 				emptyHint="You only need to pick one side."
 			/>
@@ -301,13 +302,16 @@
 		display: flex;
 		align-items: baseline;
 		gap: 0.9rem;
-		padding: 0.85rem 1.2rem;
-		background: color-mix(in srgb, var(--surface-1) 92%, transparent);
+		padding: 1rem 1.2rem;
+		background: var(--surface-floating);
 		backdrop-filter: blur(20px);
-		border: 1px solid var(--outline);
+		-webkit-backdrop-filter: blur(20px);
+		border: 1px solid var(--border-subtle);
 		border-radius: var(--radius-xl);
-		box-shadow: var(--shadow);
+		box-shadow: var(--shadow-floating);
 		flex-wrap: wrap;
+		will-change: transform;
+		contain: layout paint style;
 	}
 
 	.totals-strip__weight {
@@ -340,12 +344,12 @@
 		align-items: center;
 		justify-content: center;
 		padding: 0.28rem 0.58rem;
-		border-radius: 999px;
-		background: color-mix(in srgb, var(--md-sys-color-surface-container-lowest) 84%, transparent);
-		border: 1px solid color-mix(in srgb, var(--outline) 78%, transparent);
+		border-radius: var(--radius-md);
+		background: var(--chip-neutral-surface);
+		border: 1px solid var(--chip-outline);
 		font-size: 0.72rem;
 		font-weight: 700;
-		color: var(--text-secondary);
+		color: var(--chip-neutral-text);
 	}
 
 	.totals-strip__chip--meta {
@@ -375,11 +379,14 @@
 	.viz-card {
 		display: grid;
 		gap: 1.1rem;
-		padding: 1.2rem;
-		background: var(--surface-1);
-		border: 1px solid var(--outline);
+		padding: var(--card-padding);
+		background: var(--surface-card);
+		border: 1px solid var(--border-subtle);
 		border-radius: var(--radius-xl);
-		box-shadow: var(--shadow);
+		box-shadow: var(--shadow-soft);
+		backdrop-filter: blur(18px);
+		-webkit-backdrop-filter: blur(18px);
+		contain: layout style;
 	}
 
 	.control-header {
@@ -393,11 +400,20 @@
 		display: flex;
 		gap: 0.5rem;
 		flex-wrap: wrap;
+		overscroll-behavior-x: contain;
 	}
 
 	:global(md-suggestion-chip.preset-btn [slot='icon']) {
 		font-size: 1rem;
 		font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+	}
+
+	:global(md-suggestion-chip.preset-btn) {
+		--md-suggestion-chip-container-color: var(--chip-neutral-surface);
+		--md-suggestion-chip-outline-color: var(--chip-outline);
+		--md-suggestion-chip-label-text-color: var(--chip-neutral-text);
+		--md-suggestion-chip-icon-color: var(--chip-neutral-text);
+		--md-suggestion-chip-label-text-weight: 700;
 	}
 
 	:global(md-outlined-button.clear-btn) {
@@ -487,10 +503,10 @@
 	@media (max-width: 40rem) {
 		.totals-strip {
 			top: 0;
-			padding: 0.75rem 0.9rem;
+			padding: 0.9rem 1rem;
 			gap: 0.55rem;
 			border-radius: 14px;
-			box-shadow: none;
+			box-shadow: var(--shadow-mobile);
 		}
 
 		.totals-strip__meta {
@@ -505,9 +521,9 @@
 
 		.control-card,
 		.viz-card {
-			padding: 1rem;
+			padding: var(--card-padding-mobile);
 			gap: 0.9rem;
-			box-shadow: none;
+			box-shadow: var(--shadow-mobile);
 		}
 
 		.control-header {

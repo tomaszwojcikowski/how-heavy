@@ -56,11 +56,6 @@
 		onChange(String(next));
 	}
 
-	function handleInput(e: Event) {
-		triggerPulse();
-		onChange((e.currentTarget as HTMLInputElement).value);
-	}
-
 	function handleRemove() {
 		triggerHaptic();
 		if (onRemove) onRemove();
@@ -121,7 +116,7 @@
 	bind:open={padOpen}
 	{value}
 	label="Enter {label.toLowerCase()}"
-	onSubmit={(val) => {
+	onSubmit={(val: string) => {
 		onChange(val);
 	}}
 	onClose={() => (padOpen = false)}

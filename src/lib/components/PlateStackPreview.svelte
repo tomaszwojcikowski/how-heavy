@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { scale, fly } from 'svelte/transition';
+	import { fly } from 'svelte/transition';
 	import { backOut } from 'svelte/easing';
 
 	import type { BarWeight, PlateCount, PlateWeight } from '$lib/types/gym';
@@ -13,6 +13,7 @@
 	export let emptyGhostWeights: PlateWeight[] = [20, 10, 2.5];
 	export let onRemovePlate: ((weight: PlateWeight) => void) | null = null;
 	export let realistic = false;
+	export let viewTransitionName = '';
 
 	import { triggerHaptic } from '$lib/utils/haptics';
 
@@ -80,7 +81,11 @@
 </script>
 
 <div class="stack-shell">
-	<div class="barbell-wrap" aria-label={`Barbell loaded with ${formatWeight(barWeight)}`}>
+	<div
+		class="barbell-wrap"
+		style:view-transition-name={viewTransitionName || undefined}
+		aria-label={`Barbell loaded with ${formatWeight(barWeight)}`}
+	>
 		<!-- Shaft runs behind everything, centered vertically -->
 		<div
 			class="shaft"
@@ -187,6 +192,9 @@
 		overflow-y: visible;
 		padding: 0.5rem 0;
 		scrollbar-width: none;
+		overscroll-behavior-x: contain;
+		contain: layout paint style;
+		will-change: transform;
 	}
 
 	.barbell-wrap::-webkit-scrollbar {
@@ -223,6 +231,7 @@
 		align-items: center;
 		justify-content: center;
 		min-height: 8rem;
+		contain: layout;
 	}
 
 	/* Each arm is a horizontal row of plates + sleeve + end-cap */
@@ -260,7 +269,8 @@
 			);
 		box-shadow:
 			inset 1px 0 0 rgba(255, 255, 255, 0.06),
-			inset -1px 0 0 rgba(0, 0, 0, 0.24);
+			inset -1px 0 0 rgba(0, 0, 0, 0.24),
+			0 0 0 1px color-mix(in srgb, var(--plate-dark-contrast-ring) 72%, transparent);
 		padding: 0;
 		cursor: default;
 		overflow: hidden;
@@ -366,7 +376,7 @@
 		right: 8%;
 		border-radius: 999px;
 		background: var(--plate-rim);
-		box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.12);
+		box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.12), 0 0 10px color-mix(in srgb, var(--plate-dark-glow) 55%, transparent);
 		opacity: 0.88;
 	}
 
@@ -435,5 +445,25 @@
 		font-size: 0.78rem;
 		line-height: 1.35;
 		color: var(--text-tertiary);
+	}
+
+	@media (prefers-color-scheme: dark) {
+		.plate {
+			box-shadow:
+				inset 1px 0 0 rgba(255, 255, 255, 0.1),
+				inset -1px 0 0 rgba(0, 0, 0, 0.38),
+				0 0 0 1px var(--plate-dark-contrast-ring),
+				0 0 12px color-mix(in srgb, var(--plate-dark-glow) 34%, transparent);
+		}
+
+		.plate--ghost {
+			opacity: 0.34;
+			filter: saturate(0.88);
+		}
+
+		.bar-label {
+			background: var(--tone-neutral-surface);
+			border-color: var(--chip-outline);
+		}
 	}
 </style>
