@@ -60,16 +60,16 @@
 				<p class="eyebrow">{eyebrowText}</p>
 				<h3>{headlineText}</h3>
 			</div>
-			<div
-				class="result-card__status"
-				class:rounded={statusMeta[result.status].tone === 'rounded'}
-				class:warning={statusMeta[result.status].tone === 'warning'}
+			<md-assist-chip
+				class="status-chip"
+				class:status-chip--rounded={statusMeta[result.status].tone === 'rounded'}
+				class:status-chip--warning={statusMeta[result.status].tone === 'warning'}
+				label={statusMeta[result.status].label}
 			>
-				<span class="material-symbols-rounded result-card__status-icon" aria-hidden="true"
+				<span slot="icon" class="material-symbols-rounded" aria-hidden="true"
 					>{statusMeta[result.status].icon}</span
 				>
-				<span>{statusMeta[result.status].label}</span>
-			</div>
+			</md-assist-chip>
 		</div>
 
 		{#if isRounded || isBelowBar}
@@ -98,17 +98,15 @@
 			<PlateStackPreview barWeight={result.barWeight} plates={result.plates} />
 
 			<div class="result-card__actions">
-				<button
-					type="button"
-					class="copy-btn"
+				<md-filled-tonal-button
 					onclick={copyWeight}
 					aria-label="Copy weight to clipboard"
 				>
-					<span class="material-symbols-rounded" aria-hidden="true"
+					<span slot="icon" class="material-symbols-rounded" aria-hidden="true"
 						>{copied ? 'check' : 'content_copy'}</span
 					>
 					{copied ? 'Copied' : 'Copy'}
-				</button>
+				</md-filled-tonal-button>
 			</div>
 		{/if}
 		</div><!-- /.result-content -->
@@ -153,31 +151,31 @@
 	}
 
 	.result-card__status {
+		/* removed – using md-assist-chip now */
+	}
+
+	:global(.status-chip) {
+		--md-assist-chip-container-color: var(--tone-secondary-surface);
+		--md-assist-chip-outline-color: var(--tone-secondary-border);
+		--md-assist-chip-label-text-color: var(--tone-secondary-text);
+		--md-assist-chip-icon-color: var(--tone-secondary-text);
+		--md-assist-chip-label-text-weight: 700;
+		--md-assist-chip-label-text-size: 0.72rem;
+		--md-assist-chip-label-text-transform: uppercase;
+		--md-assist-chip-label-text-tracking: 0.06em;
 		align-self: start;
 		flex-shrink: 0;
-		display: inline-flex;
-		align-items: center;
-		gap: 0.35rem;
-		padding: 0.4rem 0.75rem 0.4rem 0.6rem;
-		border-radius: 999px;
-		border: 1px solid var(--tone-secondary-border);
-		font-size: 0.78rem;
-		font-weight: 700;
-		text-transform: uppercase;
-		letter-spacing: 0.05em;
-		line-height: var(--leading-label);
-		background: var(--tone-secondary-surface);
-		color: var(--tone-secondary-text);
 	}
 
-	.result-card__status.rounded,
-	.result-card__status.warning {
-		background: var(--tone-primary-surface);
-		border-color: var(--tone-primary-border);
-		color: var(--tone-primary-text);
+	:global(.status-chip--rounded),
+	:global(.status-chip--warning) {
+		--md-assist-chip-container-color: var(--tone-primary-surface);
+		--md-assist-chip-outline-color: var(--tone-primary-border);
+		--md-assist-chip-label-text-color: var(--tone-primary-text);
+		--md-assist-chip-icon-color: var(--tone-primary-text);
 	}
 
-	.result-card__status-icon {
+	:global(.status-chip [slot='icon']) {
 		font-size: 0.95rem;
 		font-variation-settings: 'FILL' 1, 'wght' 500, 'GRAD' 0, 'opsz' 20;
 	}
@@ -253,27 +251,7 @@
 		display: flex;
 	}
 
-	.copy-btn {
-		display: inline-flex;
-		align-items: center;
-		gap: 0.4rem;
-		padding: 0.55rem 1rem;
-		border-radius: 999px;
-		border: 1px solid var(--tone-secondary-border);
-		background: var(--tone-secondary-surface);
-		color: var(--tone-secondary-text);
-		font-size: var(--type-body-sm);
-		font-weight: 700;
-		cursor: pointer;
-		transition: background 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
-	}
-
-	.copy-btn:hover {
-		background: color-mix(in srgb, var(--tone-secondary-surface) 88%, white 12%);
-		box-shadow: 0 4px 14px color-mix(in srgb, var(--accent-secondary) 18%, transparent);
-	}
-
-	.copy-btn .material-symbols-rounded {
+	:global(.result-card__actions md-filled-tonal-button [slot='icon']) {
 		font-size: 1.1rem;
 		font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
 	}

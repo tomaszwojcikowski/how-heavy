@@ -15,15 +15,14 @@
 </script>
 
 <div class="bar-stepper" role="group" aria-label={label}>
-	<button
-		type="button"
+	<md-icon-button
 		class="stepper-btn"
 		onclick={decrement}
 		aria-label="Switch to 15 kilogram bar"
 		disabled={value === 15}
 	>
 		<span class="material-symbols-rounded" aria-hidden="true">remove</span>
-	</button>
+	</md-icon-button>
 
 	<div class="stepper-value stepper-value--bar">
 		<span class="stepper-label">{label}</span>
@@ -32,15 +31,14 @@
 		<span class="stepper-caption">{value === 20 ? 'Blue theme' : 'Pink theme'}</span>
 	</div>
 
-	<button
-		type="button"
+	<md-icon-button
 		class="stepper-btn"
 		onclick={increment}
 		aria-label="Switch to 20 kilogram bar"
 		disabled={value === 20}
 	>
 		<span class="material-symbols-rounded" aria-hidden="true">add</span>
-	</button>
+	</md-icon-button>
 </div>
 
 <style>
@@ -63,39 +61,30 @@
 	}
 
 	.stepper-btn {
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		width: 3rem;
-		flex-shrink: 0;
-		border: none;
-		background: var(--md-sys-color-surface-container-low);
-		color: var(--text-secondary);
-		cursor: pointer;
-		transition: background 120ms cubic-bezier(0.2, 0, 0, 1), color 120ms cubic-bezier(0.2, 0, 0, 1);
+		/* replaced by :global below */
 	}
 
-	.stepper-btn:first-child {
+	:global(.bar-stepper md-icon-button.stepper-btn) {
+		--md-icon-button-state-layer-shape: 0;
+		--md-icon-button-state-layer-height: 4rem;
+		--md-icon-button-state-layer-width: 3rem;
+		--md-icon-button-icon-size: 1.1rem;
+		--md-icon-button-icon-color: var(--text-secondary);
+		--md-icon-button-hover-icon-color: var(--md-sys-color-primary);
+		--md-icon-button-pressed-icon-color: var(--md-sys-color-primary);
+		--md-icon-button-disabled-icon-opacity: 0.48;
+		width: 3rem;
+		height: 4rem;
+		flex-shrink: 0;
+		background: var(--md-sys-color-surface-container-low);
+	}
+
+	:global(.bar-stepper md-icon-button.stepper-btn:first-child) {
 		border-right: 1.5px solid var(--outline);
 	}
 
-	.stepper-btn:last-child {
+	:global(.bar-stepper md-icon-button.stepper-btn:last-child) {
 		border-left: 1.5px solid var(--outline);
-	}
-
-	.stepper-btn:hover:not(:disabled) {
-		background: var(--tone-primary-surface);
-		color: var(--tone-primary-text);
-	}
-
-	.stepper-btn:disabled {
-		cursor: default;
-		opacity: 0.48;
-	}
-
-	.stepper-btn .material-symbols-rounded {
-		font-size: 1.1rem;
-		font-variation-settings: 'FILL' 0, 'wght' 600, 'GRAD' 0, 'opsz' 20;
 	}
 
 	.stepper-value {

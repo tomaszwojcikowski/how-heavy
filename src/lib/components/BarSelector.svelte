@@ -30,6 +30,7 @@
 				<span class="bar-option__theme-dot" aria-hidden="true"></span>
 				<span class="bar-option__weight">{option}</span>
 				<span class="bar-option__unit">kg</span>
+				<md-ripple></md-ripple>
 			</button>
 		{/each}
 	</div>

@@ -80,18 +80,16 @@
 						onChange={(nextValue) => (targetValue = nextValue)}
 					/>
 
-					<div class="target-presets" role="group" aria-label="Common target presets">
+					<md-chip-set class="target-presets" aria-label="Common target presets">
 						{#each presets as preset (preset)}
-							<button
-								type="button"
-								class:target-preset--selected={parsedTarget === preset}
+							<md-filter-chip
 								class="target-preset"
+								label="{preset}"
+								selected={parsedTarget === preset}
 								onclick={() => (targetValue = String(preset))}
-							>
-								{preset}
-							</button>
+							></md-filter-chip>
 						{/each}
-					</div>
+					</md-chip-set>
 				</div>
 			</section>
 		</div>
@@ -195,33 +193,17 @@
 		gap: 0.45rem;
 	}
 
-	.target-preset {
-		display: inline-flex;
-		align-items: center;
-		justify-content: center;
-		padding: 0.35rem 0.7rem;
-		border-radius: 999px;
-		border: 1px solid var(--outline);
-		background: transparent;
-		color: var(--text-secondary);
-		font-size: 0.78rem;
-		font-weight: 700;
-		cursor: pointer;
-		transition:
-			background 120ms cubic-bezier(0.2, 0, 0, 1),
-			border-color 120ms cubic-bezier(0.2, 0, 0, 1),
-			color 120ms cubic-bezier(0.2, 0, 0, 1);
-	}
-
-	.target-preset:hover {
-		background: color-mix(in srgb, var(--tone-tertiary-surface) 64%, white 36%);
-		color: var(--text-primary);
-	}
-
-	.target-preset--selected {
-		background: var(--tone-tertiary-surface);
-		border-color: color-mix(in srgb, var(--tone-tertiary-border) 76%, transparent);
-		color: var(--tone-tertiary-text);
+	:global(.target-preset) {
+		--md-filter-chip-container-shape: 999px;
+		--md-filter-chip-unselected-container-color: transparent;
+		--md-filter-chip-unselected-outline-color: var(--outline);
+		--md-filter-chip-unselected-label-text-color: var(--text-secondary);
+		--md-filter-chip-selected-container-color: var(--tone-tertiary-surface);
+		--md-filter-chip-selected-outline-color: var(--tone-tertiary-border);
+		--md-filter-chip-selected-label-text-color: var(--tone-tertiary-text);
+		--md-filter-chip-selected-hover-label-text-color: var(--tone-tertiary-text);
+		--md-filter-chip-label-text-size: 0.78rem;
+		--md-filter-chip-label-text-weight: 700;
 	}
 
 	.target-loading-card {

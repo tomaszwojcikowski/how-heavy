@@ -60,15 +60,13 @@
 
 <div class="pct-stepper-row">
 	<div class:pct-stepper--pulse={pulseActive} class="pct-stepper" role="group" aria-label={label}>
-		<button
-			type="button"
+		<md-icon-button
 			class="stepper-btn"
 			onclick={decrement}
 			aria-label={decrementLabel}
-			tabindex="0"
 		>
 			<span class="material-symbols-rounded" aria-hidden="true">remove</span>
-		</button>
+		</md-icon-button>
 
 		<div class="stepper-value">
 			<input
@@ -85,26 +83,23 @@
 			<span class="stepper-unit" aria-hidden="true">{unit}</span>
 		</div>
 
-		<button
-			type="button"
+		<md-icon-button
 			class="stepper-btn"
 			onclick={increment}
 			aria-label={incrementLabel}
-			tabindex="0"
 		>
 			<span class="material-symbols-rounded" aria-hidden="true">add</span>
-		</button>
+		</md-icon-button>
 	</div>
 
 	{#if onRemove}
-		<button
-			type="button"
+		<md-icon-button
 			class="remove-btn"
 			onclick={onRemove}
 			aria-label={removeLabel}
 		>
 			<span class="material-symbols-rounded" aria-hidden="true">close</span>
-		</button>
+		</md-icon-button>
 	{/if}
 </div>
 
@@ -119,7 +114,7 @@
 	.pct-stepper {
 		display: flex;
 		align-items: stretch;
-		height: 2.4rem;
+		height: 2.5rem;
 		border-radius: 10px;
 		border: 1.5px solid var(--outline);
 		background: var(--md-sys-color-surface-container-lowest);
@@ -137,43 +132,27 @@
 		box-shadow: 0 0 0 4px color-mix(in srgb, var(--md-sys-color-primary) 10%, transparent);
 	}
 
-	/* ── Stepper buttons ── */
-	.stepper-btn {
-		display: flex;
-		align-items: center;
-		justify-content: center;
+	/* ── Icon buttons inside pill ── */
+	:global(.pct-stepper md-icon-button.stepper-btn) {
+		--md-icon-button-state-layer-shape: 0;
+		--md-icon-button-state-layer-height: 2.5rem;
+		--md-icon-button-state-layer-width: 2.1rem;
+		--md-icon-button-icon-size: 1.1rem;
+		--md-icon-button-icon-color: var(--text-secondary);
+		--md-icon-button-hover-icon-color: var(--md-sys-color-primary);
+		--md-icon-button-pressed-icon-color: var(--md-sys-color-primary);
 		width: 2.1rem;
+		height: 2.5rem;
 		flex-shrink: 0;
-		border: none;
 		background: var(--md-sys-color-surface-container-low);
-		color: var(--text-secondary);
-		cursor: pointer;
-		transition: background 120ms cubic-bezier(0.2, 0, 0, 1), color 120ms cubic-bezier(0.2, 0, 0, 1);
-		position: relative;
-		overflow: hidden;
 	}
 
-	.stepper-btn:first-child {
+	:global(.pct-stepper md-icon-button.stepper-btn:first-child) {
 		border-right: 1.5px solid var(--outline);
 	}
 
-	.stepper-btn:last-child {
+	:global(.pct-stepper md-icon-button.stepper-btn:last-child) {
 		border-left: 1.5px solid var(--outline);
-	}
-
-	.stepper-btn:hover {
-		background: var(--tone-primary-surface);
-		color: var(--tone-primary-text);
-	}
-
-	.stepper-btn:active {
-		background: color-mix(in srgb, var(--md-sys-color-primary) 18%, var(--md-sys-color-surface-container-low));
-		transform: scale(0.92);
-	}
-
-	.stepper-btn .material-symbols-rounded {
-		font-size: 1.1rem;
-		font-variation-settings: 'FILL' 0, 'wght' 600, 'GRAD' 0, 'opsz' 20;
 	}
 
 	/* ── Value display ── */
@@ -218,33 +197,12 @@
 	}
 
 	/* ── Remove button ── */
-	.remove-btn {
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		width: 2.1rem;
-		height: 2.1rem;
-		border-radius: 50%;
-		border: 1.5px solid var(--outline);
-		background: transparent;
-		color: var(--text-secondary);
-		cursor: pointer;
+	:global(md-icon-button.remove-btn) {
+		--md-icon-button-icon-size: 1rem;
+		--md-icon-button-icon-color: var(--text-secondary);
+		--md-icon-button-hover-icon-color: var(--md-sys-color-primary);
+		--md-icon-button-pressed-icon-color: var(--md-sys-color-primary);
+		--md-icon-button-state-layer-color: var(--md-sys-color-primary);
 		flex-shrink: 0;
-		transition: background 120ms cubic-bezier(0.2, 0, 0, 1), color 120ms cubic-bezier(0.2, 0, 0, 1), border-color 120ms cubic-bezier(0.2, 0, 0, 1);
-	}
-
-	.remove-btn:hover {
-		background: var(--tone-primary-surface);
-		color: var(--tone-primary-text);
-		border-color: var(--tone-primary-border);
-	}
-
-	.remove-btn:active {
-		transform: scale(0.94);
-	}
-
-	.remove-btn .material-symbols-rounded {
-		font-size: 1rem;
-		font-variation-settings: 'FILL' 0, 'wght' 500, 'GRAD' 0, 'opsz' 20;
 	}
 </style>

@@ -196,27 +196,25 @@
 					helper="Updates the shared bar preference for every calculator."
 					subtle={true}
 				/>
-				<button
-					type="button"
-					class:clear-btn--confirm={clearPending}
+				<md-outlined-button
 					class="clear-btn"
+					class:clear-btn--confirm={clearPending}
 					onclick={clearAll}
 					disabled={oneSidePlates.length === 0}
 				>
 					{clearPending ? 'Tap again to clear' : 'Clear'}
-				</button>
+				</md-outlined-button>
 			</div>
 
 			<div class="preset-strip" role="group" aria-label="Quick setup presets">
 				{#each QUICK_PRESETS as preset (preset.label)}
-					<button
-						type="button"
+					<md-suggestion-chip
 						class="preset-btn"
+						label={preset.label}
 						onclick={() => applyPlateChange([...preset.plates], `Loaded: ${preset.label}.`)}
 					>
-						<span class="material-symbols-rounded" aria-hidden="true">{preset.icon}</span>
-						{preset.label}
-					</button>
+						<span slot="icon" class="material-symbols-rounded" aria-hidden="true">{preset.icon}</span>
+					</md-suggestion-chip>
 				{/each}
 			</div>
 
@@ -394,6 +392,26 @@
 		flex-wrap: wrap;
 	}
 
+	:global(md-suggestion-chip.preset-btn [slot='icon']) {
+		font-size: 1rem;
+		font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+	}
+
+	:global(md-outlined-button.clear-btn) {
+		flex-shrink: 0;
+		--md-outlined-button-container-shape: 8px;
+	}
+
+	:global(md-outlined-button.clear-btn.clear-btn--confirm) {
+		--md-outlined-button-label-text-color: var(--tone-primary-text);
+		--md-outlined-button-hover-label-text-color: var(--tone-primary-text);
+		--md-outlined-button-focus-label-text-color: var(--tone-primary-text);
+		--md-outlined-button-pressed-label-text-color: var(--tone-primary-text);
+		--md-outlined-button-outline-color: var(--tone-primary-border);
+		--md-outlined-button-hover-outline-color: var(--tone-primary-border);
+		--md-outlined-button-focus-outline-color: var(--tone-primary-border);
+	}
+
 	.mirror-note {
 		display: flex;
 		align-items: flex-start;
@@ -412,55 +430,6 @@
 		color: var(--tone-secondary-text);
 		margin-top: 0.08rem;
 		flex-shrink: 0;
-	}
-
-	.preset-btn {
-		display: inline-flex;
-		align-items: center;
-		gap: 0.3rem;
-		padding: 0.45rem 0.85rem;
-		border-radius: 999px;
-		border: 1px solid var(--outline);
-		background: var(--md-sys-color-surface-container-lowest);
-		color: var(--text-secondary);
-		font-size: var(--type-body-sm);
-		font-weight: 600;
-		cursor: pointer;
-		transition: color 0.14s ease, background 0.14s ease, border-color 0.14s ease;
-	}
-
-	.preset-btn:hover {
-		color: var(--text-primary);
-		background: var(--tone-secondary-surface);
-		border-color: var(--tone-secondary-border);
-	}
-
-	.preset-btn .material-symbols-rounded {
-		font-size: 1rem;
-		font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
-	}
-
-	.clear-btn {
-		flex-shrink: 0;
-		border-radius: 8px;
-		padding: 0.6rem 1rem;
-		font-weight: 700;
-		border: 1px solid var(--outline);
-		background: var(--surface-4);
-		cursor: pointer;
-		color: var(--text-primary);
-	}
-
-	.clear-btn:disabled {
-		opacity: 0.7;
-		color: var(--text-tertiary);
-		cursor: not-allowed;
-	}
-
-	.clear-btn--confirm {
-		background: var(--tone-primary-surface);
-		border-color: var(--tone-primary-border);
-		color: var(--tone-primary-text);
 	}
 
 	.undo-toast {

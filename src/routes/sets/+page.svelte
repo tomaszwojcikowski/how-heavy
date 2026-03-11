@@ -267,10 +267,10 @@
 		{/each}
 
 		{#if steps.length < MAX_STEPS}
-			<button type="button" class="add-step-btn" onclick={addStep}>
-				<span class="material-symbols-rounded" aria-hidden="true">add</span>
+			<md-outlined-button class="add-step-btn" onclick={addStep}>
+				<span slot="icon" class="material-symbols-rounded" aria-hidden="true">add</span>
 				Add set
-			</button>
+			</md-outlined-button>
 		{/if}
 	</div>
 </section>
@@ -538,30 +538,9 @@
 	}
 
 	/* Add step button */
-	.add-step-btn {
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		gap: 0.5rem;
-		padding: 0.85rem;
-		border-radius: var(--radius-xl);
-		border: 1px solid var(--outline);
-		background: color-mix(in srgb, var(--md-sys-color-surface-container-lowest) 84%, transparent);
-		color: var(--text-secondary);
-		font-size: var(--type-body-md);
-		font-weight: 600;
-		cursor: pointer;
-		transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
-	}
-
-	.add-step-btn:hover {
-		background: var(--tone-secondary-surface);
-		border-color: var(--tone-secondary-border);
-		color: var(--tone-secondary-text);
-		box-shadow: var(--shadow);
-	}
-
-	.add-step-btn .material-symbols-rounded {
-		font-size: 1.2rem;
+	:global(md-outlined-button.add-step-btn) {
+		width: 100%;
+		--md-outlined-button-container-shape: var(--radius-xl);
+		--md-outlined-button-container-height: 3.2rem;
 	}
 </style>
