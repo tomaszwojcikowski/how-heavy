@@ -1,5 +1,7 @@
 <script lang="ts">
 	import { onDestroy } from 'svelte';
+	import { triggerHaptic } from '$lib/utils/haptics';
+	import NumberPad from '$lib/components/NumberPad.svelte';
 
 	export let value: string = '';
 	export let onChange: (value: string) => void;
@@ -14,10 +16,18 @@
 	export let decrementLabel: string = 'Decrease percentage';
 	export let incrementLabel: string = 'Increase percentage';
 
+	let padOpen = false;
+
+	function openPad() {
+		triggerHaptic();
+		padOpen = true;
+	}
+
 	let pulseActive = false;
 	let pulseTimeout: ReturnType<typeof setTimeout> | null = null;
 
 	function triggerPulse() {
+		triggerHaptic();
 		pulseActive = true;
 
 		if (pulseTimeout) {
@@ -51,6 +61,11 @@
 		onChange((e.currentTarget as HTMLInputElement).value);
 	}
 
+	function handleRemove() {
+		triggerHaptic();
+		if (onRemove) onRemove();
+	}
+
 	onDestroy(() => {
 		if (pulseTimeout) {
 			clearTimeout(pulseTimeout);
@@ -70,14 +85,14 @@
 
 		<div class="stepper-value">
 			<input
-				type="number"
-				inputmode="decimal"
-				class="stepper-input"
+				type="text"
+				inputmode="none"
+				readonly
+				class="stepper-input weight-display"
 				{value}
-				{min}
-				{max}
 				placeholder={placeholder}
-				oninput={handleInput}
+				onclick={openPad}
+				onfocus={openPad}
 				aria-label={label}
 			/>
 			<span class="stepper-unit" aria-hidden="true">{unit}</span>
@@ -95,14 +110,22 @@
 	{#if onRemove}
 		<md-icon-button
 			class="remove-btn"
-			onclick={onRemove}
+			onclick={handleRemove}
 			aria-label={removeLabel}
 		>
 			<span class="material-symbols-rounded" aria-hidden="true">close</span>
 		</md-icon-button>
 	{/if}
 </div>
-
+<NumberPad
+	bind:open={padOpen}
+	{value}
+	label="Enter {label.toLowerCase()}"
+	onSubmit={(val) => {
+		onChange(val);
+	}}
+	onClose={() => (padOpen = false)}
+/>
 <style>
 	.pct-stepper-row {
 		display: flex;

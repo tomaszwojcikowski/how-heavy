@@ -1,5 +1,6 @@
 <script lang="ts">
-	import { scale } from 'svelte/transition';
+	import { scale, fly } from 'svelte/transition';
+	import { backOut } from 'svelte/easing';
 
 	import type { BarWeight, PlateCount, PlateWeight } from '$lib/types/gym';
 	import { formatWeight } from '$lib/utils/formatting';
@@ -11,6 +12,16 @@
 	export let emptyHint = 'Tap a preset or add plates above to preview the load.';
 	export let emptyGhostWeights: PlateWeight[] = [20, 10, 2.5];
 	export let onRemovePlate: ((weight: PlateWeight) => void) | null = null;
+	export let realistic = false;
+
+	import { triggerHaptic } from '$lib/utils/haptics';
+
+	function handleRemove(weight: PlateWeight) {
+		if (onRemovePlate) {
+			triggerHaptic();
+			onRemovePlate(weight);
+		}
+	}
 
 	// heavy → light, used for both sides (left arm uses row-reverse CSS)
 	$: expandedPlates = plates.flatMap((plate) => Array.from({ length: plate.count }, () => plate.weight));
@@ -34,6 +45,22 @@
 
 	function plateEdge(weight: PlateWeight): string {
 		return PLATE_MAP[weight.toString() as keyof typeof PLATE_MAP].edgeColor;
+	}
+
+	function plateAccent(weight: PlateWeight): string {
+		return PLATE_MAP[weight.toString() as keyof typeof PLATE_MAP].accentColor;
+	}
+
+	function plateText(weight: PlateWeight): string {
+		return PLATE_MAP[weight.toString() as keyof typeof PLATE_MAP].textColor;
+	}
+
+	function plateRim(weight: PlateWeight): string {
+		return PLATE_MAP[weight.toString() as keyof typeof PLATE_MAP].rimColor ?? plateAccent(weight);
+	}
+
+	function plateKind(weight: PlateWeight): 'bumper' | 'change' {
+		return PLATE_MAP[weight.toString() as keyof typeof PLATE_MAP].kind;
 	}
 
 	$: barPalette =
@@ -72,13 +99,25 @@
 						class="plate"
 						class:plate--ghost={showingGhost}
 						class:plate--interactive={onRemovePlate && !showingGhost}
-						style="width:{plateThickness(weight)}px;height:{plateHeight(weight)}px;background:{plateColor(weight)};border-color:{plateEdge(weight)}"
-						onclick={onRemovePlate && !showingGhost ? () => onRemovePlate(weight) : undefined}
+						class:plate--realistic={realistic}
+						class:plate--bumper={plateKind(weight) === 'bumper'}
+						style="width:{plateThickness(weight)}px;height:{plateHeight(weight)}px;--plate-fill:{plateColor(weight)};--plate-edge:{plateEdge(weight)};--plate-accent:{plateAccent(weight)};--plate-text:{plateText(weight)};--plate-rim:{plateRim(weight)};border-color:{plateEdge(weight)}"
+						onclick={onRemovePlate && !showingGhost ? () => handleRemove(weight) : undefined}
 						aria-label={onRemovePlate && !showingGhost ? `Remove ${weight} kg plate` : undefined}
-						in:scale={{ duration: 180, start: 0.8 }}
-						out:scale={{ duration: 140, start: 0.85 }}
+						in:fly={{ y: -30, duration: 450, easing: backOut }}
+						out:fly={{ y: -20, duration: 250, easing: backOut }}
 					>
-						<span>{weight}</span>
+						{#if realistic}
+							<span class="plate__ridge plate__ridge--top" aria-hidden="true"></span>
+							<span class="plate__ridge plate__ridge--mid" aria-hidden="true"></span>
+							<span class="plate__ridge plate__ridge--bottom" aria-hidden="true"></span>
+							<span class="plate__hub" aria-hidden="true"></span>
+							{#if plateKind(weight) === 'bumper'}
+								<span class="plate__rim plate__rim--top" aria-hidden="true"></span>
+								<span class="plate__rim plate__rim--bottom" aria-hidden="true"></span>
+							{/if}
+						{/if}
+						<span class="plate__stamp">{weight}</span>
 					</svelte:element>
 				{/each}
 				<div class="sleeve" style={`--sleeve-color:${barPalette.sleeve};`} aria-hidden="true"></div>
@@ -100,13 +139,25 @@
 						class="plate"
 						class:plate--ghost={showingGhost}
 						class:plate--interactive={onRemovePlate && !showingGhost}
-						style="width:{plateThickness(weight)}px;height:{plateHeight(weight)}px;background:{plateColor(weight)};border-color:{plateEdge(weight)}"
-						onclick={onRemovePlate && !showingGhost ? () => onRemovePlate(weight) : undefined}
+						class:plate--realistic={realistic}
+						class:plate--bumper={plateKind(weight) === 'bumper'}
+						style="width:{plateThickness(weight)}px;height:{plateHeight(weight)}px;--plate-fill:{plateColor(weight)};--plate-edge:{plateEdge(weight)};--plate-accent:{plateAccent(weight)};--plate-text:{plateText(weight)};--plate-rim:{plateRim(weight)};border-color:{plateEdge(weight)}"
+						onclick={onRemovePlate && !showingGhost ? () => handleRemove(weight) : undefined}
 						aria-label={onRemovePlate && !showingGhost ? `Remove ${weight} kg plate` : undefined}
-						in:scale={{ duration: 180, start: 0.8 }}
-						out:scale={{ duration: 140, start: 0.85 }}
+						in:fly={{ y: -30, duration: 450, easing: backOut }}
+						out:fly={{ y: -20, duration: 250, easing: backOut }}
 					>
-						<span>{weight}</span>
+						{#if realistic}
+							<span class="plate__ridge plate__ridge--top" aria-hidden="true"></span>
+							<span class="plate__ridge plate__ridge--mid" aria-hidden="true"></span>
+							<span class="plate__ridge plate__ridge--bottom" aria-hidden="true"></span>
+							<span class="plate__hub" aria-hidden="true"></span>
+							{#if plateKind(weight) === 'bumper'}
+								<span class="plate__rim plate__rim--top" aria-hidden="true"></span>
+								<span class="plate__rim plate__rim--bottom" aria-hidden="true"></span>
+							{/if}
+						{/if}
+						<span class="plate__stamp">{weight}</span>
 					</svelte:element>
 				{/each}
 				<div class="sleeve" style={`--sleeve-color:${barPalette.sleeve};`} aria-hidden="true"></div>
@@ -192,15 +243,35 @@
 	/* Individual plate: tall narrow rectangle (side-profile view) */
 	.plate {
 		flex-shrink: 0;
+		position: relative;
 		border-radius: 3px;
 		border: 1px solid;
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		box-shadow: inset 1px 0 0 rgba(255, 255, 255, 0.06);
+		background:
+			linear-gradient(
+				180deg,
+				color-mix(in srgb, white 10%, var(--plate-fill)) 0%,
+				var(--plate-fill) 20%,
+				color-mix(in srgb, var(--plate-fill) 70%, var(--plate-edge)) 52%,
+				var(--plate-fill) 82%,
+				color-mix(in srgb, black 18%, var(--plate-fill)) 100%
+			);
+		box-shadow:
+			inset 1px 0 0 rgba(255, 255, 255, 0.06),
+			inset -1px 0 0 rgba(0, 0, 0, 0.24);
 		padding: 0;
-		background: none;
 		cursor: default;
+		overflow: hidden;
+	}
+
+	.plate--realistic {
+		border-radius: 8px;
+		box-shadow:
+			inset 1px 0 0 rgba(255, 255, 255, 0.12),
+			inset -1px 0 0 rgba(0, 0, 0, 0.28),
+			0 1px 2px rgba(0, 0, 0, 0.16);
 	}
 
 	.plate.plate--interactive {
@@ -223,13 +294,88 @@
 		filter: saturate(0.72);
 	}
 
-	.plate span {
+	.plate__stamp {
+		position: relative;
+		z-index: 2;
 		font-family: 'Archivo', sans-serif;
 		font-size: 0.6rem;
 		font-weight: 700;
-		color: rgba(255, 255, 255, 0.75);
+		color: color-mix(in srgb, var(--plate-text) 88%, white 12%);
 		writing-mode: vertical-rl;
 		transform: rotate(180deg);
+		text-shadow:
+			0 1px 1px rgba(0, 0, 0, 0.55),
+			0 0 8px rgba(0, 0, 0, 0.3);
+	}
+
+	.plate--realistic .plate__stamp {
+		padding: 0.18rem 0.04rem;
+		border-radius: 999px;
+		background: color-mix(in srgb, var(--plate-edge) 78%, black 22%);
+		box-shadow:
+			0 0 0 1px rgba(255, 255, 255, 0.08),
+			0 1px 2px rgba(0, 0, 0, 0.28);
+	}
+
+	.plate__ridge,
+	.plate__hub,
+	.plate__rim {
+		position: absolute;
+		left: 0;
+		right: 0;
+		pointer-events: none;
+	}
+
+	.plate__ridge {
+		height: 1px;
+		background: color-mix(in srgb, var(--plate-accent) 38%, transparent);
+		opacity: 0.42;
+	}
+
+	.plate__ridge--top {
+		top: 14%;
+	}
+
+	.plate__ridge--mid {
+		top: 50%;
+		transform: translateY(-50%);
+		opacity: 0.26;
+	}
+
+	.plate__ridge--bottom {
+		bottom: 14%;
+	}
+
+	.plate__hub {
+		top: 50%;
+		left: 18%;
+		right: 18%;
+		height: clamp(0.2rem, 9%, 0.45rem);
+		transform: translateY(-50%);
+		border-radius: 999px;
+		background: linear-gradient(180deg, #ece6df, #b8afa4 55%, #f7f2ed);
+		box-shadow:
+			0 0 0 1px rgba(49, 38, 30, 0.28),
+			inset 0 1px 0 rgba(255, 255, 255, 0.42);
+		opacity: 0.78;
+	}
+
+	.plate__rim {
+		height: 3px;
+		left: 8%;
+		right: 8%;
+		border-radius: 999px;
+		background: var(--plate-rim);
+		box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.12);
+		opacity: 0.88;
+	}
+
+	.plate__rim--top {
+		top: 6%;
+	}
+
+	.plate__rim--bottom {
+		bottom: 6%;
 	}
 
 	/* Sleeve: the bar extension plates slide onto */
@@ -237,8 +383,11 @@
 		flex-shrink: 0;
 		width: 1.2rem;
 		height: 0.75rem;
-		background: var(--sleeve-color);
+		background:
+			linear-gradient(180deg, rgba(255, 255, 255, 0.18), transparent 34%),
+			linear-gradient(90deg, color-mix(in srgb, var(--sleeve-color) 70%, white 30%), var(--sleeve-color) 62%, color-mix(in srgb, var(--sleeve-color) 78%, black 22%));
 		border-radius: 2px;
+		box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.16), inset 0 -1px 0 rgba(0, 0, 0, 0.18);
 	}
 
 	/* End cap: outer tip of the sleeve */
@@ -246,7 +395,7 @@
 		flex-shrink: 0;
 		width: 0.35rem;
 		height: 1.75rem;
-		background: var(--end-cap-color);
+		background: linear-gradient(180deg, color-mix(in srgb, var(--end-cap-color) 78%, white 22%), var(--end-cap-color) 58%, color-mix(in srgb, var(--end-cap-color) 70%, black 30%));
 		border-radius: 2px;
 	}
 

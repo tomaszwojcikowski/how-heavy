@@ -14,6 +14,7 @@
 	import { buildSetStepsFromTemplate, computeSmartSetSequence, SET_TEMPLATES, type SetTemplate } from '$lib/utils/sets';
 	import type { BarWeight, PlateCount } from '$lib/types/gym';
 	import { applyBarTheme } from '$lib/utils/theme';
+	import { triggerHaptic } from '$lib/utils/haptics';
 
 	const DEFAULT_PERCENTAGES = ['60', '70', '80', '85', '90'];
 	const MAX_STEPS = 10;
@@ -70,6 +71,7 @@
 	}
 
 	function addStep() {
+		triggerHaptic();
 		if (steps.length >= MAX_STEPS) return;
 		selectedTemplateId = null;
 		steps = [...steps, { id: nextId++, percentage: '' }];
@@ -86,6 +88,7 @@
 	}
 
 	function applyTemplate(template: SetTemplate) {
+		triggerHaptic();
 		const nextSteps = template.buildSteps
 			? template.buildSteps(parsedOneRm, selectedBar)
 			: buildSetStepsFromTemplate(template.percentages ?? []);
@@ -175,7 +178,11 @@
 					<div class="step-card__meta">
 						<span class="step-label">Set {stepIndex + 1}</span>
 						{#if computed}
-							<span class="step-weight">{formatWeight(computed.result.resolvedTotal ?? computed.result.requestedTotal)}</span>
+							<span class="step-weight weight-display"
+								>{formatWeight(
+									computed.result.resolvedTotal ?? computed.result.requestedTotal
+								)}</span
+							>
 						{/if}
 					</div>
 
@@ -231,6 +238,7 @@
 					<PlateStackPreview
 						barWeight={selectedBar}
 						plates={computed.result.plates}
+						realistic={true}
 						emptyMessage="Empty bar — no plates needed."
 						emptyHint="Use a warm-up preset or enter a percentage to preview plates for this set."
 					/>

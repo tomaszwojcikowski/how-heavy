@@ -1,15 +1,18 @@
 <script lang="ts">
 	import type { BarWeight } from '$lib/types/gym';
+	import { triggerHaptic } from '$lib/utils/haptics';
 
 	export let value: BarWeight = 20;
 	export let label: string = 'Bar weight';
 	export let onChange: (value: BarWeight) => void;
 
 	function increment() {
+		triggerHaptic();
 		onChange(20);
 	}
 
 	function decrement() {
+		triggerHaptic();
 		onChange(15);
 	}
 </script>
@@ -26,7 +29,7 @@
 
 	<div class="stepper-value stepper-value--bar">
 		<span class="stepper-label">{label}</span>
-		<strong class="stepper-number">{value}</strong>
+		<strong class="stepper-number weight-display">{value}</strong>
 		<span class="stepper-unit" aria-hidden="true">kg</span>
 		<span class="stepper-caption">{value === 20 ? 'Blue theme' : 'Pink theme'}</span>
 	</div>

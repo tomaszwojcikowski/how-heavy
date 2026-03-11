@@ -10,6 +10,7 @@
 	import type { BarWeight } from '$lib/types/gym';
 	import { resolveTargetLoad } from '$lib/utils/calculations';
 	import { applyBarTheme } from '$lib/utils/theme';
+	import { triggerHaptic } from '$lib/utils/haptics';
 
 	const presets = [40, 60, 80, 100, 120, 140];
 
@@ -33,6 +34,10 @@
 			barWeight: selectedBar,
 			value: targetValue
 		});
+	}
+	function applyPreset(preset: number) {
+		triggerHaptic();
+		targetValue = String(preset);
 	}
 </script>
 
@@ -80,7 +85,7 @@
 								class="target-preset"
 								label="{preset}"
 								selected={parsedTarget === preset}
-								onclick={() => (targetValue = String(preset))}
+								onclick={() => applyPreset(preset)}
 							></md-filter-chip>
 						{/each}
 					</md-chip-set>

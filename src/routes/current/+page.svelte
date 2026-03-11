@@ -12,6 +12,7 @@
 	import { formatWeight } from '$lib/utils/formatting';
 	import { getMaxPlateCountPerSide } from '$lib/utils/plates';
 	import { applyBarTheme } from '$lib/utils/theme';
+	import { triggerHaptic } from '$lib/utils/haptics';
 
 	const QUICK_PRESETS: { label: string; icon: string; plates: PlateWeight[] }[] = [
 		{ label: 'Empty bar', icon: 'fitness_center', plates: [] },
@@ -81,6 +82,7 @@
 	}
 
 	function stageClearIntent() {
+		triggerHaptic();
 		clearPending = true;
 
 		if (clearResetTimeout) {
@@ -94,6 +96,7 @@
 	}
 
 	function applyPlateChange(nextPlates: PlateWeight[], message: string) {
+		triggerHaptic();
 		const previousPlates = oneSidePlates;
 		oneSidePlates = nextPlates;
 		resetClearIntent();
@@ -166,14 +169,14 @@
 
 		<!-- Sticky total strip — always visible as user taps plates -->
 		<div class="totals-strip" aria-live="polite" aria-label="Running total">
-			<strong class="totals-strip__weight">{formatWeight(summary.totalWeight)}</strong>
+			<strong class="totals-strip__weight weight-display">{formatWeight(summary.totalWeight)}</strong>
 			<div class="totals-strip__meta">
 				<span class="totals-strip__label">Total</span>
 				<span class="sep">·</span>
 				<span class="totals-strip__label">Side</span>
-				<strong class="totals-strip__value">{formatWeight(summary.oneSideWeight)}</strong>
+				<strong class="totals-strip__value weight-display">{formatWeight(summary.oneSideWeight)}</strong>
 				<span class="sep">·</span>
-				<span class="totals-strip__label">{formatWeight(summary.barWeight)}</span>
+				<span class="totals-strip__label weight-display">{formatWeight(summary.barWeight)}</span>
 			</div>
 			{#if showStickyPlateSummary}
 				<div class="totals-strip__chips" aria-label="Plate summary per side">

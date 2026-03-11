@@ -6,10 +6,21 @@
 	import type { PlateWeight } from '$lib/types/gym';
 	import { getMaxPlateCountPerSide, PLATE_DEFINITIONS } from '$lib/utils/plates';
 	import { summarizePlateCounts } from '$lib/utils/calculations';
+	import { triggerHaptic } from '$lib/utils/haptics';
 
 	export let selectedPlates: PlateWeight[] = [];
 	export let onAdd: (weight: PlateWeight) => void = () => {};
 	export let onRemove: (weight: PlateWeight) => void = () => {};
+
+	function handleAdd(weight: PlateWeight) {
+		triggerHaptic();
+		onAdd(weight);
+	}
+
+	function handleRemove(weight: PlateWeight) {
+		triggerHaptic();
+		onRemove(weight);
+	}
 
 	const plateGroups = [
 		{
@@ -86,12 +97,12 @@
 							<button
 								type="button"
 								class="plate-choice__action plate-choice__action--remove"
-								onpointerdown={() => count > 0 && startHold(() => onRemove(plate.weight))}
+								onpointerdown={() => count > 0 && startHold(() => handleRemove(plate.weight))}
 								onpointerup={endHold}
 								onpointerleave={endHold}
 								onpointercancel={endHold}
 								onclick={(e: MouseEvent) => {
-									if (e.detail === 0 && count > 0) onRemove(plate.weight);
+									if (e.detail === 0 && count > 0) handleRemove(plate.weight);
 								}}
 								disabled={count === 0}
 								aria-label={`Remove ${plate.weight} kilogram plate`}
@@ -101,12 +112,12 @@
 							<button
 								type="button"
 								class="plate-choice__action plate-choice__action--add"
-								onpointerdown={() => !atMaxCount && startHold(() => onAdd(plate.weight))}
+								onpointerdown={() => !atMaxCount && startHold(() => handleAdd(plate.weight))}
 								onpointerup={endHold}
 								onpointerleave={endHold}
 								onpointercancel={endHold}
 								onclick={(e: MouseEvent) => {
-									if (e.detail === 0 && !atMaxCount) onAdd(plate.weight);
+									if (e.detail === 0 && !atMaxCount) handleAdd(plate.weight);
 								}}
 								disabled={atMaxCount}
 								aria-label={`Add ${plate.weight} kilogram plate`}
@@ -126,7 +137,7 @@
 				{#each selectedCounts as plate (plate.weight)}
 					<md-input-chip
 						label="{plate.weight} kg × {plate.count}"
-						onremove={() => onRemove(plate.weight)}
+						onremove={() => handleRemove(plate.weight)}
 						in:scale={{ duration: 160, start: 0.85 }}
 						out:scale={{ duration: 120, start: 0.9 }}
 					></md-input-chip>

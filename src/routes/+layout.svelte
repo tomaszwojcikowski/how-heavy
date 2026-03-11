@@ -7,12 +7,14 @@
 	import { modeLabels, navLabels } from '$lib/site';
 	import { loadCalculatorState } from '$lib/stores/calculator';
 	import { applyBarTheme } from '$lib/utils/theme';
+	import { triggerHaptic } from '$lib/utils/haptics';
 	import '$lib/material';
 	import '../app.css';
 
 	let { children } = $props();
 
 	onNavigate((navigation) => {
+		triggerHaptic();
 		if (!document.startViewTransition) return;
 		return new Promise((resolve) => {
 			document.startViewTransition(async () => {

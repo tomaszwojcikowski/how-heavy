@@ -3,6 +3,7 @@
 	import { cubicOut } from 'svelte/easing';
 	import PlateStackPreview from '$lib/components/PlateStackPreview.svelte';
 	import { formatWeight } from '$lib/utils/formatting';
+	import { triggerHaptic } from '$lib/utils/haptics';
 	import type { PlateCount, TargetLoadResult } from '$lib/types/gym';
 
 	export let result: TargetLoadResult;
@@ -36,6 +37,7 @@
 	let copied = false;
 
 	function copyWeight() {
+		triggerHaptic(15);
 		const total = formatWeight(result.resolvedTotal ?? result.requestedTotal);
 		const breakdown =
 			result.plates.length > 0 ? ' (' + formatPlatesPerSide(result.plates) + ' per side)' : '';
@@ -58,7 +60,7 @@
 		<div class="result-card__header">
 			<div class="result-card__headline">
 				<p class="eyebrow">{eyebrowText}</p>
-				<h3>{headlineText}</h3>
+					<h3 class="weight-display">{headlineText}</h3>
 			</div>
 			<md-assist-chip
 				class="status-chip"
@@ -81,16 +83,16 @@
 				{#if isRounded}
 					<div>
 						<small>Requested</small>
-						<strong>{formatWeight(result.requestedTotal)}</strong>
+						<strong class="weight-display">{formatWeight(result.requestedTotal)}</strong>
 					</div>
 					<div>
 						<small>Loaded</small>
-						<strong>{formatWeight(result.resolvedTotal)}</strong>
+						<strong class="weight-display">{formatWeight(result.resolvedTotal)}</strong>
 					</div>
 				{:else}
 					<div>
 						<small>Total</small>
-						<strong>{formatWeight(result.resolvedTotal)}</strong>
+						<strong class="weight-display">{formatWeight(result.resolvedTotal)}</strong>
 					</div>
 				{/if}
 			</div>

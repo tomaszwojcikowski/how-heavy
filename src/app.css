@@ -181,6 +181,14 @@ body {
 	color: var(--text-primary);
 }
 
+.weight-display {
+	font-family: 'Roboto Mono', 'Archivo', monospace !important;
+	font-weight: 700 !important;
+	color: var(--text-primary) !important;
+	font-variant-numeric: tabular-nums;
+	letter-spacing: -0.02em;
+}
+
 body {
 	min-height: 100vh;
 	line-height: var(--leading-copy);
@@ -602,10 +610,14 @@ p {
 	}
 
 	.primary-nav {
-		grid-template-columns: repeat(2, minmax(0, 1fr));
+		grid-template-columns: repeat(3, minmax(0, 1fr));
 		gap: 0.3rem;
 		padding: 0.25rem;
-		width: calc(100vw - 1rem);
+		left: 0.5rem;
+		right: 0.5rem;
+		width: auto;
+		max-width: none;
+		transform: none;
 		border-radius: 14px;
 		bottom: max(0.5rem, env(safe-area-inset-bottom));
 		background: color-mix(in srgb, var(--surface-3) 94%, transparent);
@@ -618,6 +630,16 @@ p {
 		font-size: 0.84rem;
 		min-height: 3rem;
 		gap: 0.12rem;
+	}
+
+	.nav-icon {
+		font-size: 1.2rem;
+	}
+
+	.nav-label {
+		font-size: 0.68rem;
+		letter-spacing: 0.01em;
+		white-space: nowrap;
 	}
 
 	.primary-nav a.active {

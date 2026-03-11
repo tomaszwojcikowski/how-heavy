@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { BarWeight } from '$lib/types/gym';
 	import { BAR_OPTIONS } from '$lib/utils/plates';
+	import { triggerHaptic } from '$lib/utils/haptics';
 
 	export let label = 'Bar weight';
 	export let helper = 'Saved across the app.';
@@ -8,6 +9,11 @@
 	export let showText = true;
 	export let value: BarWeight = 20;
 	export let onChange: (nextValue: BarWeight) => void = () => {};
+
+	function handleChange(nextValue: BarWeight) {
+		triggerHaptic();
+		onChange(nextValue);
+	}
 </script>
 
 <div class:bar-selector--subtle={subtle} class="bar-selector" role="group" aria-label={label}>
@@ -27,7 +33,7 @@
 				class:bar-option--20={option === 20}
 				class:bar-option--selected={option === value}
 				class="bar-option"
-				onclick={() => onChange(option)}
+				onclick={() => handleChange(option)}
 				aria-pressed={option === value}
 			>
 				<span class="bar-option__theme-dot" aria-hidden="true"></span>
