@@ -16,8 +16,7 @@
 	const QUICK_PRESETS: { label: string; icon: string; plates: PlateWeight[] }[] = [
 		{ label: 'Empty bar', icon: 'fitness_center', plates: [] },
 		{ label: '1 plate/side', icon: 'looks_one', plates: [20] },
-		{ label: '2 plates/side', icon: 'looks_two', plates: [20, 20] },
-		{ label: '3 plates/side', icon: 'looks_3', plates: [20, 20, 20] }
+		{ label: '2 plates/side', icon: 'looks_two', plates: [20, 20] }
 	];
 
 	let selectedBar: BarWeight = 20;
@@ -193,8 +192,9 @@
 					bind:value={selectedBar}
 					onChange={(nextValue) => (selectedBar = nextValue)}
 					label="Bar"
-					helper="Saved across the app."
+					helper=""
 					subtle={true}
+					showText={false}
 				/>
 				<md-outlined-button
 					class="clear-btn"
@@ -218,10 +218,10 @@
 				{/each}
 			</div>
 
-			<div class="mirror-note" role="note" aria-label="Mirrored plate loading">
+			<p class="mirror-note" role="note" aria-label="Mirrored plate loading">
 				<span class="material-symbols-rounded" aria-hidden="true">compare_arrows</span>
 				<span>Pick one side only. The other side matches automatically.</span>
-			</div>
+			</p>
 
 			<PlatePicker selectedPlates={oneSidePlates} onAdd={addPlate} onRemove={removePlate} />
 		</section>
@@ -416,10 +416,7 @@
 		display: flex;
 		align-items: flex-start;
 		gap: 0.55rem;
-		padding: 0.8rem 0.9rem;
-		border-radius: 10px;
-		border: 1px solid var(--outline);
-		background: color-mix(in srgb, var(--tone-secondary-surface) 68%, white 32%);
+		margin: 0;
 		font-size: 0.84rem;
 		line-height: 1.35;
 		color: var(--text-secondary);
@@ -511,8 +508,8 @@
 		}
 
 		.control-header {
-			display: grid;
-			grid-template-columns: 1fr;
+			display: flex;
+			justify-content: space-between;
 			align-items: stretch;
 		}
 
@@ -528,8 +525,7 @@
 		}
 
 		.mirror-note {
-			padding: 0.72rem 0.8rem;
-			background: transparent;
+			font-size: 0.78rem;
 		}
 
 		.undo-toast {

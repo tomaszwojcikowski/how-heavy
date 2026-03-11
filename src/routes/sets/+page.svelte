@@ -120,21 +120,14 @@
 				value={selectedBar}
 				onChange={(v) => (selectedBar = v)}
 				label="Bar"
-				helper="Saved across the app."
+				helper=""
 				subtle={true}
+				showText={false}
 			/>
 		</div>
 
 		<div class="orm-block">
-			<div class="orm-copy">
-				<p class="orm-label">1 Rep Max</p>
-				<p class="orm-helper">
-					Step by 2.5 kg or type a number.
-					{#if Number.isFinite(parsedOneRm) && parsedOneRm <= selectedBar}
-						 Keep it above {selectedBar} kg.
-					{/if}
-				</p>
-			</div>
+			<p class="orm-label">1 Rep Max</p>
 
 			<PercentageStepper
 				value={oneRmValue}
@@ -151,10 +144,7 @@
 		</div>
 
 		<div class="template-strip" role="group" aria-label="Training set presets">
-			<div class="template-strip__copy">
-				<p class="template-strip__label">Warm-up presets</p>
-				<p class="template-strip__helper">Start with a preset, then edit any set.</p>
-			</div>
+			<p class="template-strip__label">Warm-up presets</p>
 			<div class="template-strip__buttons">
 				{#each SET_TEMPLATES as template (template.id)}
 					<button
@@ -163,13 +153,7 @@
 						class="template-btn"
 						onclick={() => applyTemplate(template)}
 					>
-						<div class="template-btn__header">
-							<span>{template.label}</span>
-							{#if selectedTemplateId === template.id}
-								<span class="material-symbols-rounded template-btn__check" aria-hidden="true">check</span>
-							{/if}
-						</div>
-						<small>{template.description}</small>
+						<span>{template.label}</span>
 					</button>
 				{/each}
 			</div>
@@ -302,7 +286,7 @@
 
 	.setup-field {
 		display: grid;
-		gap: 0.5rem;
+		gap: 0.35rem;
 	}
 
 	.orm-block {
@@ -316,11 +300,6 @@
 		padding-top: 0.15rem;
 	}
 
-	.template-strip__copy {
-		display: grid;
-		gap: 0.18rem;
-	}
-
 	.template-strip__label {
 		margin: 0;
 		font-size: var(--type-body-sm);
@@ -328,27 +307,21 @@
 		color: var(--text-primary);
 	}
 
-	.template-strip__helper {
-		margin: 0;
-		font-size: 0.78rem;
-		line-height: 1.35;
-		color: var(--text-secondary);
-	}
-
 	.template-strip__buttons {
 		display: grid;
-		grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
-		gap: 0.6rem;
+		grid-template-columns: repeat(auto-fit, minmax(8rem, 1fr));
+		gap: 0.45rem;
 	}
 
 	.template-btn {
-		display: grid;
-		gap: 0.18rem;
-		padding: 0.8rem 0.9rem;
-		border-radius: 12px;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		padding: 0.68rem 0.8rem;
+		border-radius: 999px;
 		border: 1px solid var(--outline);
 		background: color-mix(in srgb, var(--md-sys-color-surface-container-lowest) 84%, transparent);
-		text-align: left;
+		text-align: center;
 		cursor: pointer;
 		transition:
 			transform 120ms cubic-bezier(0.2, 0, 0, 1),
@@ -363,26 +336,6 @@
 		font-weight: 800;
 		letter-spacing: var(--tracking-tight);
 		color: var(--text-primary);
-	}
-
-	.template-btn__header {
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-		gap: 0.4rem;
-	}
-
-	.template-btn__check {
-		font-size: 1rem !important;
-		font-variation-settings: 'FILL' 1, 'wght' 600, 'GRAD' 0, 'opsz' 20 !important;
-		color: var(--tone-secondary-text);
-		flex-shrink: 0;
-	}
-
-	.template-btn small {
-		font-size: 0.76rem;
-		line-height: 1.35;
-		color: var(--text-secondary);
 	}
 
 	.template-btn:hover {
@@ -400,23 +353,11 @@
 		box-shadow: 0 10px 22px color-mix(in srgb, var(--accent-secondary) 16%, transparent);
 	}
 
-	.orm-copy {
-		display: grid;
-		gap: 0.18rem;
-	}
-
 	.orm-label {
 		margin: 0;
 		font-size: var(--type-body-sm);
 		font-weight: 700;
 		color: var(--text-primary);
-	}
-
-	.orm-helper {
-		margin: 0;
-		font-size: 0.8rem;
-		color: var(--text-secondary);
-		line-height: 1.35;
 	}
 
 	/* Steps */
@@ -552,15 +493,11 @@
 		}
 
 		.template-strip {
-			gap: 0.6rem;
-		}
-
-		.template-strip__helper {
-			display: none;
+			gap: 0.5rem;
 		}
 
 		.template-strip__buttons {
-			grid-template-columns: 1fr;
+			grid-template-columns: repeat(2, minmax(0, 1fr));
 		}
 
 		.step-card__header {

@@ -61,8 +61,9 @@
 
 		<BarSelector
 			label="Bar"
-			helper="You can change it per screen."
+			helper=""
 			subtle={true}
+			showText={false}
 			bind:value={selectedBar}
 			onChange={(nextValue) => (selectedBar = nextValue)}
 		/>

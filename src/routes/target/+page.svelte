@@ -48,22 +48,18 @@
 		</header>
 
 		<div class="target-layout">
-			<div class="target-sidebar">
-				<section class="setup-card">
+			<section class="control-card">
+				<div class="target-toolbar">
+					<p class="target-label">Target total</p>
 					<BarSelector
 						label="Bar"
-						helper="Saved across the app."
+						helper=""
 						subtle={true}
+						showText={false}
 						bind:value={selectedBar}
 						onChange={(nextValue) => (selectedBar = nextValue)}
 					/>
-				</section>
-
-				<section class="control-card">
-					<div class="target-copy">
-						<p class="target-label">Target total</p>
-						<p class="target-helper">Step by 2.5 kg or type a number.</p>
-					</div>
+				</div>
 
 					<PercentageStepper
 						value={targetValue}
@@ -88,8 +84,7 @@
 							></md-filter-chip>
 						{/each}
 					</md-chip-set>
-				</section>
-			</div>
+			</section>
 
 			<div class="target-result">
 				<ResultCard {result} />
@@ -97,30 +92,22 @@
 		</div>
 	{:else}
 		<div class="target-layout" aria-busy="true" aria-label="Loading saved target setup">
-			<div class="target-sidebar">
-				<section class="setup-card loading-card">
-					<div class="loading-grid">
-						<div class="loading-pill"></div>
-						<div class="loading-pill"></div>
-					</div>
-				</section>
-
-				<section class="control-card loading-card">
-					<div class="loading-stack">
-						<div class="loading-line" style="width: 34%"></div>
-						<div class="loading-line" style="width: 100%; height: 3.35rem"></div>
-						<div class="loading-line" style="width: 72%"></div>
-					</div>
-					<div class="loading-grid loading-grid--3">
-						<div class="loading-pill"></div>
-						<div class="loading-pill"></div>
-						<div class="loading-pill"></div>
-						<div class="loading-pill"></div>
-						<div class="loading-pill"></div>
-						<div class="loading-pill"></div>
-					</div>
-				</section>
-			</div>
+			<section class="control-card loading-card">
+				<div class="loading-grid">
+					<div class="loading-pill"></div>
+					<div class="loading-pill"></div>
+				</div>
+				<div class="loading-stack">
+					<div class="loading-line" style="width: 100%; height: 3.35rem"></div>
+					<div class="loading-line" style="width: 72%"></div>
+				</div>
+				<div class="loading-grid loading-grid--3">
+					<div class="loading-pill"></div>
+					<div class="loading-pill"></div>
+					<div class="loading-pill"></div>
+					<div class="loading-pill"></div>
+				</div>
+			</section>
 
 			<section class="loading-card target-loading-card">
 				<div class="loading-stack">
@@ -145,11 +132,6 @@
 		gap: 0.85rem;
 	}
 
-	.target-sidebar {
-		display: grid;
-		gap: 0.75rem;
-	}
-
 	.page-header {
 		display: grid;
 		gap: 0.2rem;
@@ -163,7 +145,6 @@
 		letter-spacing: var(--tracking-body);
 	}
 
-	.setup-card,
 	.control-card {
 		display: grid;
 		gap: 0.9rem;
@@ -174,17 +155,15 @@
 		box-shadow: var(--shadow);
 	}
 
-	.setup-card {
-		background: color-mix(in srgb, var(--tone-tertiary-surface) 70%, var(--md-sys-color-surface-container-lowest) 30%);
-	}
-
 	.target-result {
 		display: grid;
 	}
 
-	.target-copy {
-		display: grid;
-		gap: 0.18rem;
+	.target-toolbar {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		gap: 1rem;
 	}
 
 	.target-label {
@@ -194,17 +173,16 @@
 		color: var(--text-primary);
 	}
 
-	.target-helper {
-		margin: 0;
-		font-size: 0.8rem;
-		color: var(--text-secondary);
-		line-height: 1.35;
-	}
-
 	.target-presets {
 		display: flex;
-		flex-wrap: wrap;
+		flex-wrap: nowrap;
+		overflow-x: auto;
 		gap: 0.45rem;
+		scrollbar-width: none;
+	}
+
+	.target-presets::-webkit-scrollbar {
+		display: none;
 	}
 
 	:global(.target-preset) {
@@ -226,10 +204,13 @@
 	}
 
 	@media (max-width: 40rem) {
-		.setup-card,
 		.control-card {
 			padding: 1rem;
 			box-shadow: none;
+		}
+
+		.target-toolbar {
+			gap: 0.75rem;
 		}
 
 		.target-presets {

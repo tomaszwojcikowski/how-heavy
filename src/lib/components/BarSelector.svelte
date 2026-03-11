@@ -5,17 +5,20 @@
 	export let label = 'Bar weight';
 	export let helper = 'Saved across the app.';
 	export let subtle = false;
+	export let showText = true;
 	export let value: BarWeight = 20;
 	export let onChange: (nextValue: BarWeight) => void = () => {};
 </script>
 
 <div class:bar-selector--subtle={subtle} class="bar-selector" role="group" aria-label={label}>
-	<div class="bar-selector__copy">
-		<p class="bar-selector__label">{label}</p>
-		{#if helper}
-			<p class="bar-selector__helper">{helper}</p>
+		{#if showText}
+			<div class="bar-selector__copy">
+				<p class="bar-selector__label">{label}</p>
+				{#if helper}
+					<p class="bar-selector__helper">{helper}</p>
+				{/if}
+			</div>
 		{/if}
-	</div>
 	<div class="bar-selector__options">
 		{#each BAR_OPTIONS as option (option)}
 			<button
@@ -43,7 +46,7 @@
 	}
 
 	.bar-selector--subtle {
-		gap: 0.55rem;
+		gap: 0.35rem;
 	}
 
 	.bar-selector__copy {
@@ -151,7 +154,7 @@
 
 	.bar-selector--subtle .bar-option {
 		min-width: 3.7rem;
-		padding: 0.45rem 0.72rem;
+		padding: 0.4rem 0.68rem;
 	}
 
 	.bar-selector--subtle .bar-option__weight {
