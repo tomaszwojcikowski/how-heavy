@@ -23,6 +23,7 @@
 	$: hasValidResult = result.status === 'exact' || result.status === 'rounded';
 	$: isRounded = result.status === 'rounded';
 	$: isBelowBar = result.status === 'below-bar';
+	$: showStatusChip = result.status !== 'exact';
 	$: headlineText = hasValidResult
 		? result.plates.length === 0
 			? 'Empty bar'
@@ -62,16 +63,18 @@
 				<p class="eyebrow">{eyebrowText}</p>
 					<h3 class="weight-display">{headlineText}</h3>
 			</div>
-			<md-assist-chip
-				class="status-chip"
-				class:status-chip--info={statusMeta[result.status].tone === 'info'}
-				class:status-chip--warning={statusMeta[result.status].tone === 'warning'}
-				label={statusMeta[result.status].label}
-			>
-				<span slot="icon" class="material-symbols-rounded" aria-hidden="true"
-					>{statusMeta[result.status].icon}</span
+			{#if showStatusChip}
+				<md-assist-chip
+					class="status-chip"
+					class:status-chip--info={statusMeta[result.status].tone === 'info'}
+					class:status-chip--warning={statusMeta[result.status].tone === 'warning'}
+					label={statusMeta[result.status].label}
 				>
-			</md-assist-chip>
+					<span slot="icon" class="material-symbols-rounded" aria-hidden="true"
+						>{statusMeta[result.status].icon}</span
+					>
+				</md-assist-chip>
+			{/if}
 		</div>
 
 		{#if isRounded || isBelowBar}

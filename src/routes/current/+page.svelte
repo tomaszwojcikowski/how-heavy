@@ -14,10 +14,10 @@
 	import { applyBarTheme } from '$lib/utils/theme';
 	import { triggerHaptic } from '$lib/utils/haptics';
 
-	const QUICK_PRESETS: { label: string; icon: string; plates: PlateWeight[] }[] = [
-		{ label: 'Empty bar', icon: 'fitness_center', plates: [] },
-		{ label: '1 plate/side', icon: 'looks_one', plates: [20] },
-		{ label: '2 plates/side', icon: 'looks_two', plates: [20, 20] }
+	const QUICK_PRESETS: { label: string; plates: PlateWeight[] }[] = [
+		{ label: 'Empty bar', plates: [] },
+		{ label: '1 plate/side', plates: [20] },
+		{ label: '2 plates/side', plates: [20, 20] }
 	];
 
 	let selectedBar: BarWeight = 20;
@@ -39,7 +39,6 @@
 
 	$: summary = calculateCurrentLoad(selectedBar, oneSidePlates);
 	$: groupedPlates = summarizePlateCounts(oneSidePlates);
-	$: showStickyPlateSummary = oneSidePlates.length >= 3;
 	$: if (browser && hydrated) {
 		applyBarTheme(selectedBar);
 		void saveCurrentState({
@@ -151,9 +150,6 @@
 		}
 	}
 
-	function formatPlateChip(weight: PlateWeight, count: number) {
-		return `${count}×${weight}`;
-	}
 </script>
 
 <svelte:head>
@@ -171,21 +167,12 @@
 		<div class="totals-strip" aria-live="polite" aria-label="Running total">
 			<strong class="totals-strip__weight weight-display">{formatWeight(summary.totalWeight)}</strong>
 			<div class="totals-strip__meta">
-				<span class="totals-strip__label">Total</span>
-				<span class="sep">·</span>
-				<span class="totals-strip__label">Side</span>
+				<span class="totals-strip__label">Per side</span>
 				<strong class="totals-strip__value weight-display">{formatWeight(summary.oneSideWeight)}</strong>
 				<span class="sep">·</span>
-				<span class="totals-strip__label weight-display">{formatWeight(summary.barWeight)}</span>
+				<span class="totals-strip__label">Bar</span>
+				<strong class="totals-strip__value weight-display">{formatWeight(summary.barWeight)}</strong>
 			</div>
-			{#if showStickyPlateSummary}
-				<div class="totals-strip__chips" aria-label="Plate summary per side">
-					{#each groupedPlates as plate (plate.weight)}
-						<span class="totals-strip__chip">{formatPlateChip(plate.weight, plate.count)}</span>
-					{/each}
-					<span class="totals-strip__chip totals-strip__chip--meta">/ side</span>
-				</div>
-			{/if}
 		</div>
 
 		<!-- Controls: bar selector + plate picker -->
@@ -215,15 +202,12 @@
 						class="preset-btn"
 						label={preset.label}
 						onclick={() => applyPlateChange([...preset.plates], `Loaded: ${preset.label}.`)}
-					>
-						<span slot="icon" class="material-symbols-rounded" aria-hidden="true">{preset.icon}</span>
-					</md-suggestion-chip>
+					></md-suggestion-chip>
 				{/each}
 			</div>
 
 			<p class="mirror-note" role="note" aria-label="Mirrored plate loading">
-				<span class="material-symbols-rounded" aria-hidden="true">compare_arrows</span>
-				<span>Pick one side only. The other side matches automatically.</span>
+				Pick one side only. The other side mirrors automatically.
 			</p>
 
 			<PlatePicker selectedPlates={oneSidePlates} onAdd={addPlate} onRemove={removePlate} />
@@ -332,32 +316,6 @@
 		flex-wrap: wrap;
 	}
 
-	.totals-strip__chips {
-		display: flex;
-		flex-wrap: wrap;
-		gap: 0.35rem;
-		width: 100%;
-	}
-
-	.totals-strip__chip {
-		display: inline-flex;
-		align-items: center;
-		justify-content: center;
-		padding: 0.28rem 0.58rem;
-		border-radius: var(--radius-md);
-		background: var(--chip-neutral-surface);
-		border: 1px solid var(--chip-outline);
-		font-size: 0.72rem;
-		font-weight: 700;
-		color: var(--chip-neutral-text);
-	}
-
-	.totals-strip__chip--meta {
-		background: transparent;
-		border-style: dashed;
-		color: var(--text-tertiary);
-	}
-
 	.totals-strip__label {
 		color: var(--text-tertiary);
 		font-size: var(--type-label);
@@ -403,11 +361,6 @@
 		overscroll-behavior-x: contain;
 	}
 
-	:global(md-suggestion-chip.preset-btn [slot='icon']) {
-		font-size: 1rem;
-		font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
-	}
-
 	:global(md-suggestion-chip.preset-btn) {
 		--md-suggestion-chip-container-color: var(--chip-neutral-surface);
 		--md-suggestion-chip-outline-color: var(--chip-outline);
@@ -432,20 +385,10 @@
 	}
 
 	.mirror-note {
-		display: flex;
-		align-items: flex-start;
-		gap: 0.55rem;
 		margin: 0;
 		font-size: 0.84rem;
 		line-height: 1.35;
-		color: var(--text-secondary);
-	}
-
-	.mirror-note .material-symbols-rounded {
-		font-size: 1rem;
-		color: var(--tone-secondary-text);
-		margin-top: 0.08rem;
-		flex-shrink: 0;
+		color: var(--text-tertiary);
 	}
 
 	.undo-toast {
@@ -515,9 +458,6 @@
 			font-size: 0.8rem;
 		}
 
-		.totals-strip__chips {
-			display: none;
-		}
 
 		.control-card,
 		.viz-card {

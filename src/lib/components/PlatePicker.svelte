@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { onDestroy } from 'svelte';
-	import { scale } from 'svelte/transition';
 
 	import PlateGraphic from '$lib/components/PlateGraphic.svelte';
 	import type { PlateWeight } from '$lib/types/gym';
@@ -73,11 +72,7 @@
 	{#each plateGroups as group (group.key)}
 		<section class="plate-picker__section" data-kind={group.key} aria-label={group.title}>
 			<div class="plate-picker__section-copy">
-				<div>
-					<p class="plate-picker__section-title">{group.title}</p>
-					<p class="plate-picker__section-helper">{group.helper}</p>
-				</div>
-				<span class="plate-picker__section-badge">{group.plates.length} options</span>
+				<p class="plate-picker__section-title">{group.title}</p>
 			</div>
 
 			<div class="plate-picker__tray">
@@ -131,20 +126,6 @@
 		</section>
 	{/each}
 
-	{#if selectedCounts.length > 0}
-		<div class="plate-picker__selected">
-			<md-chip-set>
-				{#each selectedCounts as plate (plate.weight)}
-					<md-input-chip
-						label="{plate.weight} kg × {plate.count}"
-						onremove={() => handleRemove(plate.weight)}
-						in:scale={{ duration: 160, start: 0.85 }}
-						out:scale={{ duration: 120, start: 0.9 }}
-					></md-input-chip>
-				{/each}
-			</md-chip-set>
-		</div>
-	{/if}
 </div>
 
 <style>
@@ -173,9 +154,7 @@
 
 	.plate-picker__section-copy {
 		display: flex;
-		justify-content: space-between;
-		gap: 0.75rem;
-		align-items: start;
+		align-items: center;
 	}
 
 	.plate-picker__section-title {
@@ -185,27 +164,6 @@
 		font-weight: 800;
 		letter-spacing: var(--tracking-tight);
 		color: var(--text-primary);
-	}
-
-	.plate-picker__section-helper {
-		margin: 0.15rem 0 0;
-		font-size: 0.78rem;
-		line-height: 1.35;
-		color: var(--text-secondary);
-	}
-
-	.plate-picker__section-badge {
-		display: inline-flex;
-		align-items: center;
-		justify-content: center;
-		padding: 0.28rem 0.6rem;
-		border-radius: 999px;
-		background: color-mix(in srgb, var(--md-sys-color-surface-container-lowest) 82%, transparent);
-		border: 1px solid var(--outline);
-		font-size: 0.72rem;
-		font-weight: 700;
-		white-space: nowrap;
-		color: var(--text-secondary);
 	}
 
 	.plate-picker__tray {
@@ -323,10 +281,6 @@
 		cursor: not-allowed;
 	}
 
-	.plate-picker__selected {
-		display: block;
-	}
-
 	@media (max-width: 40rem) {
 		.plate-picker {
 			gap: 0.75rem;
@@ -338,11 +292,6 @@
 
 		.plate-picker__section-copy {
 			align-items: center;
-		}
-
-		.plate-picker__section-helper,
-		.plate-picker__section-badge {
-			display: none;
 		}
 
 		.plate-picker__tray {

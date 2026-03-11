@@ -147,7 +147,6 @@
 		</div>
 
 		<div class="template-strip" role="group" aria-label="Training set presets">
-			<p class="template-strip__label">Warm-up presets</p>
 			<div class="template-strip__buttons">
 				{#each SET_TEMPLATES as template (template.id)}
 					<button
@@ -301,15 +300,8 @@
 
 	.template-strip {
 		display: grid;
-		gap: 0.75rem;
+		gap: 0.45rem;
 		padding-top: 0.15rem;
-	}
-
-	.template-strip__label {
-		margin: 0;
-		font-size: var(--type-body-sm);
-		font-weight: 700;
-		color: var(--text-primary);
 	}
 
 	.template-strip__buttons {
@@ -322,8 +314,8 @@
 		display: inline-flex;
 		align-items: center;
 		justify-content: center;
-		padding: 0.68rem 0.8rem;
-		border-radius: 999px;
+		padding: 0.62rem 0.75rem;
+		border-radius: 12px;
 		border: 1px solid var(--outline);
 		background: color-mix(in srgb, var(--md-sys-color-surface-container-lowest) 84%, transparent);
 		text-align: center;
@@ -337,7 +329,7 @@
 
 	.template-btn span {
 		font-family: 'Archivo', sans-serif;
-		font-size: 0.96rem;
+		font-size: 0.9rem;
 		font-weight: 800;
 		letter-spacing: var(--tracking-tight);
 		color: var(--text-primary);
@@ -386,7 +378,8 @@
 	}
 
 	.step-card--resolved {
-		box-shadow: var(--shadow), inset 3px 0 0 var(--accent-secondary);
+		background: color-mix(in srgb, var(--surface-card) 84%, var(--tone-secondary-surface) 16%);
+		border-color: var(--tone-secondary-border);
 	}
 
 	.step-card__header {
