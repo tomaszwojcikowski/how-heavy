@@ -287,7 +287,7 @@
 		align-items: baseline;
 		gap: 0.9rem;
 		padding: 1rem 1.2rem;
-		background: var(--surface-floating);
+		background: color-mix(in srgb, var(--surface-floating-solid) 92%, transparent);
 		backdrop-filter: blur(20px);
 		-webkit-backdrop-filter: blur(20px);
 		border: 1px solid var(--border-subtle);
@@ -348,9 +348,9 @@
 	}
 
 	.control-header {
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
+		display: grid;
+		grid-template-columns: minmax(0, 1fr) auto;
+		align-items: start;
 		gap: 1rem;
 	}
 
@@ -358,10 +358,16 @@
 		display: flex;
 		gap: 0.5rem;
 		flex-wrap: wrap;
+		padding: 0.25rem;
+		border-radius: var(--radius-lg);
+		border: 1px solid var(--border-subtle);
+		background: color-mix(in srgb, var(--surface-3) 88%, transparent);
 		overscroll-behavior-x: contain;
 	}
 
 	:global(md-suggestion-chip.preset-btn) {
+		--md-suggestion-chip-container-height: 2.1rem;
+		--md-suggestion-chip-container-shape: 999px;
 		--md-suggestion-chip-container-color: var(--chip-neutral-surface);
 		--md-suggestion-chip-outline-color: var(--chip-outline);
 		--md-suggestion-chip-label-text-color: var(--chip-neutral-text);
@@ -371,7 +377,9 @@
 
 	:global(md-outlined-button.clear-btn) {
 		flex-shrink: 0;
-		--md-outlined-button-container-shape: 8px;
+		--md-outlined-button-container-shape: var(--radius-md);
+		--md-outlined-button-container-height: 2.6rem;
+		--md-outlined-button-outline-color: color-mix(in srgb, var(--outline) 88%, transparent);
 	}
 
 	:global(md-outlined-button.clear-btn.clear-btn--confirm) {
@@ -401,7 +409,8 @@
 		gap: 0.9rem;
 		width: min(calc(100vw - 2rem), 28rem);
 		padding: 0.9rem 1rem;
-		border-radius: 8px;
+		border-radius: var(--radius-lg);
+		border: 1px solid color-mix(in srgb, var(--md-sys-color-inverse-on-surface) 16%, transparent);
 		background: var(--md-sys-color-inverse-surface);
 		color: var(--md-sys-color-inverse-on-surface);
 		box-shadow: 0 18px 40px rgba(0, 0, 0, 0.24);
@@ -467,9 +476,12 @@
 		}
 
 		.control-header {
-			display: flex;
-			justify-content: space-between;
+			grid-template-columns: 1fr;
 			align-items: stretch;
+		}
+
+		:global(md-outlined-button.clear-btn) {
+			width: 100%;
 		}
 
 		.preset-strip {

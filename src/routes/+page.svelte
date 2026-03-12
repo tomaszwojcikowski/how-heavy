@@ -123,10 +123,12 @@
 		display: grid;
 		grid-template-columns: repeat(3, minmax(0, 1fr));
 		gap: 0.75rem;
+		align-items: stretch;
 	}
 
 	.mode-card {
 		display: grid;
+		grid-template-rows: auto auto 1fr auto;
 		gap: 0.6rem;
 		padding: 1rem;
 		background: color-mix(in srgb, var(--surface-card-strong) 88%, var(--surface-card) 12%);
@@ -152,11 +154,16 @@
 		color: var(--text-secondary);
 		line-height: var(--leading-surface);
 		letter-spacing: var(--tracking-body);
+		max-width: 30ch;
 	}
 
 	.mode-card md-filled-button,
 	.mode-card md-filled-tonal-button {
 		width: 100%;
+		--md-filled-button-container-shape: var(--radius-md);
+		--md-filled-button-container-height: 2.7rem;
+		--md-filled-tonal-button-container-shape: var(--radius-md);
+		--md-filled-tonal-button-container-height: 2.7rem;
 	}
 
 	.feature-list {
@@ -172,7 +179,7 @@
 		align-items: flex-start;
 		gap: 0.8rem;
 		padding: 1rem;
-		background: var(--surface-card);
+		background: color-mix(in srgb, var(--surface-card-strong) 88%, var(--surface-card) 12%);
 		border: 1px solid var(--border-subtle);
 		border-radius: var(--radius-xl);
 		box-shadow: var(--shadow-mobile);

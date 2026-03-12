@@ -168,9 +168,9 @@
 	}
 
 	.target-toolbar {
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
+		display: grid;
+		grid-template-columns: minmax(0, 1fr) auto;
+		align-items: start;
 		gap: 1rem;
 	}
 
@@ -186,6 +186,10 @@
 		flex-wrap: nowrap;
 		overflow-x: auto;
 		gap: 0.45rem;
+		padding: 0.2rem;
+		border-radius: var(--radius-lg);
+		border: 1px solid var(--border-subtle);
+		background: color-mix(in srgb, var(--surface-3) 86%, transparent);
 		scrollbar-width: none;
 		overscroll-behavior-x: contain;
 	}
@@ -196,6 +200,7 @@
 
 	:global(.target-preset) {
 		--md-filter-chip-container-shape: 999px;
+		--md-filter-chip-container-height: 2.1rem;
 		--md-filter-chip-unselected-container-color: var(--chip-neutral-surface);
 		--md-filter-chip-unselected-outline-color: var(--chip-outline);
 		--md-filter-chip-unselected-label-text-color: var(--chip-neutral-text);
@@ -224,6 +229,12 @@
 
 		.target-presets {
 			gap: 0.35rem;
+		}
+	}
+
+	@media (max-width: 48rem) {
+		.target-toolbar {
+			grid-template-columns: 1fr;
 		}
 	}
 
