@@ -50,6 +50,13 @@
 			<p>{modeDescriptions.countPlates}</p>
 			<md-filled-tonal-button href={resolve('/current')}>Open {modeLabels.countPlates}</md-filled-tonal-button>
 		</section>
+
+		<section class="mode-card">
+			<p class="eyebrow">Plan Training</p>
+			<h2>{modeLabels.trainingSets}</h2>
+			<p>{modeDescriptions.trainingSets}</p>
+			<md-filled-tonal-button href={resolve('/sets')}>Open {modeLabels.trainingSets}</md-filled-tonal-button>
+		</section>
 	</div>
 
 	<section class="preference-strip">
@@ -114,7 +121,7 @@
 
 	.mode-grid {
 		display: grid;
-		grid-template-columns: repeat(2, minmax(0, 1fr));
+		grid-template-columns: repeat(3, minmax(0, 1fr));
 		gap: 0.75rem;
 	}
 
@@ -200,6 +207,12 @@
 
 		.feature-list li {
 			padding: 0.8rem 0.9rem;
+		}
+	}
+
+	@media (max-width: 62rem) and (min-width: 42.01rem) {
+		.mode-grid {
+			grid-template-columns: repeat(2, minmax(0, 1fr));
 		}
 	}
 </style>
