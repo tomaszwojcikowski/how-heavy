@@ -238,6 +238,13 @@
 		}
 	}
 
+	@media (min-width: 48rem) and (max-width: 61.99rem) {
+		.target-layout {
+			grid-template-columns: minmax(18rem, 20rem) minmax(0, 1fr);
+			align-items: start;
+		}
+	}
+
 	@media (min-width: 62rem) {
 		.target-layout {
 			grid-template-columns: minmax(18rem, 22rem) minmax(0, 1fr);

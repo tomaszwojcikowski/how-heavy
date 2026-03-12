@@ -657,7 +657,7 @@ p {
 
 @media (min-width: 48rem) {
 	.app-shell {
-		padding: 1.25rem 1.25rem 4rem;
+		padding: 1.25rem 1.25rem calc(5rem + env(safe-area-inset-bottom, 0px));
 	}
 
 	.topbar {
@@ -678,6 +678,16 @@ p {
 	.feature-card,
 	.placeholder-card {
 		padding: 1.35rem;
+	}
+}
+
+@media (min-width: 62rem) {
+	.app-shell {
+		padding-bottom: calc(5.25rem + env(safe-area-inset-bottom, 0px));
+	}
+
+	.primary-nav {
+		bottom: max(0.5rem, env(safe-area-inset-bottom));
 	}
 }
 

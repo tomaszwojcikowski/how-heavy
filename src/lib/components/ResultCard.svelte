@@ -266,6 +266,24 @@
 		font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
 	}
 
+	@media (min-width: 48rem) and (max-width: 61.99rem) {
+		.result-card {
+			padding: 1rem;
+		}
+
+		.result-card__header {
+			gap: 0.7rem;
+		}
+
+		.result-card__metrics--2col {
+			grid-template-columns: 1fr;
+		}
+
+		:global(.result-card__actions md-filled-tonal-button) {
+			width: 100%;
+		}
+	}
+
 	@media (max-width: 40rem) {
 		.result-card {
 			padding: var(--card-padding-mobile);

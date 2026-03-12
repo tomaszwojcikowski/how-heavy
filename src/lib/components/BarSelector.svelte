@@ -180,6 +180,24 @@
 		border-radius: 14px;
 	}
 
+	@media (min-width: 48rem) and (max-width: 61.99rem) {
+		.bar-selector {
+			gap: 0.65rem;
+		}
+
+		.bar-option {
+			padding: 0.64rem 0.72rem;
+		}
+
+		.bar-option__weight {
+			font-size: 0.96rem;
+		}
+
+		.bar-selector--subtle .bar-option {
+			padding: 0.52rem 0.62rem;
+		}
+	}
+
 	@media (max-width: 40rem) {
 		.bar-selector {
 			gap: 0.6rem;

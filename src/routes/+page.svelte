@@ -222,4 +222,18 @@
 			grid-template-columns: repeat(2, minmax(0, 1fr));
 		}
 	}
+
+	@media (min-width: 48rem) and (max-width: 61.99rem) {
+		.hero-card {
+			grid-template-columns: 1fr;
+			align-items: stretch;
+		}
+	}
+
+	@media (min-width: 62rem) {
+		.hero-card {
+			grid-template-columns: 1fr;
+			align-items: stretch;
+		}
+	}
 </style>

@@ -281,6 +281,25 @@
 		cursor: not-allowed;
 	}
 
+	@media (min-width: 48rem) and (max-width: 61.99rem) {
+		.plate-picker {
+			gap: 0.82rem;
+		}
+
+		.plate-picker__section {
+			padding: 0.9rem;
+		}
+
+		.plate-picker__tray {
+			grid-template-columns: repeat(2, minmax(0, 1fr));
+			gap: 0.75rem;
+		}
+
+		.plate-choice {
+			padding: 0.68rem 0.6rem 0.78rem;
+		}
+	}
+
 	@media (max-width: 40rem) {
 		.plate-picker {
 			gap: 0.75rem;

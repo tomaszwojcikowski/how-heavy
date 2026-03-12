@@ -484,6 +484,27 @@
 		--md-outlined-button-container-height: 3.2rem;
 	}
 
+	@media (min-width: 48rem) and (max-width: 61.99rem) {
+		.calculator-shell {
+			grid-template-columns: minmax(17rem, 20rem) minmax(0, 1fr);
+			align-items: start;
+		}
+
+		.page-header {
+			grid-column: 1 / -1;
+		}
+
+		.setup-card {
+			grid-column: 1;
+			position: sticky;
+			top: 0.5rem;
+		}
+
+		.steps-list {
+			grid-column: 2;
+		}
+	}
+
 	@media (max-width: 40rem) {
 		.setup-card,
 		.step-card {

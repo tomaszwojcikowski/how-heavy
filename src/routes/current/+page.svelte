@@ -428,6 +428,26 @@
 		font-weight: 700;
 	}
 
+	@media (min-width: 48rem) and (max-width: 61.99rem) {
+		.calculator-shell {
+			grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+			align-items: start;
+		}
+
+		.page-header,
+		.totals-strip {
+			grid-column: 1 / -1;
+		}
+
+		.control-card {
+			grid-column: 1;
+		}
+
+		.viz-card {
+			grid-column: 2;
+		}
+	}
+
 	@media (min-width: 62rem) {
 		/* On desktop: controls left, (total + viz) right as a side panel */
 		.calculator-shell {
