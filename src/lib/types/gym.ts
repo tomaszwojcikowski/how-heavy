@@ -1,6 +1,6 @@
 export const SUPPORTED_BAR_WEIGHTS = [15, 20] as const;
 
-export const SUPPORTED_PLATE_WEIGHTS = [20, 15, 10, 5, 2.5, 2, 1.5, 1.25, 1, 0.5] as const;
+export const SUPPORTED_PLATE_WEIGHTS = [20, 15, 10, 5, 2.5, 2, 1.5, 1, 0.5] as const;
 
 export type BarWeight = (typeof SUPPORTED_BAR_WEIGHTS)[number];
 export type PlateWeight = (typeof SUPPORTED_PLATE_WEIGHTS)[number];

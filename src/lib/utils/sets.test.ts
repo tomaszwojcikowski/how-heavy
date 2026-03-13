@@ -82,7 +82,7 @@ describe('set templates', () => {
 		)[0].result;
 
 		for (const plate of result.plates) {
-			if ([2.5, 2, 1.5, 1.25, 1, 0.5].includes(plate.weight)) {
+			if ([2.5, 2, 1.5, 1, 0.5].includes(plate.weight)) {
 				expect(plate.count).toBeLessThanOrEqual(2);
 			}
 		}

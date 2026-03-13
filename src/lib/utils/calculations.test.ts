@@ -78,7 +78,7 @@ describe('plate calculation engine', () => {
 	});
 
 	it('keeps the one-side weight calculation precise', () => {
-		expect(calculateOneSideWeight([2.5, 1.25, 0.5])).toBe(4.25);
+		expect(calculateOneSideWeight([2.5, 1.5, 0.5])).toBe(4.5);
 	});
 
 	it('groups repeated plates in display order', () => {

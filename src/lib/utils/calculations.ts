@@ -4,7 +4,7 @@ import type { BarWeight, CurrentLoadSummary, PlateCount, PlateWeight, TargetLoad
 const SEARCH_STEP_UNITS = 2;
 
 // Tiebreaker: prefer 15 kg, 10 kg before 20 kg.
-// PLATE_DEFINITIONS: [20=0, 15=1, 10=2, 5=3, 2.5=4, 2=5, 1.5=6, 1.25=7, 1=8, 0.5=9]
+// PLATE_DEFINITIONS: [20=0, 15=1, 10=2, 5=3, 2.5=4, 2=5, 1.5=6, 1=7, 0.5=8]
 const lookupSideUnits = createPlateLookupTable({
 	maxChangePerSide: 4,
 	tiebreakOrder: [1, 2, 0, 3, 4, 5, 6, 7, 8, 9],
