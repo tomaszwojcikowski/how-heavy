@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { onDestroy } from 'svelte';
+	import '@material/web/iconbutton/icon-button.js';
 	import { triggerHaptic } from '$lib/utils/haptics';
 	import NumberPad from '$lib/components/NumberPad.svelte';
 

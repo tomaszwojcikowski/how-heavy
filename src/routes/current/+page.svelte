@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
 	import { onDestroy, onMount } from 'svelte';
+	import '@material/web/button/outlined-button.js';
+	import '@material/web/chips/suggestion-chip.js';
 
 	import BarSelector from '$lib/components/BarSelector.svelte';
 	import PlatePicker from '$lib/components/PlatePicker.svelte';

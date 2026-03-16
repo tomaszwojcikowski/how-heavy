@@ -5,10 +5,9 @@
 	import { onMount } from 'svelte';
 	import favicon from '$lib/assets/favicon.svg';
 	import { modeLabels, navLabels } from '$lib/site';
-	import { loadCalculatorState } from '$lib/stores/calculator';
 	import { applyBarTheme } from '$lib/utils/theme';
 	import { triggerHaptic } from '$lib/utils/haptics';
-	import '$lib/material';
+	import '@material/web/ripple/ripple.js';
 	import '../app.css';
 
 	let { children } = $props();
@@ -24,9 +23,10 @@
 		});
 	});
 
-	onMount(async () => {
-		const state = await loadCalculatorState();
-		applyBarTheme(state.preferences.preferredBarWeight);
+	onMount(() => {
+		const storedBarWeight = window.localStorage.getItem('how-heavy:preferred-bar-weight');
+		const preferredBarWeight = storedBarWeight === '15' ? 15 : 20;
+		applyBarTheme(preferredBarWeight);
 	});
 </script>
 

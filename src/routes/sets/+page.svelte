@@ -4,6 +4,7 @@
 	import { fly, scale } from 'svelte/transition';
 	import { flip } from 'svelte/animate';
 	import { cubicOut } from 'svelte/easing';
+	import '@material/web/button/outlined-button.js';
 
 	import BarSelector from '$lib/components/BarSelector.svelte';
 	import PercentageStepper from '$lib/components/PercentageStepper.svelte';

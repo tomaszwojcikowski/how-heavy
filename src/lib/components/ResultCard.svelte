@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { fade, fly } from 'svelte/transition';
 	import { cubicOut } from 'svelte/easing';
+	import '@material/web/button/filled-tonal-button.js';
+	import '@material/web/chips/assist-chip.js';
 	import PlateStackPreview from '$lib/components/PlateStackPreview.svelte';
 	import { formatWeight } from '$lib/utils/formatting';
 	import { triggerHaptic } from '$lib/utils/haptics';

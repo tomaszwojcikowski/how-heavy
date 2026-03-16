@@ -1,4 +1,5 @@
 <script lang="ts">
+	import '@material/web/iconbutton/icon-button.js';
 	import type { BarWeight } from '$lib/types/gym';
 	import { triggerHaptic } from '$lib/utils/haptics';
 

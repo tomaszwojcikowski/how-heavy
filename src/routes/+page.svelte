@@ -3,26 +3,54 @@
 	import { browser } from '$app/environment';
 	import { resolve } from '$app/paths';
 	import { onMount } from 'svelte';
+	import '@material/web/button/filled-button.js';
+	import '@material/web/button/filled-tonal-button.js';
 
 	import BarSelector from '$lib/components/BarSelector.svelte';
 	import { appName, modeLabels, tagline } from '$lib/site';
-	import { loadCalculatorState, savePreferredBarWeight } from '$lib/stores/calculator';
 	import type { BarWeight } from '$lib/types/gym';
 	import { applyBarTheme } from '$lib/utils/theme';
+
+	const THEME_STORAGE_KEY = 'how-heavy:preferred-bar-weight';
+
+	let calculatorStoreModulePromise: Promise<typeof import('$lib/stores/calculator')> | null = null;
 
 	let selectedBar: BarWeight = 20;
 	let hydrated = false;
 
+	function getCalculatorStoreModule() {
+		if (!calculatorStoreModulePromise) {
+			calculatorStoreModulePromise = import('$lib/stores/calculator');
+		}
+
+		return calculatorStoreModulePromise;
+	}
+
+	async function persistPreferredBarWeight(preferredBarWeight: BarWeight): Promise<void> {
+		const { savePreferredBarWeight } = await getCalculatorStoreModule();
+		await savePreferredBarWeight(preferredBarWeight);
+	}
+
 	onMount(async () => {
-		const state = await loadCalculatorState();
-		selectedBar = state.preferences.preferredBarWeight;
+		const storedBarWeight = window.localStorage.getItem(THEME_STORAGE_KEY);
+		selectedBar = storedBarWeight === '15' ? 15 : 20;
 		applyBarTheme(selectedBar);
 		hydrated = true;
+
+		const { loadCalculatorState } = await getCalculatorStoreModule();
+		const state = await loadCalculatorState();
+
+		if (state.preferences.preferredBarWeight !== selectedBar) {
+			selectedBar = state.preferences.preferredBarWeight;
+			window.localStorage.setItem(THEME_STORAGE_KEY, String(selectedBar));
+			applyBarTheme(selectedBar);
+		}
 	});
 
 	$: if (browser && hydrated) {
 		applyBarTheme(selectedBar);
-		void savePreferredBarWeight(selectedBar);
+		window.localStorage.setItem(THEME_STORAGE_KEY, String(selectedBar));
+		void persistPreferredBarWeight(selectedBar);
 	}
 </script>
 

@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
 	import { onMount } from 'svelte';
+	import '@material/web/chips/chip-set.js';
+	import '@material/web/chips/filter-chip.js';
 
 	import BarSelector from '$lib/components/BarSelector.svelte';
 	import PercentageStepper from '$lib/components/PercentageStepper.svelte';
